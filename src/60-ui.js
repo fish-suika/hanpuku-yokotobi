@@ -156,7 +156,7 @@ function frame(ts) {
 // ===== 共有（記録用紙のカード）=====
 function shareText() {
   const r = resultInfo();
-  return '反復横とびで 記録 ' + fmt(r.rec) + ' 回（本当は ' + r.steps + ' 回）、判定「' + r.judge + '」！ 分身 ' + r.maxN + ' 人 #反復横とび';
+  return '分身反復横跳びで 記録 ' + fmt(r.rec) + ' 回（本当は ' + r.steps + ' 回）、判定「' + r.judge + '」！ 分身 ' + r.maxN + ' 人 #分身反復横跳び';
 }
 function shareUrl() {
   const web = /^https?:/.test(location.protocol) && !/^(localhost|127\.0\.0\.1)/.test(location.host);
