@@ -1,0 +1,96 @@
+<!doctype html>
+<html lang="ja">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover,user-scalable=no">
+<title>反復横とび</title>
+<style>
+*{box-sizing:border-box;-webkit-tap-highlight-color:transparent}
+html,body{margin:0;height:100%;overflow:hidden;background:#e8d6a8;
+  font-family:"Hiragino Maru Gothic ProN","Yu Gothic UI","Meiryo",sans-serif;color:#2b2b3a;
+  user-select:none;-webkit-user-select:none;touch-action:none;
+  word-break:auto-phrase;line-break:strict;text-wrap:balance}
+body{display:flex;align-items:center;justify-content:center}
+.nb{display:inline-block;white-space:nowrap}
+
+/* 絵は画面いっぱい（縦長の端末も横長の画面も、体育館が左右・上下に広がる）。遊ぶ場所は縦9:16で中央 */
+#cv{position:fixed;inset:0;width:100%;height:100%;display:block;touch-action:none}
+/* 遊ぶ場所の枠。単位は cqw（枠の幅の1%）。文字の置き場所に使うだけで、触れるのは下の絵 */
+#stage{position:relative;container-type:size;
+  width:min(100vw,calc(100dvh*9/16));aspect-ratio:9/16;pointer-events:none}
+
+/* タイトル */
+#title{position:absolute;left:5cqw;right:5cqw;top:53cqw;z-index:20;text-align:center;
+  display:flex;flex-direction:column;align-items:center;gap:2.4cqw}
+#title.hide{display:none}
+#title .t1{font-size:4.6cqw;font-weight:bold;color:#fff;background:#d2382f;border-radius:5cqw;padding:.8cqw 4.5cqw;letter-spacing:.6cqw;box-shadow:0 .8cqw 0 #8f221c}
+#title .t2{font-size:17cqw;font-weight:900;line-height:1.1;color:#fff;
+  -webkit-text-stroke:1.4cqw #213a86;paint-order:stroke fill;text-shadow:0 1.4cqw 0 #213a86,0 2.2cqw 3cqw #0004}
+#title .t3{font-size:5.2cqw;font-weight:bold;color:#213a86;background:#fffd;border-radius:3cqw;padding:1cqw 4cqw}
+#title .t4{margin-top:3cqw;font-size:6cqw;font-weight:bold;color:#fff;background:#e0356f;border-radius:6cqw;
+  padding:2cqw 8cqw;box-shadow:0 1.2cqw 0 #a82350;animation:blink 1.1s ease-in-out infinite}
+@keyframes blink{50%{transform:scale(1.07)}}
+
+/* 結果：体力測定の記録用紙 */
+#result{position:absolute;left:6cqw;right:6cqw;top:40cqw;z-index:30;padding:5cqw 5.5cqw 5cqw;
+  background:#fffdf2;border:.7cqw solid #2c4aa0;border-radius:1.6cqw;
+  box-shadow:0 2cqw 0 #1c3170,0 3cqw 6cqw #0006;
+  color:#2b2b3a;display:none;flex-direction:column;align-items:stretch;gap:2cqw;text-align:center;pointer-events:auto}
+#result.show{display:flex;animation:pop .3s cubic-bezier(.3,1.5,.5,1)}
+#result.wait{pointer-events:none}
+@keyframes pop{from{transform:scale(.7) rotate(-2deg);opacity:0}to{transform:none;opacity:1}}
+#result .hd{font-size:5.4cqw;font-weight:bold;color:#2c4aa0;border-bottom:.5cqw solid #2c4aa0;padding-bottom:1.6cqw;letter-spacing:.5cqw}
+#result .ln{display:flex;justify-content:space-between;align-items:baseline;font-size:4.4cqw;
+  border-bottom:.3cqw dashed #9aa7d0;padding-bottom:1cqw}
+#result .ln span:first-child{color:#55608a}
+#result .ln b{font-size:4.8cqw}
+#result .big{position:relative;display:flex;justify-content:space-between;align-items:center;margin:1cqw 0 .6cqw}
+#result .big .lb{font-size:4.8cqw;color:#55608a;font-weight:bold}
+#result .big .num{font-size:15cqw;font-weight:900;line-height:1;color:#d2382f;font-variant-numeric:tabular-nums}
+#result .big .num small{font-size:5cqw;color:#55608a;font-weight:bold;margin-left:.8cqw}
+#stamp{position:absolute;left:17cqw;top:-5cqw;width:21cqw;height:21cqw;border:.9cqw solid #d2382f;border-radius:50%;
+  color:#d2382f;font-weight:900;display:flex;align-items:center;justify-content:center;text-align:center;line-height:1.1;
+  transform:rotate(-14deg) scale(2.4);opacity:0;background:#fffdf277;font-size:11cqw}
+#stamp.long{font-size:4.6cqw}
+#stamp.on{animation:stamp .28s cubic-bezier(.4,1.6,.6,1) forwards}
+@keyframes stamp{to{transform:rotate(-14deg) scale(1);opacity:1}}
+#rJudge{font-size:4.2cqw;color:#55608a;min-height:5.4cqw}
+#rBest{font-size:3.8cqw;color:#55608a;min-height:5cqw}
+.row{display:flex;gap:3cqw;align-items:center;width:100%;margin-top:1cqw}
+.btn{border:0;border-radius:3.6cqw;font:inherit;font-weight:bold;color:#fff;cursor:pointer;
+  background:linear-gradient(#ff6b9a,#e0356f);box-shadow:0 1.2cqw 0 #a82350;touch-action:manipulation}
+.btn:active{transform:translateY(.8cqw);box-shadow:0 .4cqw 0 #a82350}
+#retry{flex:1;height:14cqw;font-size:5.8cqw}
+#share{width:25cqw;height:10cqw;font-size:3.4cqw;background:transparent;color:#2c4aa0;
+  border:.6cqw solid #2c4aa0;border-radius:3cqw;box-shadow:0 .6cqw 0 #2c4aa066}
+#share:active{transform:translateY(.5cqw)}
+</style>
+</head>
+<body>
+<canvas id="cv"></canvas>
+<div id="stage">
+  <div id="title">
+    <div class="t2">反復<span class="nb">横とび</span></div>
+    <div class="t3"><span class="nb">速すぎて</span><span class="nb">分身する</span></div>
+    <div class="t4">タップで スタート</div>
+  </div>
+  <div id="result">
+    <div class="hd">体力測定 記録用紙</div>
+    <div class="ln"><span>種目</span><b>反復横とび</b></div>
+    <div class="big">
+      <span class="lb">記録</span>
+      <span class="num"><span id="rRec">0</span><small>回</small></span>
+      <div id="stamp"></div>
+    </div>
+    <div id="rJudge"></div>
+    <div class="ln"><span>本当の回数</span><b><span id="rSteps">0</span> 回</b></div>
+    <div class="ln"><span>最高の分身</span><b><span id="rMaxN">0</span> 人</b></div>
+    <div class="ln"><span>転んだ回数</span><b><span id="rTrips">0</span> 回</b></div>
+    <div id="rBest"></div>
+    <div class="row">
+      <button id="retry" class="btn">もう一回</button>
+      <button id="share" class="btn">Xで シェア</button>
+    </div>
+  </div>
+</div>
+<script>
