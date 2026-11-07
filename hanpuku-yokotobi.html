@@ -105,15 +105,15 @@ const CFG = {
   hopK: 28,              // 位置が目標へ寄る速さ（大きいほど速く跳ぶ絵）
 
   // 勢い（直近1秒ほどの跳ぶ速さ 回/秒）。段階 i になる最低の速さ
-  levelRate: [0, 3, 4.5, 6, 7.5, 9, 10.5],
+  levelRate: [0, 2.5, 3.5, 4.5, 5.5, 6.5, 8],   // 2026-11-07 本人の感想で下げた（元は 3 / 4.5 / 6 / 7.5 / 9 / 10.5）
   winFull: 0.8,          // この秒数までの歩は重さ1
   winEnd: 1.2,           // この秒数で重さ0（その間は線形に減る）
-  upHold: 0.5,           // 上の段階の速さを保ってから上がるまで
+  upHold: 0.4,           // 上の段階の速さを保ってから上がるまで
   downHold: 0.8,         // 遅くなってから下がるまで
-  bodies: [1, 1, 2, 4, 8, 16, 32],   // 段階ごとの体の数（本人を含む）
+  bodies: [1, 2, 4, 8, 16, 32, 48],   // 段階ごとの体の数（本人を含む）。段階1から分身する
 
   // 判定（記録の下限）
-  judge: [[0, 'E'], [40, 'D'], [80, 'C'], [130, 'B'], [200, 'A'], [400, 'S'], [1000, '測定不能'], [3000, '人類の範囲外']],
+  judge: [[0, 'E'], [40, 'D'], [80, 'C'], [150, 'B'], [400, 'A'], [1000, 'S'], [3000, '測定不能'], [7000, '人類の範囲外']],   // 分身が早く出るようにしたので記録の桁が上がった（元は 130/200/400/1000/3000）
 
   cloneDelay: 0.022,     // 分身1体あたりの遅れ（秒）
   shareUrl: 'https://fish-suika.github.io/hanpuku-yokotobi/',
@@ -290,7 +290,7 @@ const easeOut = p => 1 - (1 - p) * (1 - p);
 const popups = [], smoke = [], hist = [];
 let hudPop = 0, flash = 0, shakeT = 0, tripAt = -99, lvlShown = 0, bubbleT = 0;
 const CL = [];   // 分身 k=1..31 の見た目の状態
-for (let k = 0; k < 32; k++) CL.push({ app: 0 });
+for (let k = 0; k < 48; k++) CL.push({ app: 0 });
 
 function addPopup(text, x, y, size, color, life, rise, outline) {
   popups.push({ text, x, y, size, color, life: 0, max: life, rise, outline: outline || '#fff' });
@@ -521,7 +521,7 @@ function drawBodies() {
   const ph = nowT * 14;
   // 分身（奥から手前へ）
   const list = [];
-  for (let k = 1; k < 32; k++) if (CL[k].app > 0.01) list.push(k);
+  for (let k = 1; k < CL.length; k++) if (CL[k].app > 0.01) list.push(k);
   list.sort((a, b) => b - a);   // 大きい k = 奥
   const px = xOf(Game.xv, 1);
   for (const k of list) {
@@ -684,7 +684,7 @@ function render() {
 function updateVisual(dt) {
   pushHist();
   const N = CFG.bodies[Game.lvl];
-  for (let k = 1; k < 32; k++) {
+  for (let k = 1; k < CL.length; k++) {
     const c = CL[k];
     if (k < N) c.app = Math.min(1, c.app + dt * 4.5);
     else {
@@ -829,7 +829,7 @@ function saveBest(v) { try { localStorage.setItem(BEST_KEY, String(v)); } catch 
 const fmt = n => n.toLocaleString('ja-JP');
 
 let shownResult = false, rollT = 1, stampDone = true, last = 0, murLvl = -1;
-const LV_TEXT = ['', 'ざんぞう！', 'ぶんしん！！', '4にんに！', '8にん！！', '16にん！！！', '測定不能！！！'];
+const LV_TEXT = ['', 'ぶんしん！', '4にん！', '8にん！！', '16にん！！', '32にん！！！', '測定不能！！！'];
 const LV_COLOR = ['', '#2c4aa0', '#1f8f6a', '#e08a1a', '#e0502a', '#d2382f', '#b01a8a'];
 const CROWD = ['わー！', 'すげー！', 'はやっ！', 'なにあれ！', 'ぶんしん！？', 'えええ！', '2人いる！', '見えない！'];
 let crowdT = 0;

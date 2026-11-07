@@ -5,7 +5,7 @@ function saveBest(v) { try { localStorage.setItem(BEST_KEY, String(v)); } catch 
 const fmt = n => n.toLocaleString('ja-JP');
 
 let shownResult = false, rollT = 1, stampDone = true, last = 0, murLvl = -1;
-const LV_TEXT = ['', 'ざんぞう！', 'ぶんしん！！', '4にんに！', '8にん！！', '16にん！！！', '測定不能！！！'];
+const LV_TEXT = ['', 'ぶんしん！', '4にん！', '8にん！！', '16にん！！', '32にん！！！', '測定不能！！！'];
 const LV_COLOR = ['', '#2c4aa0', '#1f8f6a', '#e08a1a', '#e0502a', '#d2382f', '#b01a8a'];
 const CROWD = ['わー！', 'すげー！', 'はやっ！', 'なにあれ！', 'ぶんしん！？', 'えええ！', '2人いる！', '見えない！'];
 let crowdT = 0;

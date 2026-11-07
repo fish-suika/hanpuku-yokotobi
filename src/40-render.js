@@ -26,7 +26,7 @@ const easeOut = p => 1 - (1 - p) * (1 - p);
 const popups = [], smoke = [], hist = [];
 let hudPop = 0, flash = 0, shakeT = 0, tripAt = -99, lvlShown = 0, bubbleT = 0;
 const CL = [];   // 分身 k=1..31 の見た目の状態
-for (let k = 0; k < 32; k++) CL.push({ app: 0 });
+for (let k = 0; k < 48; k++) CL.push({ app: 0 });
 
 function addPopup(text, x, y, size, color, life, rise, outline) {
   popups.push({ text, x, y, size, color, life: 0, max: life, rise, outline: outline || '#fff' });
@@ -257,7 +257,7 @@ function drawBodies() {
   const ph = nowT * 14;
   // 分身（奥から手前へ）
   const list = [];
-  for (let k = 1; k < 32; k++) if (CL[k].app > 0.01) list.push(k);
+  for (let k = 1; k < CL.length; k++) if (CL[k].app > 0.01) list.push(k);
   list.sort((a, b) => b - a);   // 大きい k = 奥
   const px = xOf(Game.xv, 1);
   for (const k of list) {
@@ -420,7 +420,7 @@ function render() {
 function updateVisual(dt) {
   pushHist();
   const N = CFG.bodies[Game.lvl];
-  for (let k = 1; k < 32; k++) {
+  for (let k = 1; k < CL.length; k++) {
     const c = CL[k];
     if (k < N) c.app = Math.min(1, c.app + dt * 4.5);
     else {

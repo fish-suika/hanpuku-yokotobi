@@ -91,15 +91,15 @@
 
   // --- 勢いの段階 ---
   const b5 = run({ rate: 5 });
-  check('毎秒5回で正しく押すと段階2前後', b5.lvl >= 2 && b5.lvl <= 3 && b5.trips === 0, 'lvl=' + b5.lvl + ' rec=' + b5.rec);
-  const b3 = run({ rate: 3.8 });
-  check('毎秒3.8回なら段階1', b3.lvl === 1, 'lvl=' + b3.lvl + ' rec=' + b3.rec);
+  check('毎秒5回で正しく押すと段階3（8人）', b5.lvl === 3 && b5.trips === 0, 'lvl=' + b5.lvl + ' rec=' + b5.rec);
+  const b3 = run({ rate: 3 });
+  check('毎秒3回でも段階1（もう分身 2 人）', b3.lvl === 1 && b3.maxN === 2, 'lvl=' + b3.lvl + ' rec=' + b3.rec);
   const b2 = run({ rate: 2 });
   check('毎秒2回なら段階0（分身しない）', b2.lvl === 0 && b2.maxN === 1, 'lvl=' + b2.lvl);
-  const b10 = run({ rate: 10 });
-  check('毎秒10回で段階5以上に届く', b10.lvl >= 5 && b10.trips === 0, 'lvl=' + b10.lvl + ' maxN=' + b10.maxN + ' rec=' + b10.rec);
-  const b11 = run({ rate: 11 });
-  check('毎秒11回で最上段（段階6・32人）に届く', b11.lvl === 6 && b11.maxN === 32, 'lvl=' + b11.lvl + ' rec=' + b11.rec);
+  const b10 = run({ rate: 9 });
+  check('毎秒9回で最上段（段階6）に届く', b10.lvl === 6 && b10.trips === 0, 'lvl=' + b10.lvl + ' maxN=' + b10.maxN + ' rec=' + b10.rec);
+  const b11 = run({ rate: 10 });
+  check('毎秒10回で 48 人になる', b11.lvl === 6 && b11.maxN === 48, 'lvl=' + b11.lvl + ' rec=' + b11.rec);
 
   // 段階がチカチカ増減しない（一定の速さなら、上がったあとは下がらない）
   const stable = b10.lvlAt;
@@ -119,11 +119,11 @@
   const altMed = median(altR.map(r => r.rec)), okMed = median(okR.map(r => r.rec));
   check('交互に連打するだけ（右左右左）は転び続けて記録が伸びない', altMed * 5 < okMed && altR.every(r => r.trips >= 20),
     '交互 記録=' + altMed + ' 転倒=' + median(altR.map(r => r.trips)) + ' ／ 正しい順 記録=' + okMed);
-  check('交互連打では分身が 2 人を超えない', altR.every(r => r.maxN <= 2), 'maxN=' + altR.map(r => r.maxN).join(','));
+  check('交互連打では分身が 4 人を超えない', altR.every(r => r.maxN <= 4), 'maxN=' + altR.map(r => r.maxN).join(','));
 
   // --- 速さと正確さの引っ張り合い ---
   // 速いほどミスが増える人間を想定: 7回/秒でミス2% ／ 9回/秒でミス8% ／ 11回/秒でミス20%
-  const pull = [[4.5, 0.01], [7, 0.02], [9, 0.07], [11, 0.2]].map(([rate, err]) =>
+  const pull = [[3.5, 0.01], [6, 0.02], [8, 0.07], [10, 0.22]].map(([rate, err]) =>
     median([1, 2, 3, 4, 5, 6, 7, 8].map(s => run({ rate, err, seed: s }).rec)));
   check('速くしすぎてミスが増えると記録が下がる（引っ張り合いがある）', pull[3] < pull[2] && pull[2] > pull[0],
     '4.5回/秒=' + pull[0] + ' 7回=' + pull[1] + ' 9回=' + pull[2] + ' 11回(ミス多)=' + pull[3]);
@@ -144,11 +144,11 @@
   check('記録は「歩ごとの体の数」の合計（本当の回数より大きい）', b10.rec > b10.steps * 3, 'steps=' + b10.steps + ' rec=' + b10.rec);
 
   // --- 判定の線引き ---
-  const j = [0, 39, 40, 79, 80, 130, 200, 400, 999, 1000, 2999, 3000].map(judgeFor).join(',');
+  const j = [0, 39, 40, 79, 80, 150, 400, 1000, 2999, 3000, 6999, 7000].map(judgeFor).join(',');
   check('判定の線引き（E〜S→測定不能→人類の範囲外）', j === 'E,E,D,D,C,B,A,S,S,測定不能,測定不能,人類の範囲外', j);
   check('最高速のボットは最上位の判定に届く', judgeFor(b11.rec) === '人類の範囲外', 'rec=' + b11.rec);
   check('のんびり（毎秒2回）は低い判定', judgeFor(b2.rec) === 'D' || judgeFor(b2.rec) === 'C' || judgeFor(b2.rec) === 'E', 'rec=' + b2.rec + ' ' + judgeFor(b2.rec));
-  check('ふつう（毎秒5回）は A までには届かない', ['C', 'B', 'A'].includes(judgeFor(b5.rec)), 'rec=' + b5.rec + ' ' + judgeFor(b5.rec));
+  check('ふつう（毎秒5回）は A（S には届かない）、毎秒3回は C', judgeFor(b5.rec) === 'A' && judgeFor(b3.rec) === 'C', 'rec=' + b5.rec + ' ' + judgeFor(b5.rec));
 
   const s = document.createElement('h2');
   s.textContent = fail === 0 ? '全部 OK' : 'NG が ' + fail + ' 件';
