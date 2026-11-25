@@ -15,7 +15,7 @@ const Game = {
   t: 0, readyT: 0, finT: 0, seed: 1, rand: null,
   pos: 1, lastSide: 0, xv: 0, stun: 0,
   stepTimes: [], rate: 0, lvl: 0, upT: 0, downT: 0,
-  rec: 0, steps: 0, trips: 0, maxN: 1, maxLvl: 0,
+  rec: 0, recF: 0, steps: 0, trips: 0, maxN: 1, maxLvl: 0,
   events: [],
 
   reset(seed) {
@@ -25,7 +25,7 @@ const Game = {
     this.t = 0; this.readyT = 0; this.finT = 0;
     this.pos = 1; this.lastSide = 0; this.xv = 0; this.stun = 0;
     this.stepTimes = []; this.rate = 0; this.lvl = 0; this.upT = 0; this.downT = 0;
-    this.rec = 0; this.steps = 0; this.trips = 0; this.maxN = 1; this.maxLvl = 0;
+    this.rec = 0; this.recF = 0; this.steps = 0; this.trips = 0; this.maxN = 1; this.maxLvl = 0;
     this.events = [];
   },
 
@@ -59,9 +59,12 @@ const Game = {
       if (this.pos === 1) { this.pos = 1 + side; this.lastSide = side; }
       else this.pos = 1;
       const n = this.bodies();
-      this.steps++; this.rec += n;
+      this.steps++;
+      this.recF += n * CFG.recMul;   // 記録の倍率（購買部）。小数のぶんは持ち越す
+      const gain = Math.floor(this.recF + 1e-9) - this.rec;
+      this.rec += gain;
       this.stepTimes.push(this.t);
-      this.events.push({ type: 'step', n, side, pos: this.pos });
+      this.events.push({ type: 'step', n, gain, side, pos: this.pos });
       return 'step';
     }
     const was = this.lvl;
@@ -86,7 +89,14 @@ const Game = {
     this.xv += ((this.pos - 1) - this.xv) * (1 - Math.exp(-dt * CFG.hopK));
     if (this.mode === 'ready') {
       this.readyT += dt;
-      if (this.readyT >= CFG.readySecs) { this.mode = 'play'; this.t = 0; this.events.push({ type: 'start' }); }
+      if (this.readyT >= CFG.readySecs) {
+        this.mode = 'play'; this.t = 0; this.events.push({ type: 'start' });
+        if (CFG.startLvl > 0) {   // 応援団：はじめから高い段階
+          this.lvl = Math.min(CFG.startLvl, CFG.levelRate.length - 1);
+          this.maxLvl = this.lvl; this.maxN = Math.max(this.maxN, this.bodies());
+          this.events.push({ type: 'lvl', up: true, lvl: this.lvl });
+        }
+      }
       return;
     }
     if (this.mode === 'finish') {
@@ -119,7 +129,8 @@ const Game = {
       }
     } else if (cand < this.lvl) {
       this.upT = 0;
-      if (this.stun <= 0) {
+      if (this.t < CFG.startGrace) this.downT = 0;   // はじめの少しのあいだは落ちない
+      else if (this.stun <= 0) {
         this.downT += dt;
         if (this.downT >= CFG.downHold) {
           this.lvl--; this.downT = 0;

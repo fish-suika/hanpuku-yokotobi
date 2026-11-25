@@ -1,5 +1,5 @@
 // ===== 画面の流れ・操作・ループ・結果・共有 =====
-const fmt = n => n.toLocaleString('ja-JP');
+const fmt = fmtNum;   // 大きな数字の表示は fmtNum（12-strings.js）1 か所
 const esc = s => s.replace(/[&<>"]/g, c => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;' }[c]));
 // 「|」で区切った言葉を、文節ごとに途中で改行しない塊にして HTML にする
 const phHtml = s => s.split('|').map(p => '<span class="nb">' + esc(p) + '</span>').join('');
@@ -10,9 +10,10 @@ const store = {
   setItem(k, v) { try { localStorage.setItem(k, v); } catch (_) {} },
 };
 let SAVE = Tourney.load(store);
+Shop.apply(SAVE);
 
 // 画面：title → list（大会の一覧）→ intro（ライバルの紹介）→ play（測定）→ result（記録用紙）→ list …。ending は宇宙大会に初めて勝ったあと
-const App = { screen: 'title', idx: 0, introAt: 0, res: null, pendingEnding: false };
+const App = { screen: 'title', idx: 0, introAt: 0, res: null, pendingEnding: false, shopFrom: 'list' };
 
 let shownResult = false, rollT = 1, stampDone = true, vsT = -1, last = 0, murLvl = -1;
 let crowdT = 0;
@@ -28,6 +29,7 @@ function setScreen(s) {
   App.screen = s;
   $('title').classList.toggle('hide', s !== 'title');
   $('list').classList.toggle('on', s === 'list');
+  $('shop').classList.toggle('on', s === 'shop');
   $('intro').classList.toggle('on', s === 'intro');
   $('ending').classList.toggle('on', s === 'ending');
   if (s !== 'result') $('result').classList.remove('show', 'wait');
@@ -67,6 +69,14 @@ function bindUI() {
   $('toList').addEventListener('click', () => { Snd.init(); if (App.pendingEnding) showEnding(); else openList(); });
   $('share').addEventListener('click', share);
   $('listBack').addEventListener('click', () => { resetRun(); setScreen('title'); });
+  $('toShop').addEventListener('click', () => { Snd.init(); openShop('list'); });
+  $('rShop').addEventListener('click', () => { Snd.init(); openShop('result'); });
+  $('shopBack').addEventListener('click', () => { Snd.init(); if (App.pendingEnding) showEnding(); else openList(); });
+  $('shopGo').addEventListener('click', () => { Snd.init(); startRun(); });
+  $('shopBody').addEventListener('click', e => {
+    const b = e.target.closest('.buy');
+    if (b) { Snd.init(); buyItem(b.closest('.it').dataset.id); }
+  });
   $('inBack').addEventListener('click', () => openList());
   $('endBtn').addEventListener('click', () => openList());
   $('listBody').addEventListener('click', e => {
@@ -81,7 +91,7 @@ function resetRun() {
   shownResult = false; stampDone = true; rollT = 1; vsT = -1;
   popups.length = 0; smoke.length = 0; hist.length = 0;
   for (const c of CL) c.app = 0;
-  lvlShown = 0; murLvl = -1; tripAt = -99; rivalPassed = false; rivalPassAt = -99;
+  lvlShown = 0; murLvl = -1; crowdAmt = 0; tripAt = -99; rivalPassed = false; rivalPassAt = -99;
   Snd.murmur(0);
   $('stamp').classList.remove('on'); $('vsStamp').classList.remove('on');
 }
@@ -110,6 +120,49 @@ function renderList() {
   }
   $('listBody').innerHTML = html;
   $('listProg').textContent = L.progress(Tourney.wonCount(SAVE), n);
+  $('listTk').textContent = fmt(SAVE.tickets);
+  $('toShop').classList.toggle('hot', anyBuyable());
+}
+
+// ---- 購買部 ----
+function anyBuyable() { return Shop.ids.some(id => Shop.canBuy(SAVE, id)); }
+
+// from：'list'（大会の一覧から）／'result'（記録用紙から。「もう一回」で続けて測れる）
+function openShop(from) {
+  App.shopFrom = from;
+  if (from !== 'result') resetRun();
+  renderShop();
+  $('shopGo').style.display = from === 'result' && !App.pendingEnding ? '' : 'none';
+  setScreen('shop');
+}
+
+function renderShop() {
+  const S = STR.shop;
+  let html = '';
+  for (const id of Shop.ids) {
+    const I = S.items[id], lv = Shop.level(SAVE, id), mx = Shop.maxLevel(id), st = Shop.state(SAVE, id);
+    const cur = (I.lb ? I.lb + ' ' : '') + I.v(Shop.effect(id, lv));
+    let fx = esc(st === 'max' ? cur : cur + S.arrow + I.v(Shop.effect(id, lv + 1)));
+    if (st === 'locked') fx = phHtml(S.gate(ph(STR.tournaments[Shop.gate(SAVE, id) - 1].name)));
+    let pips = '';
+    for (let k = 0; k < mx; k++) pips += '<i' + (k < lv ? ' class="on"' : '') + '>●</i>';
+    const label = st === 'max' ? S.soldOut : st === 'locked' ? S.lock : fmt(Shop.price(SAVE, id));
+    html += '<div class="it ' + st + '" data-id="' + id + '">'
+      + '<div class="mid"><div class="l1"><span class="nm">' + esc(I.name) + '</span><span class="pips">' + pips + '</span></div>'
+      + '<div class="ds">' + phHtml(I.desc) + '</div><div class="fx">' + fx + '</div></div>'
+      + '<button class="buy"' + (st === 'max' ? ' disabled' : '') + '>' + esc(label) + '</button></div>';
+  }
+  $('shopBody').innerHTML = html;
+  $('shopTk').textContent = fmt(SAVE.tickets);
+}
+
+function buyItem(id) {
+  const r = Shop.buy(SAVE, id);
+  if (r.ok) { Tourney.persist(store, SAVE); Snd.buy(); }
+  else if (r.reason !== 'max') Snd.deny();
+  renderShop();
+  const row = $('shopBody').querySelector('[data-id="' + id + '"]');
+  if (row && r.reason !== 'max') { row.classList.add(r.ok ? 'got' : 'no'); setTimeout(() => row.classList.remove('got', 'no'), 400); }
 }
 
 function openIntro(i) {
@@ -129,6 +182,7 @@ function openIntro(i) {
 // 測定をはじめる（「よーい」から）。結果からの「もう一回」もここ＝1タップ
 function startRun() {
   resetRun();
+  Shop.apply(SAVE);   // 買った強化を、この測定のぶん CFG に反映する
   setScreen('play');
   Game.begin();
 }
@@ -147,7 +201,9 @@ function resultInfo() {
 }
 
 // 長い数字は小さく（枠からはみ出さないように）
-function fitNum(el) { el.className = el.textContent.length > 9 ? 'l3' : el.textContent.length > 6 ? 'l2' : ''; }
+// 記録の大きな数字：長いときは文字を小さくして、判子や単位とぶつからないようにする
+function fitRec(el) { el.parentNode.style.fontSize = el.textContent.length > 5 ? '9.5cqw' : el.textContent.length > 4 ? '11cqw' : ''; }
+function fitNum(el) { el.className = el.textContent.length > 7 ? 'l3' : el.textContent.length > 5 ? 'l2' : ''; }
 
 function showResult() {
   shownResult = true;
@@ -161,6 +217,9 @@ function showResult() {
   $('rMaxN').textContent = fmt(r.maxN);
   $('rTrips').textContent = fmt(r.trips);
   $('rRec').textContent = '0';
+  fitRec($('rRec'));
+  $('rTk').textContent = S.ticketGain(fmt(info.gain));
+  $('rShop').classList.toggle('hot', anyBuyable());
   const st = $('stamp');
   st.textContent = r.judge;
   st.className = r.judge.length > 1 ? 'long' : '';
@@ -191,7 +250,7 @@ function updateResult(dt) {
   if (rollT < 1) {
     rollT = Math.min(1, rollT + dt / 0.9);
     const v = fmt(Math.round(Game.rec * easeOut(rollT)));
-    $('rRec').textContent = v;
+    $('rRec').textContent = v; fitRec($('rRec'));
     $('vsYou').textContent = v; fitNum($('vsYou'));
   } else if (!stampDone) {
     stampDone = true;
@@ -235,9 +294,9 @@ function reactToEvents() {
     } else if (e.type === 'lvl') {
       if (e.up) {
         Snd.levelUp(e.lvl);
-        const LV_COLOR = ['', '#2c4aa0', '#1f8f6a', '#e08a1a', '#e0502a', '#d2382f', '#b01a8a'];
-        flash = 0.12 + 0.05 * e.lvl; shakeT = 0.1;
-        addPopup(STR.pop.lv[e.lvl], 50, 84, 12 + e.lvl * 0.6, LV_COLOR[e.lvl], 1.1, 10, '#fff');
+        const LV_COLOR = ['', '#2c4aa0', '#1f8f6a', '#e08a1a', '#e0502a', '#d2382f', '#b01a8a', '#8a1ab0', '#5a1ab0', '#2a1ab0', '#0a3ad0'];
+        flash = 0.12 + 0.05 * Math.min(e.lvl, 8); shakeT = 0.1;
+        addPopup(STR.pop.lv[e.lvl] || STR.pop.lvN(CFG.bodies[e.lvl]), 50, 84, 12 + Math.min(e.lvl, 8) * 0.6, LV_COLOR[Math.min(e.lvl, 10)], 1.1, 10, '#fff');
         puffSmoke(e.lvl >= 4 ? 8 : 0);
       }
     } else if (e.type === 'end') {
@@ -306,7 +365,11 @@ function makeShareImage() {
     c.fillStyle = '#55608a'; c.font = '48px ' + FONT; c.textAlign = 'left'; c.fillText(K.kind, 160, 330);
     c.textAlign = 'right'; c.fillStyle = '#2b2b3a'; c.font = 'bold 54px ' + FONT; c.fillText(K.kindVal, Wd - 160, 330);
     c.textAlign = 'left'; c.fillStyle = '#55608a'; c.font = 'bold 52px ' + FONT; c.fillText(K.rec, 160, 520);
-    c.textAlign = 'right'; c.fillStyle = '#d2382f'; c.font = '900 200px ' + FONT; c.fillText(fmt(r.rec), Wd - 260, 560);
+    const recS = fmt(r.rec); let fs = 200;
+    c.font = '900 ' + fs + 'px ' + FONT;
+    const mw = c.measureText(recS).width;
+    if (mw > 560) { fs = Math.floor(fs * 560 / mw); c.font = '900 ' + fs + 'px ' + FONT; }   // 長い数字は、左の「記録」にぶつからない幅に縮める
+    c.textAlign = 'right'; c.fillStyle = '#d2382f'; c.fillText(recS, Wd - 260, 560);
     c.fillStyle = '#55608a'; c.font = 'bold 58px ' + FONT; c.fillText(K.unit, Wd - 160, 560);
     // 判定の判子
     c.save(); c.translate(Wd - 230, 360); c.rotate(-0.25);

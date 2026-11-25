@@ -162,7 +162,7 @@
   const N = Tourney.count();
   const winRec = i => CFG.targets[i] + 1;
 
-  check('大会は 9 つ・ライバルの目標の記録は設定どおり', N === 9 && CFG.targets.join() === '80,200,600,2000,6000,20000,100000,500000,3000000', CFG.targets.join());
+  check('大会は 9 つ・ライバルの目標の記録は設定どおり', N === 9 && CFG.targets.join() === '80,200,500,1200,3000,8000,20000,45000,100000', CFG.targets.join());
   check('目標の記録は、大会が進むほど大きくなる', CFG.targets.every((t, i) => i === 0 || t > CFG.targets[i - 1]));
   check('大会の名前・ライバル・一言が 9 つぶん揃っている（言葉の表）',
     STR.tournaments.length === N && STR.tournaments.every(t => t.name && t.rival.name && t.rival.short && t.rival.say));
@@ -264,12 +264,171 @@
   check('勝ちがあるなら、その次の大会は開いている', Tourney.sanitize({ won: [false, false, true] }).unlocked === 3);
   check('知らない項目は残す（Phase 2 の強化を足しても消えない）', odd.extra === 'keep');
 
+  // ===== v2 Phase 2：購買部と強化 =====
+  // --- 大きな数字の表示 ---
+  const F = fmtNum;
+  check('数字の表示：1 万未満はそのまま（カンマ付き）', F(0) === '0' && F(7) === '7' && F(999) === '999' && F(1000) === '1,000' && F(9999) === '9,999', [0, 999, 1000, 9999].map(F).join(' '));
+  check('数字の表示：1 万以上は 万（有効数字 4 桁・余分な 0 は落とす）', F(10000) === '1万' && F(12346) === '1.235万' && F(123456) === '12.35万' && F(1234567) === '123.5万' && F(12345678) === '1235万' && F(30000) === '3万' && F(100000) === '10万', [10000, 12346, 123456, 1234567, 12345678].map(F).join(' '));
+  check('数字の表示：億・兆と繰り上がり（9999.9万→1億）', F(99999999) === '1億' && F(100000000) === '1億' && F(123456789) === '1.235億' && F(1e12) === '1兆' && F(2.5e12) === '2.5兆' && F(99999600) === '1億', [99999999, 123456789, 1e12, 2.5e12].map(F).join(' '));
+  check('数字の表示：壊れた値（NaN・文字・負・小数）でも文字列を返す', F(NaN) === '0' && F(undefined) === '0' && F(Infinity) === '0' && F(-5) === '-5' && F(-12346) === '-1.235万' && F(2.4) === '2' && F('1234') === '1,234');
+  let longest = 0;
+  for (const v of [9999, 10000, 99999, 123456, 999999, 1234567, 9999999, 12345678, 99999999, 123456789, 999999999, 1.234e10, 1.234e11, 1e12, 1.234e13, 1.234e15]) longest = Math.max(longest, F(v).length);
+  check('数字の表示：想定する最大の数字でも 6 文字以内（画面からはみ出さない）', longest <= 6 && F(1.234e15).length <= 6, 'longest=' + longest + ' ' + F(1.234e15));
+
+  // --- 品物の定義 ---
+  check('購買部は 6 つの品物（シューズ・体操着・受け身・記録係・応援団・秘伝書）', Shop.ids.length === 6 && ['shoes', 'clothes', 'fall', 'recorder', 'cheer', 'book'].every(id => Shop.ids.indexOf(id) >= 0), Shop.ids.join());
+  check('どの品物にも名前・1 行の説明・効果の表示がある（言葉の表）', Shop.ids.every(id => STR.shop.items[id] && STR.shop.items[id].name && STR.shop.items[id].desc && typeof STR.shop.items[id].v === 'function' && STR.shop.items[id].v(Shop.effect(id, 1))));
+  check('値段は段階ごとに上がり、全部の品物が複数の段階をもつ', Shop.ids.every(id => CFG.shop[id].price.length >= 4 && CFG.shop[id].price.every((p, i, a) => i === 0 || p > a[i - 1])));
+  check('秘伝書の段階は、体の数と速さの線を 1 つずつ持つ（7=100人・8=500人・9=3000人）', CFG.bodiesExtra.slice(0, 3).join() === '100,500,3000' && CFG.bodiesExtra.length === CFG.levelRateExtra.length && CFG.levelRateExtra.every((r, i, a) => r > CFG.levelRate[6] && (i === 0 || r > a[i - 1])));
+  check('秘伝書は大会に勝たないと買えない段階を持つ（段階が上がるほど多く勝つ）', CFG.shop.book.gate.length === CFG.shop.book.price.length && CFG.shop.book.gate.every((g, i, a) => i === 0 || g > a[i - 1]) && CFG.shop.book.gate[0] >= 2);
+
+  // --- 引換券の払い出し ---
+  check('引換券：記録の一部（勝つと多め）', Shop.payout(1000, true, 500, true) === Math.floor(1000 * CFG.payWin) && Shop.payout(1000, false, 500, true) === Math.floor(1000 * CFG.payLose) && CFG.payWin > CFG.payLose);
+  check('引換券：まだ勝っていない大会は参加賞がつく（勝った大会にはつかない）', Shop.payout(1000, false, 500, false) === Math.floor(1000 * CFG.payLose) + Math.floor(500 * CFG.payPart) && Shop.payout(1000, false, 500, true) < Shop.payout(1000, false, 500, false));
+  check('引換券：記録が 0 でも参加賞だけはもらえる／勝った大会で 0 なら 0', Shop.payout(0, false, 500, false) === Math.floor(500 * CFG.payPart) && Shop.payout(0, false, 500, true) === 0);
+  check('引換券：記録があれば最低 1 枚', Shop.payout(5, false, 80, true) >= 1);
+  sv = Tourney.newSave();
+  r = Tourney.record(sv, 0, 1000);
+  check('結果を記録すると引換券がたまる（残りに加わり、結果にも出る）', r.gain === Shop.payout(1000, true, CFG.targets[0], false) && sv.tickets === r.gain && r.gain > 0, 'gain=' + r.gain);
+  r = Tourney.record(sv, 0, 10);
+  check('負けても（勝った大会でも）引換券は増える・減らない', r.gain >= 1 && sv.tickets > 0);
+  const snapT = sv.tickets;
+  r = Tourney.record(sv, 5, 99999999);
+  check('まだ開いていない大会の結果では、引換券は増えない', r.gain === 0 && sv.tickets === snapT);
+
+  // --- 買う ---
+  const poorSv = Tourney.newSave();
+  check('引換券がなければ買えない（何も変わらない）', Shop.state(poorSv, 'shoes') === 'poor' && Shop.buy(poorSv, 'shoes').ok === false && poorSv.up.shoes === 0 && poorSv.tickets === 0);
+  const rich = Tourney.newSave(); rich.tickets = 1e9;
+  const p1 = Shop.price(rich, 'shoes');
+  let br = Shop.buy(rich, 'shoes');
+  check('買うと引換券が値段の分だけ減り、段階が 1 つ上がる', br.ok && rich.tickets === 1e9 - p1 && rich.up.shoes === 1 && br.level === 1 && br.price === p1);
+  check('次の段階の値段は高くなる', Shop.price(rich, 'shoes') > p1);
+  for (const id of ['shoes', 'clothes', 'fall', 'recorder', 'cheer']) while (Shop.buy(rich, id).ok);
+  check('最大の段階まで買うと、それ以上は買えない（値段なし・状態は max）', Shop.ids.filter(id => id !== 'book').every(id => rich.up[id] === Shop.maxLevel(id) && Shop.state(rich, id) === 'max' && Shop.price(rich, id) === null && Shop.buy(rich, id).reason === 'max'));
+  const gSv = Tourney.newSave(); gSv.tickets = 1e9;
+  check('秘伝書：大会に勝つ前は、引換券があっても買えない（ロック）', Shop.state(gSv, 'book') === 'locked' && Shop.buy(gSv, 'book').ok === false && gSv.up.book === 0 && gSv.tickets === 1e9 && Shop.gate(gSv, 'book') === CFG.shop.book.gate[0]);
+  for (let i = 0; i < CFG.shop.book.gate[0] - 1; i++) Tourney.record(gSv, i, winRec(i));
+  gSv.tickets = 1e9;
+  check('秘伝書：1 つ足りないあいだはまだロック', Shop.state(gSv, 'book') === 'locked');
+  Tourney.record(gSv, CFG.shop.book.gate[0] - 1, winRec(CFG.shop.book.gate[0] - 1));
+  gSv.tickets = 1e9;
+  check('秘伝書：必要な数の大会に勝つと買える', Shop.state(gSv, 'book') === 'ok' && Shop.buy(gSv, 'book').ok && gSv.up.book === 1);
+  check('秘伝書：次の段階は、もっと多くの大会に勝たないと買えない', Shop.state(gSv, 'book') === 'locked' && Shop.gate(gSv, 'book') === CFG.shop.book.gate[1]);
+  const cheap = Tourney.newSave(); cheap.tickets = CFG.shop.clothes.price[0];
+  check('いちばん安い買える品物が選べる（ボット用）', Shop.cheapest(cheap) !== null && Shop.price(cheap, Shop.cheapest(cheap)) <= cheap.tickets && Shop.cheapest(Tourney.newSave()) === null);
+
+  // --- 強化が CFG を変える（測定の前に反映）---
+  const base0 = JSON.stringify([CFG.winFull, CFG.winEnd, CFG.levelRate, CFG.bodies, CFG.stunDrop, CFG.stunSecs, CFG.recMul, CFG.startLvl, CFG.startGrace]);
+  const up1 = id => { const q = Tourney.newSave(); q.up[id] = 1; Shop.apply(q); return q; };
+  up1('shoes');
+  check('体育館シューズ：勢いを数える時間がのびる（winFull・winEnd が長くなる）', CFG.winFull > Shop.base.winFull && CFG.winEnd > Shop.base.winEnd && CFG.winEnd > CFG.winFull);
+  up1('clothes');
+  check('新しい体操着：段階になる速さが下がる（0 は 0 のまま・並びは昇順のまま）', CFG.levelRate[0] === 0 && CFG.levelRate.slice(1).every((x, i) => x < Shop.base.levelRate[i + 1] && (i === 0 || x > CFG.levelRate[i])));
+  up1('fall');
+  check('受け身の練習：転んだときの勢いの落ちが小さく、動けない時間が短い', CFG.stunDrop < Shop.base.stunDrop && CFG.stunSecs < Shop.base.stunSecs);
+  up1('recorder');
+  check('記録係を増やす：記録の倍率が上がる', CFG.recMul > 1);
+  up1('cheer');
+  check('応援団：はじめの段階が上がる', CFG.startLvl >= 1 && CFG.startGrace > 0);
+  const bk = Tourney.newSave(); bk.up.book = 2; Shop.apply(bk);
+  check('分身の秘伝書：段階の上限が増える（7 段階 → 9 段階・体の数 100 と 500 が加わる）', CFG.bodies.length === 9 && CFG.levelRate.length === 9 && CFG.bodies[7] === 100 && CFG.bodies[8] === 500 && CFG.bodies[6] === 48);
+  const allMax = Tourney.newSave(); for (const id of Shop.ids) allMax.up[id] = Shop.maxLevel(id);
+  Shop.apply(allMax); const jMax = JSON.stringify([CFG.winFull, CFG.levelRate, CFG.bodies]); Shop.apply(allMax);
+  check('強化の反映は何度やっても重ならない（同じ強化なら同じ値）', JSON.stringify([CFG.winFull, CFG.levelRate, CFG.bodies]) === jMax);
+  check('全部最大：秘伝書の最大の段階まで体の数と速さの線が揃う', CFG.bodies.length === 7 + CFG.bodiesExtra.length && CFG.levelRate.length === CFG.bodies.length && CFG.startLvl <= CFG.bodies.length - 1);
+  Shop.reset();
+  check('強化なし（Shop.reset）にすると、素の値にぴったり戻る', JSON.stringify([CFG.winFull, CFG.winEnd, CFG.levelRate, CFG.bodies, CFG.stunDrop, CFG.stunSecs, CFG.recMul, CFG.startLvl, CFG.startGrace]) === base0);
+
+  // --- 強化が実際の記録に効く（最初の 1 段階から分かる）---
+  // 段階の線にぎりぎりの速さだと 1 段階では変わらないこともあるので、いくつかの速さの平均で見る
+  const recAt = rate => median([1, 2, 3, 4, 5, 6, 7].map(sd => run({ rate, err: 0.03, seed: sd }).rec));
+  const rec5 = () => [4, 5, 6, 7].reduce((a, rt) => a + Math.log(recAt(rt)), 0) / 4;   // 対数の平均（＝倍率の平均）
+  const baseRec = rec5();
+  const gains = {};
+  for (const id of ['shoes', 'clothes', 'recorder', 'cheer']) { up1(id); gains[id] = Math.exp(rec5() - baseRec); Shop.reset(); }
+  check('最初の 1 段階から、記録が目に見えて増える（シューズ・体操着・記録係は 10% 以上、応援団は 5% 以上）', gains.shoes >= 1.1 && gains.clothes >= 1.1 && gains.recorder >= 1.4 && gains.cheer >= 1.05,
+    Object.keys(gains).map(k => k + ' ×' + gains[k].toFixed(2)).join(' '));
+  // 受け身：ミスの多い人の記録が上がる
+  const sloppy5 = () => median([1, 2, 3, 4, 5, 6, 7].map(sd => run({ rate: 7, err: 0.08, seed: sd }).rec));
+  const sBase = sloppy5(); up1('fall'); const sFall = sloppy5(); Shop.reset();
+  check('受け身の練習：ミスの多い人の記録が上がる', sFall > sBase * 1.05, 'before=' + sBase + ' after=' + sFall);
+  // 応援団：1 歩目から分身
+  const ch = Tourney.newSave(); ch.up.cheer = 2; Shop.apply(ch);
+  startPlay(3);
+  check('応援団：測定がはじまった瞬間から勢いの段階が高い（出だしから分身）', Game.lvl === CFG.startLvl && Game.lvl >= 2 && Game.maxN === CFG.bodies[CFG.startLvl]);
+  Game.input(1);
+  check('応援団：1 歩目から多い人数ぶんの記録が入る', Game.rec === CFG.bodies[CFG.startLvl]);
+  Shop.reset();
+  // 記録係：倍率どおり。小数のぶんは持ち越す
+  const rm = Tourney.newSave(); rm.up.recorder = 1; Shop.apply(rm);
+  startPlay(4);
+  for (let k = 0; k < 4; k++) { Game.input(Game.nextSides()[0]); advance(0.15); }
+  check('記録係：倍率をかけた記録になり、小数のぶんは持ち越して取りこぼさない', Game.rec === Math.floor(4 * CFG.recMul) && Game.steps === 4, 'rec=' + Game.rec + ' recMul=' + CFG.recMul);
+  Shop.reset();
+  // 秘伝書：新しい段階まで上がる
+  const bk3 = Tourney.newSave(); for (const id of Shop.ids) bk3.up[id] = Shop.maxLevel(id); Shop.apply(bk3);
+  const hi = run({ rate: 9, err: 0.01, seed: 2 });
+  check('秘伝書：速い人は 48 人を超えて 100 人以上に分身できる（段階 7 以上）', hi.maxLvl >= 7 && hi.maxN >= 100, 'maxLvl=' + hi.maxLvl + ' maxN=' + hi.maxN);
+  const slowHi = run({ rate: 2, seed: 2 });
+  check('秘伝書があっても、ゆっくりなら秘伝書の段階（7 以上）には上がらない', slowHi.maxLvl < 7, 'maxLvl=' + slowHi.maxLvl);
+  Shop.reset();
+
+  // --- 保存：引換券と強化、Phase 1 の保存の引き継ぎ ---
+  const p1save = { v: 1, unlocked: 3, won: [true, true, true, false, false, false, false, false, false], best: [90, 250, 700, 100, 0, 0, 0, 0, 0] };
+  const stP1 = fake({ [SAVE_KEY]: JSON.stringify(p1save) });
+  const mig2 = Tourney.load(stP1);
+  check('Phase 1 の保存を読むと、進み具合とベストはそのまま、引換券は 0・強化は全部 0', mig2.unlocked === 3 && mig2.won.slice(0, 3).every(Boolean) && mig2.best[1] === 250 && mig2.tickets === 0 && Shop.ids.every(id => mig2.up[id] === 0) && mig2.v === 2 && SAVE_VER === 2);
+  sv = Tourney.newSave(); Tourney.record(sv, 0, 5000); sv.up.shoes = 2; sv.up.cheer = 1;
+  const stP2 = fake({}); Tourney.persist(stP2, sv);
+  const back2 = Tourney.load(stP2);
+  check('保存して読み直すと、引換券と強化の段階も同じ', back2.tickets === sv.tickets && back2.up.shoes === 2 && back2.up.cheer === 1 && back2.up.book === 0 && JSON.stringify(back2) === JSON.stringify(sv), 'tickets=' + back2.tickets);
+  const weird = Tourney.sanitize({ tickets: -50, up: { shoes: 99, clothes: -3, fall: 'x', recorder: 2.9, cheer: null, book: 1 } });
+  check('おかしい保存は直して読む（引換券は 0 以上・強化は 0〜最大）', weird.tickets === 0 && weird.up.shoes === Shop.maxLevel('shoes') && weird.up.clothes === 0 && weird.up.fall === 0 && weird.up.recorder === 2 && weird.up.cheer === 0 && weird.up.book === 1);
+  check('引換券が小数・文字でも整数の枚数に直す', Tourney.sanitize({ tickets: 12.8 }).tickets === 12 && Tourney.sanitize({ tickets: 'abc' }).tickets === 0 && Tourney.sanitize({ up: 5 }).up.shoes === 0);
+  check('v1 のベストの引き継ぎは、これまでどおり新しい保存の形で書かれる', JSON.parse(st2.d[SAVE_KEY]).v === 2 && JSON.parse(st2.d[SAVE_KEY]).tickets === 0);
+  Shop.reset();
+
+  // ===== ボットでペースを確認：毎秒 4 / 6 / 8 回のボットが、次に勝っていない大会を遊び続け、いちばん安い強化を買いながら宇宙大会まで =====
+  // 1 回は約 30 秒（測定 20 秒＋画面）で数える
+  function playThrough(rate, err, seed, maxRuns) {
+    const q = Tourney.newSave(); let runs = 0, buys = 0;
+    while (!q.won[N - 1] && runs < maxRuns) {
+      const i = q.won.indexOf(false);
+      Shop.apply(q);
+      const res = run({ rate, err, seed: seed * 1000 + runs });
+      Tourney.record(q, i, res.rec);
+      runs++;
+      for (let g = 0; g < 60; g++) { const id = Shop.cheapest(q); if (!id) break; Shop.buy(q, id); buys++; }
+    }
+    Shop.reset();
+    return { runs, done: q.won[N - 1], up: q.up, buys, tickets: q.tickets };
+  }
+  const bots = [[4, 0.02], [6, 0.03], [8, 0.03]].map(([rate, err]) => {
+    const rs = [1, 2, 3, 4, 5].map(sd => playThrough(rate, err, sd, 600));
+    const runs = rs.map(x => x.runs).sort((a, b) => a - b);
+    return { rate, err, runs: runs[2], min: runs[2] * 0.5, done: rs.every(x => x.done), up: rs[2].up };
+  });
+  const tbl = document.createElement('pre');
+  tbl.textContent = 'ボットで宇宙大会まで（5 回の中央値・1 回 30 秒で換算）\n' + bots.map(b => '毎秒 ' + b.rate + ' 回（ミス ' + Math.round(b.err * 100) + '%）：' + b.runs + ' 回・約 ' + b.min.toFixed(1) + ' 分　最終の強化 ' + JSON.stringify(b.up)).join('\n');
+  out.appendChild(tbl);
+  check('ボット：毎秒 6 回の人は 20〜30 分で宇宙大会に勝つ', bots[1].done && bots[1].min >= 20 && bots[1].min <= 30, bots[1].runs + ' 回・' + bots[1].min.toFixed(1) + ' 分');
+  check('ボット：毎秒 8 回の人は、毎秒 6 回の人より早い', bots[2].done && bots[2].runs < bots[1].runs, bots[2].runs + ' 回・' + bots[2].min.toFixed(1) + ' 分');
+  check('ボット：毎秒 4 回の人も、いつかは勝てる（毎秒 6 回の人の 5 倍以内）', bots[0].done && bots[0].runs <= bots[1].runs * 5, bots[0].runs + ' 回・' + bots[0].min.toFixed(1) + ' 分');
+  check('ボット：毎秒 6 回の人は最初の大会に 1 回目で勝てる（始めで詰まらない）', (() => { Shop.reset(); const x = run({ rate: 6, err: 0.03, seed: 1 }); return Tourney.beats(x.rec, 0); })());
+  check('ボット：毎秒 4 回の人でも、最初の強化は 5 回以内に買える（遅い人でも最初の手応えが早い）', (() => {
+    const q = Tourney.newSave(); let runs = 0;
+    while (!Shop.cheapest(q) && runs < 30) { const i = q.won.indexOf(false); Shop.apply(q); Tourney.record(q, i, run({ rate: 4, err: 0.02, seed: 50 + runs }).rec); runs++; }
+    Shop.reset(); return runs <= 5;
+  })());
+  Shop.reset();
+
   // ボットで目安：強化なしの Phase 1 で、どこまで勝てるか
   const rec6 = median([1, 2, 3, 4, 5].map(sd => run({ rate: 6, err: 0.02, seed: sd }).rec));
   const rec9 = median([1, 2, 3, 4, 5].map(sd => run({ rate: 9, err: 0.05, seed: sd }).rec));
   const beaten = rec => CFG.targets.filter(t => rec > t).length;
   check('毎秒6回のボットは、少なくとも最初の大会に勝てる（遊び始めで詰まらない）', beaten(rec6) >= 1, 'rec=' + rec6 + ' 勝てる大会=' + beaten(rec6));
-  check('強化なしでは、後ろの大会は勝てない（毎秒9回でも全国大会以降は届かない）', beaten(rec9) < 6 && beaten(b11.rec) < 6, 'rec9=' + rec9 + ' 勝てる大会=' + beaten(rec9) + ' ／ 最高速 rec=' + b11.rec);
+  check('強化なしでは、最後の大会には勝てない（毎秒10回でも宇宙大会には届かない）', beaten(rec9) < N && beaten(b11.rec) < N, 'rec9=' + rec9 + ' 勝てる大会=' + beaten(rec9) + ' ／ 最高速 rec=' + b11.rec);
 
   const s = document.createElement('h2');
   s.textContent = fail === 0 ? '全部 OK' : 'NG が ' + fail + ' 件';

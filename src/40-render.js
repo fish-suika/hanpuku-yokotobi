@@ -26,7 +26,8 @@ const easeOut = p => 1 - (1 - p) * (1 - p);
 const popups = [], smoke = [], hist = [];
 let hudPop = 0, flash = 0, shakeT = 0, tripAt = -99, lvlShown = 0, bubbleT = 0;
 let rivalPassed = false, rivalPassAt = -99;   // 測定中にライバルの記録を超えたか
-const CL = [];   // 分身 k=1..31 の見た目の状態
+let crowdAmt = 0;   // 奥の人だかりの量（0〜1）。分身が 48 人を超えると出てくる
+const CL = [];   // 分身 k=1..47 の見た目の状態
 for (let k = 0; k < 48; k++) CL.push({ app: 0 });
 
 function addPopup(text, x, y, size, color, life, rise, outline) {
@@ -291,6 +292,43 @@ function drawBodies() {
   drawKid(cx, px2, Y0, KS, { lean: o.lean, hop: o.hop, ph, fall: pf, fallDir: -Game.lastSide || 1, sit, bob: breath, face, point });
 }
 
+// ---- 人だかり：分身が 48 人を超えたら、手前の 47 人はそのまま描き、奥へ小さな人の列を足す（描く数に上限）----
+function crowdTarget() {
+  const lv = Game.mode === 'play' ? Game.lvl : (Game.mode === 'finish' || Game.mode === 'over' ? lvlShown : 0);
+  const N = CFG.bodies[lv] || 1;
+  return N > 48 ? clamp(Math.log(N / 48) / Math.log(20000 / 48), 0.05, 1) : 0;
+}
+function drawCrowd() {
+  if (crowdAmt < 0.01) return;
+  const rows = 4 + Math.round(crowdAmt * 9), maxPer = 22 + Math.round(crowdAmt * 16), fill = 0.4 + 0.6 * crowdAmt;
+  const wide = EX1 - EX0 + 24;
+  cx.save(); cx.globalAlpha = 0.9 * Math.min(1, crowdAmt * 8);
+  for (let r = rows - 1; r >= 0; r--) {   // 奥の列から
+    const z = 18 + r * 3.2, s = sOf(z), y = yOf(s), sc = s * KS * 1.25;
+    const step = Math.max(8 * sc, wide / maxPer), n = Math.floor(wide / step);
+    const shift = histX(nowT - (48 + r * 6) * CFG.cloneDelay) * LS * s;   // 本人の動きに少し遅れてついていく
+    const x0 = EX0 - 12 + (r % 2 ? step * 0.5 : 0) + shift;
+    const dots = [];
+    for (let i = 0; i < n; i++) {
+      if (((i * 37 + r * 91) % 100) / 100 > fill) continue;
+      dots.push(x0 + i * step, y - Math.abs(Math.sin(nowT * 9 + i * 1.3 + r)) * 2.2 * sc);
+    }
+    const part = (col, f) => { cx.fillStyle = col; cx.beginPath(); for (let k = 0; k < dots.length; k += 2) f(dots[k], dots[k + 1]); cx.fill(); };
+    part('#f3c8a0', (x, yy) => { cx.rect(x - 3.6 * sc, yy - 10 * sc, 2.4 * sc, 10 * sc); cx.rect(x + 1.2 * sc, yy - 10 * sc, 2.4 * sc, 10 * sc); });
+    part('#2c4aa0', (x, yy) => cx.rect(x - 5.3 * sc, yy - 15.5 * sc, 10.6 * sc, 5.6 * sc));
+    part(r % 2 ? '#e4eaff' : '#ffffff', (x, yy) => cx.rect(x - 5.6 * sc, yy - 25.4 * sc, 11.2 * sc, 11.4 * sc));
+    part('#f3c8a0', (x, yy) => { cx.moveTo(x + 5.6 * sc, yy - 30.2 * sc); cx.arc(x, yy - 30.2 * sc, 5.6 * sc, 0, 6.283); });
+    part('#3a2a22', (x, yy) => { cx.moveTo(x + 5.9 * sc, yy - 30.6 * sc); cx.arc(x, yy - 30.6 * sc, 5.9 * sc, Math.PI, 6.283); });
+  }
+  cx.restore();
+}
+function drawCount() {   // 分身の人数を数字でも見せる
+  const lv = Game.mode === 'play' ? Game.lvl : (Game.mode === 'finish' || Game.mode === 'over' ? lvlShown : 0);
+  const N = CFG.bodies[lv] || 1;
+  if (N < 8 || App.screen === 'result') return;
+  fitTxt(STR.hud.bodies(fmtNum(N)), 50, 66, 6.6, 64, '#d2382f', { stroke: '#fff', sw: 1.3 });
+}
+
 // ---- 背景の効果 ----
 function drawRays() {
   const lv = Game.lvl;
@@ -359,7 +397,7 @@ function drawHud() {
   txt(STR.hud.rec, 52, 8.6, 3.4, '#55608a');
   const pop = 1 + 0.16 * hudPop;
   cx.save(); cx.translate(52, 19.8); cx.scale(pop, pop);
-  txt(String(Game.rec), 0, 0, Game.rec >= 10000 ? 9.5 : 12, '#d2382f');
+  fitTxt(fmtNum(Game.rec), 0, 0, 12, 46, '#d2382f');   // 大きな数字は 万・億・兆 にして、枠に入る幅に縮める
   cx.restore();
   txt(STR.hud.real(Game.steps), 52, 27.6, 2.6, '#55608a');
   // 残り時間
@@ -370,7 +408,7 @@ function drawHud() {
   cx.fillStyle = '#dde3f3'; rr(cx, 6, 34.7, 88, 1.5, 0.75); cx.fill();
   cx.fillStyle = left <= 5 ? '#e03030' : '#2c9a6a'; rr(cx, 6, 34.7, Math.max(1.5, 88 * left / CFG.duration), 1.5, 0.75); cx.fill();
   // 記録係のひとこと
-  let b = STR.hud.bubble[lv];
+  let b = STR.hud.bubble[Math.min(lv, STR.hud.bubble.length - 1)];
   if (Game.mode === 'finish') b = STR.hud.bFinish;
   else if (Game.mode === 'over') b = STR.hud.bOver(Game.rec);
   else if (Game.mode === 'title') b = STR.hud.bReady;
@@ -379,10 +417,10 @@ function drawHud() {
 }
 
 // 文字が枠に入りきらないときは、その幅に縮める
-function fitTxt(s, x, y, size, maxW, fill) {
+function fitTxt(s, x, y, size, maxW, fill, o) {
   cx.font = 'bold ' + size + 'px ' + FONT;
   const w = cx.measureText(s).width;
-  txt(s, x, y, w > maxW ? size * maxW / w : size, fill);
+  txt(s, x, y, w > maxW ? size * maxW / w : size, fill, o);
 }
 // ライバルの札：記録板の下、右の端。記録に合わせて下から色が満ち、超えると金色になる
 function drawRival() {
@@ -426,11 +464,13 @@ function render() {
   drawGym();
   drawLines();
   drawRays();
+  drawCrowd();
   drawSpectators();
   drawBodies();
   drawSmoke();
   cx.setTransform(DPR * U, 0, 0, DPR * U, DPR * OX, DPR * OY);
   if (App.screen !== 'result') drawHud();   // 記録用紙のあいだは、記録板をひっこめる
+  if (App.screen === 'play') drawCount();
   if (App.screen === 'play') drawRival();
   drawPopups();
   if (Game.mode === 'ready') {
@@ -447,6 +487,8 @@ function render() {
 function updateVisual(dt) {
   pushHist();
   const N = CFG.bodies[Game.lvl];
+  crowdAmt += (crowdTarget() - crowdAmt) * Math.min(1, dt * 3);
+  if (crowdAmt < 0.005) crowdAmt = 0;
   for (let k = 1; k < CL.length; k++) {
     const c = CL[k];
     if (k < N) c.app = Math.min(1, c.app + dt * 4.5);

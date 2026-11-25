@@ -6,6 +6,7 @@ cat src/00-head.html \
     src/10-config.js \
     src/12-strings.js \
     src/20-logic.js \
+    src/22-shop.js \
     src/25-tourney.js \
     src/40-render.js \
     src/50-audio.js \
@@ -19,6 +20,7 @@ cat src/verify-head.html \
     src/10-config.js \
     src/12-strings.js \
     src/20-logic.js \
+    src/22-shop.js \
     src/25-tourney.js \
     src/verify-tests.js \
     src/99-tail.html > verify.html

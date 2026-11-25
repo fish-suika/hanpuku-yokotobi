@@ -95,7 +95,7 @@ const Snd = (() => {
     // ざわめきの大きさを段階に合わせる
     murmur(l) {
       if (!ac) return;
-      murGain.gain.setTargetAtTime(l >= 3 ? 0.05 + 0.05 * (l - 3) : 0, now(), 0.3);
+      murGain.gain.setTargetAtTime(l >= 3 ? 0.05 + 0.05 * (Math.min(l, 6) - 3) : 0, now(), 0.3);
     },
     // ゼーゼー
     pant() {
@@ -110,6 +110,18 @@ const Snd = (() => {
       tone(1568, t + 0.09, 0.14, { type: 'square', gain: 0.07 });
       tone(2093, t + 0.18, 0.3, { type: 'square', gain: 0.08 });
       tone(3136, t + 0.18, 0.4, { type: 'sine', gain: 0.07 });
+    },
+    // 購買部：買えた（チャリン）／買えない
+    buy() {
+      if (!ac) return; const t = now();
+      tone(1568, t, 0.08, { type: 'square', gain: 0.06 });
+      tone(2093, t + 0.07, 0.25, { type: 'square', gain: 0.07 });
+      tone(3136, t + 0.07, 0.3, { type: 'sine', gain: 0.06 });
+    },
+    deny() {
+      if (!ac) return; const t = now();
+      tone(196, t, 0.12, { type: 'square', gain: 0.05 });
+      tone(165, t + 0.1, 0.16, { type: 'square', gain: 0.05 });
     },
     // 勝ち負けの判子のあと
     win() {

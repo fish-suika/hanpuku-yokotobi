@@ -8,6 +8,23 @@ const STR = {
     progress: (n, m) => n + ' / ' + m,
     vs: 'VS', unit: '回', best: 'ベスト', noBest: 'ベスト ---',
     tagWon: '勝ち', tagNext: '挑戦！', tagLocked: 'ロック', hidden: '？？？',
+    tickets: '引換券', shop: '購買部',
+  },
+
+  // 購買部。品物は 6 つ。name・desc（何が強くなるか 1 行）・lb（効果の見出し）・v（段階ごとの効果の短い表示。引数は Shop.effect の値）。画面には「lb v → 次の v」
+  shop: {
+    head: '購買部', tickets: '引換券', back: '大会の一覧', go: 'もう一回',
+    price: n => n, max: 'MAX', soldOut: '最大', poor: 'たりない', lock: 'ロック',
+    gate: name => name + 'に|勝つと|買える',
+    arrow: ' → ',
+    items: {
+      shoes: { name: '体育館シューズ', desc: '勢いが|長もち|する', lb: '長もち', v: e => '×' + e.mul.toFixed(1) },
+      clothes: { name: '新しい体操着', desc: '分身が|出やすく|なる', lb: '必要な速さ', v: e => e.mul < 1 ? '-' + Math.round((1 - e.mul) * 100) + '%' : '±0%' },
+      fall: { name: '受け身の練習', desc: '転んでも|立ち直りが|早い', lb: '', v: e => '-' + e.drop + '段 ' + e.secs.toFixed(2) + '秒' },
+      recorder: { name: '記録係を増やす', desc: '記録が|ふえる', lb: '記録', v: e => '×' + (e.mul % 1 ? e.mul.toFixed(1) : e.mul) },
+      cheer: { name: '応援団', desc: 'はじめから|勢いが|高い', lb: 'スタート', v: e => fmtNum(e.bodies) + '人' },
+      book: { name: '分身の秘伝書', desc: '分身の|上限が|ふえる', lb: '最大', v: e => fmtNum(e.bodies) + '人' },
+    },
   },
 
   intro: { rival: 'ライバル', rec: 'ライバルの記録', unit: '回', best: 'ベスト', start: 'タップで スタート', back: 'もどる' },
@@ -37,6 +54,7 @@ const STR = {
     noteReplay: 'ライバルに|また 勝ちました。',
     noteEnd: '全大会|せいは！',
     retry: 'もう一回', toList: '大会の一覧', cont: 'つづける', share: 'Xで シェア',
+    tickets: '引換券', ticketGain: n => '+' + n, shop: '購買部',
   },
 
   // 宇宙大会に勝ったあと（Phase 3 で作り直す）
@@ -47,7 +65,7 @@ const STR = {
 
   // 測定中の画面（記録板・ふきだし・文字の演出）
   hud: {
-    banner: '体力測定', rec: '記録', real: n => 'ほんとうは ' + n + ' 回', left: 'のこり',
+    banner: '体力測定', rec: '記録', real: n => 'ほんとうは ' + n + ' 回', left: 'のこり', bodies: n => '分身 ' + n + '人',
     bubble: ['いーち、にー…', 'は、はやっ！', 'えっ…？ にー、よん…', 'ひとが ふえてる…', 'ゆ、ゆかが…！', 'でんたく でんたく…！', 'そ、測定不能…！'],
     bFinish: 'そこまで！ きろくします…', bOver: n => '…' + n + ' 回です。', bReady: 'よーい…',
     ready: 'よーい…', vs: 'VS', passed: '超えた！',
@@ -56,6 +74,7 @@ const STR = {
     start: 'スタート！', stumble: 'もつれた！', out: 'はみだした！', down: '勢い ダウン', end: 'そこまで！', pant: 'ゼーゼー',
     rival: 'ライバルを 超えた！',
     lv: ['', 'ぶんしん！', '4にん！', '8にん！！', '16にん！！', '32にん！！！', '測定不能！！！'],
+    lvN: n => fmtNum(n) + 'にん！！！',   // 段階 7 以上（分身の秘伝書）
     crowd: ['わー！', 'すげー！', 'はやっ！', 'なにあれ！', 'ぶんしん！？', 'えええ！', '2人いる！', '見えない！'],
   },
 
@@ -67,3 +86,28 @@ const STR = {
   },
 };
 const ph = s => s.replace(/\|/g, '');   // 「|」を取った普通の文字列
+
+// ===== 大きな数字の表示（ここ 1 か所。Phase 4 で英語の K / M / B を足すときは units と、読みを変えるところだけ）=====
+// 1 万未満はそのまま（3 桁ごとにカンマ）。1 万以上は 万・億・兆 を付けて、有効数字 4 桁まで（例 12.34万・123.4万・1234万・1.5億）
+STR.num = { units: [[1e4, '万'], [1e8, '億'], [1e12, '兆']], sep: ',', sig: 4 };
+function fmtNum(v) {
+  let n = Math.round(Number(v));
+  if (!Number.isFinite(n)) return '0';
+  const neg = n < 0; if (neg) n = -n;
+  const U = STR.num.units;
+  let out;
+  if (n < U[0][0]) {
+    out = String(n).replace(/\B(?=(\d{3})+(?!\d))/g, STR.num.sep);
+  } else {
+    let u = 0;
+    while (u + 1 < U.length && n >= U[u + 1][0]) u++;
+    const body = k => {   // 有効数字 sig 桁に丸めて、余分な 0 を落とす
+      const m = n / U[k][0], d = Math.max(0, STR.num.sig - 1 - Math.floor(Math.log10(m)));
+      return Number(m.toFixed(d));
+    };
+    let m = body(u);
+    if (m >= 10000 && u + 1 < U.length) { u++; m = body(u); }   // 9999.6万 → 1億 のような繰り上がり
+    out = String(m) + U[u][1];
+  }
+  return neg ? '-' + out : out;
+}

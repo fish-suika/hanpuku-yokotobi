@@ -36,11 +36,16 @@ body{display:flex;align-items:center;justify-content:center}
   background:#f1e6c2;box-shadow:0 0 0 100vmax #f1e6c2;padding:5cqw 5cqw 4.5cqw;gap:2cqw}
 .scr.on{display:flex;animation:fade .22s ease-out}
 @keyframes fade{from{opacity:0}to{opacity:1}}
-#list .hd{display:flex;justify-content:space-between;align-items:baseline;font-size:6.2cqw;font-weight:900;color:#2c4aa0;
+#list .hd,#shop .hd{display:flex;justify-content:space-between;align-items:baseline;font-size:6.2cqw;font-weight:900;color:#2c4aa0;
   border-bottom:.6cqw solid #2c4aa0;padding-bottom:1.4cqw;letter-spacing:.5cqw;white-space:nowrap}
-#list .hd small{font-size:3.8cqw;color:#55608a;letter-spacing:0;font-weight:bold}
-#listBody{flex:1;min-height:0;display:flex;flex-direction:column;gap:1.8cqw;overflow-y:auto;touch-action:pan-y;padding:1cqw 1.4cqw 1.4cqw}
-.tn{flex:1 1 0;min-height:12.5cqw;max-height:17cqw;display:grid;grid-template-columns:8.4cqw minmax(0,1fr) auto;align-items:center;column-gap:2.6cqw;
+#list .hd small,#shop .hd small{font-size:3.8cqw;color:#55608a;letter-spacing:0;font-weight:bold}
+#listBody,#shopBody{flex:1;min-height:0;display:flex;flex-direction:column;gap:1.7cqw;overflow-y:auto;touch-action:pan-y;padding:1cqw 1.4cqw 1.4cqw}
+.bar{display:flex;justify-content:space-between;align-items:center;gap:3cqw}
+.bar .tk{font-size:4.2cqw;font-weight:bold;color:#55608a;white-space:nowrap}
+.bar .tk b{font-size:5.6cqw;color:#d2382f;font-variant-numeric:tabular-nums;margin-left:1cqw}
+.sm{height:9cqw;padding:0 5.5cqw;font-size:4.2cqw;white-space:nowrap;pointer-events:auto;border-radius:3cqw}
+.hot{animation:blink 1.1s ease-in-out infinite}
+.tn{flex:1 1 0;min-height:11.6cqw;max-height:17cqw;display:grid;grid-template-columns:8.4cqw minmax(0,1fr) auto;align-items:center;column-gap:2.6cqw;
   border:.5cqw solid #2c4aa0;border-radius:2cqw;background:#fffdf2;padding:0 2.8cqw 0 2.4cqw;font:inherit;color:#2b2b3a;text-align:left;
   cursor:pointer;box-shadow:0 .8cqw 0 #1c3170;touch-action:manipulation}
 .tn:active:not(:disabled){transform:translateY(.6cqw);box-shadow:0 .2cqw 0 #1c3170}
@@ -60,10 +65,39 @@ body{display:flex;align-items:center;justify-content:center}
 .tn.locked .no{background:#a6a18a}
 .tn.locked .sb,.tn.locked .bs{color:#9b9680}
 .tn.locked .tag{color:#9b9680;border-color:#b3ae98}
-#list .back,#intro .back{align-self:center;height:9cqw;padding:0 7cqw;font-size:3.8cqw;background:transparent;color:#2c4aa0;
+#list .back,#intro .back,#shop .back{align-self:center;height:9cqw;padding:0 7cqw;font-size:3.8cqw;background:transparent;color:#2c4aa0;
   border:.5cqw solid #2c4aa0;border-radius:3cqw;box-shadow:0 .6cqw 0 #2c4aa066;white-space:nowrap;pointer-events:auto}
 
 #intro .back{background:#fffdf2e8}
+
+/* 購買部 */
+.it{flex:1 1 0;min-height:15cqw;max-height:21cqw;display:grid;grid-template-columns:minmax(0,1fr) 22cqw;align-items:center;column-gap:2.4cqw;
+  border:.5cqw solid #2c4aa0;border-radius:2cqw;background:#fffdf2;padding:0 2.4cqw 0 3cqw;box-shadow:0 .8cqw 0 #1c3170}
+.it .mid{display:flex;flex-direction:column;gap:.5cqw;min-width:0}
+.it .l1{display:flex;align-items:baseline;gap:2cqw;white-space:nowrap}
+.it .nm{font-size:4.5cqw;font-weight:bold}
+.it .pips{font-size:3cqw;letter-spacing:.2cqw;color:#e0356f}
+.it .pips i{font-style:normal;color:#c9cde0}
+.it .pips i.on{color:#e0356f}
+.it .ds{font-size:3.4cqw;color:#2b2b3a;white-space:nowrap}
+.it .fx{font-size:3.3cqw;color:#2c4aa0;font-weight:bold;white-space:nowrap}
+.it .buy{height:11.5cqw;border:0;border-radius:3cqw;font:inherit;font-size:4.8cqw;font-weight:900;color:#fff;cursor:pointer;touch-action:manipulation;
+  background:linear-gradient(#ff6b9a,#e0356f);box-shadow:0 1cqw 0 #a82350;white-space:nowrap;font-variant-numeric:tabular-nums;pointer-events:auto}
+.it .buy:active{transform:translateY(.7cqw);box-shadow:0 .3cqw 0 #a82350}
+.it.poor .buy{background:#e6dfc6;color:#8b8672;box-shadow:0 1cqw 0 #bdb69c}
+.it.locked{background:#e6dfc6;border-color:#a6a18a;box-shadow:none}
+.it.locked .buy{background:#cfc9b0;color:#8b8672;box-shadow:none;font-size:3.8cqw}
+.it.locked .fx{color:#8b8672}
+.it.max{background:#eef3ff}
+.it.max .buy{background:#2c4aa0;color:#fff;box-shadow:none;font-size:4cqw;cursor:default}
+.it.got{animation:got .35s ease-out}
+.it.no{animation:shake .25s}
+@keyframes got{0%{transform:scale(1.04);background:#fff6b0}100%{transform:none}}
+@keyframes shake{25%{transform:translateX(-1.2cqw)}75%{transform:translateX(1.2cqw)}}
+#shop .row{margin-top:0}
+#shop .hd small b{color:#d2382f;margin-left:1cqw;font-size:5.4cqw;font-variant-numeric:tabular-nums}
+#shopBack{flex:1;height:10cqw;font-size:3.9cqw;background:transparent;color:#2c4aa0;white-space:nowrap;border:.5cqw solid #2c4aa0;border-radius:3cqw;box-shadow:0 .6cqw 0 #2c4aa066}
+#shopGo{flex:1.2;height:12cqw;font-size:5.2cqw;white-space:nowrap}
 #intro{position:absolute;left:6cqw;right:6cqw;top:51cqw;z-index:25;display:none;flex-direction:column;align-items:center;gap:3cqw;text-align:center}
 #intro.on{display:flex;animation:pop .3s cubic-bezier(.3,1.5,.5,1)}
 #inName{font-size:5cqw;font-weight:bold;color:#fff;background:#d2382f;border-radius:5cqw;padding:.8cqw 5cqw;letter-spacing:.5cqw;box-shadow:0 .8cqw 0 #8f221c;white-space:nowrap}
@@ -134,11 +168,13 @@ body{display:flex;align-items:center;justify-content:center}
   background:linear-gradient(#ff6b9a,#e0356f);box-shadow:0 1.2cqw 0 #a82350;touch-action:manipulation}
 .btn:active{transform:translateY(.8cqw);box-shadow:0 .4cqw 0 #a82350}
 #retry{flex:1;height:13cqw;font-size:5.8cqw;white-space:nowrap}
-#toList,#share{height:10cqw;font-size:3.6cqw;background:transparent;color:#2c4aa0;white-space:nowrap;
+#toList,#rShop,#share{height:10cqw;font-size:3.5cqw;background:transparent;color:#2c4aa0;white-space:nowrap;padding:0 1.5cqw;
   border:.6cqw solid #2c4aa0;border-radius:3cqw;box-shadow:0 .6cqw 0 #2c4aa066}
-#toList{flex:1}
-#share{width:27cqw}
-#toList:active,#share:active{transform:translateY(.5cqw)}
+#toList{flex:1.15}
+#rShop{flex:1}
+#share{width:23cqw}
+#rShop.hot{background:#fff0f5;border-color:#e0356f;color:#c4235c}
+#toList:active,#rShop:active,#share:active{transform:translateY(.5cqw)}
 </style>
 </head>
 <body>
@@ -151,8 +187,14 @@ body{display:flex;align-items:center;justify-content:center}
   </div>
   <div id="list" class="scr">
     <div class="hd"><span data-s="list.head"></span><small id="listProg"></small></div>
+    <div class="bar"><span class="tk"><span data-s="list.tickets"></span><b id="listTk"></b></span><button id="toShop" class="btn sm" data-s="list.shop"></button></div>
     <div id="listBody"></div>
     <button id="listBack" class="btn back" data-s="list.back"></button>
+  </div>
+  <div id="shop" class="scr">
+    <div class="hd"><span data-s="shop.head"></span><small><span data-s="shop.tickets"></span><b id="shopTk"></b></small></div>
+    <div id="shopBody"></div>
+    <div class="row"><button id="shopBack" class="btn" data-s="shop.back"></button><button id="shopGo" class="btn" data-s="shop.go"></button></div>
   </div>
   <div id="intro">
     <div id="inName"></div>
@@ -183,6 +225,7 @@ body{display:flex;align-items:center;justify-content:center}
       <div class="col you"><span data-s="sheet.you"></span><b id="vsYou">0</b></div>
     </div>
     <div id="vsNote"></div>
+    <div class="ln"><span data-s="sheet.tickets"></span><b id="rTk"></b></div>
     <div class="ln"><span data-s="sheet.steps"></span><b><span id="rSteps">0</span><span data-s="sheet.times"></span></b></div>
     <div class="ln"><span data-s="sheet.maxN"></span><b><span id="rMaxN">0</span><span data-s="sheet.people"></span></b></div>
     <div class="ln"><span data-s="sheet.trips"></span><b><span id="rTrips">0</span><span data-s="sheet.times"></span></b></div>
@@ -192,6 +235,7 @@ body{display:flex;align-items:center;justify-content:center}
     </div>
     <div class="row">
       <button id="toList" class="btn"></button>
+      <button id="rShop" class="btn" data-s="sheet.shop"></button>
       <button id="share" class="btn" data-s="sheet.share"></button>
     </div>
   </div>
@@ -226,7 +270,25 @@ const CFG = {
   judge: [[0, 'E'], [40, 'D'], [80, 'C'], [150, 'B'], [400, 'A'], [1000, 'S'], [3000, '測定不能'], [7000, '人類の範囲外']],   // 分身が早く出るようにしたので記録の桁が上がった（元は 130/200/400/1000/3000）
 
   // v2 大会：ライバルの記録（これを超えると勝ち）。数字は仮。Phase 2 でボットを使って調整する
-  targets: [80, 200, 600, 2000, 6000, 20000, 100000, 500000, 3000000],
+  targets: [80, 200, 500, 1200, 3000, 8000, 20000, 45000, 100000],
+
+  // v2 Phase 2：購買部。強化は、測定の前に CFG の値へ掛け算・足し算で反映する（Shop.apply）。ここの値は強化なしの素の値
+  recMul: 1,             // 記録の倍率（記録係を増やす）
+  startLvl: 0,           // 測定のはじめの勢いの段階（応援団）
+  startGrace: 0,         // はじめのこの秒数は、勢いが落ちない（応援団）
+  levelRateExtra: [8.6, 9.6, 10.8, 12.5],            // 分身の秘伝書で増える段階 7〜10 の、段階になる最低の速さ
+  bodiesExtra: [100, 500, 3000, 20000],        // その段階の体の数
+  payWin: 0.08, payLose: 0.04,                 // 記録のうち引換券になる割合（勝ったときは多い）
+  payPart: 0.3,                                // 参加賞：まだ勝っていない大会の目標の記録に、この割合をかけた引換券
+  shop: {
+    // price＝次の段階を買う値段（配列の長さ＝段階の数）。ほかは段階ごとの効果
+    shoes:    { price: [130, 950, 3200, 35000, 380000], mul: [1.2, 1.3, 1.4, 1.5, 1.6] },                         // 勢いを数える時間の倍率
+    clothes:  { price: [190, 1400, 4700, 51000, 560000], mul: [0.8, 0.72, 0.65, 0.6, 0.55] },                  // 段階になる速さの倍率
+    fall:     { price: [430, 7000, 77000, 840000], drop: [1, 1, 1, 0], secs: [0.36, 0.32, 0.28, 0.24] },     // 転んだときの勢いの落ち方・動けない時間
+    recorder: { price: [290, 2100, 23000, 250000, 2800000], mul: [1.5, 2, 3, 5, 8] },                                 // 記録の倍率
+    cheer:    { price: [640, 10000, 110000, 1300000], lvl: [3, 4, 5, 6], grace: 3 },                            // はじめの勢いの段階
+    book:     { price: [16000, 170000, 1900000, 4100000], gate: [3, 5, 7, 9] },                                     // 段階の上限が増える。gate＝勝っておく大会の数
+  },
 
   cloneDelay: 0.022,     // 分身1体あたりの遅れ（秒）
   shareUrl: 'https://fish-suika.github.io/hanpuku-yokotobi/',
@@ -241,6 +303,23 @@ const STR = {
     progress: (n, m) => n + ' / ' + m,
     vs: 'VS', unit: '回', best: 'ベスト', noBest: 'ベスト ---',
     tagWon: '勝ち', tagNext: '挑戦！', tagLocked: 'ロック', hidden: '？？？',
+    tickets: '引換券', shop: '購買部',
+  },
+
+  // 購買部。品物は 6 つ。name・desc（何が強くなるか 1 行）・lb（効果の見出し）・v（段階ごとの効果の短い表示。引数は Shop.effect の値）。画面には「lb v → 次の v」
+  shop: {
+    head: '購買部', tickets: '引換券', back: '大会の一覧', go: 'もう一回',
+    price: n => n, max: 'MAX', soldOut: '最大', poor: 'たりない', lock: 'ロック',
+    gate: name => name + 'に|勝つと|買える',
+    arrow: ' → ',
+    items: {
+      shoes: { name: '体育館シューズ', desc: '勢いが|長もち|する', lb: '長もち', v: e => '×' + e.mul.toFixed(1) },
+      clothes: { name: '新しい体操着', desc: '分身が|出やすく|なる', lb: '必要な速さ', v: e => e.mul < 1 ? '-' + Math.round((1 - e.mul) * 100) + '%' : '±0%' },
+      fall: { name: '受け身の練習', desc: '転んでも|立ち直りが|早い', lb: '', v: e => '-' + e.drop + '段 ' + e.secs.toFixed(2) + '秒' },
+      recorder: { name: '記録係を増やす', desc: '記録が|ふえる', lb: '記録', v: e => '×' + (e.mul % 1 ? e.mul.toFixed(1) : e.mul) },
+      cheer: { name: '応援団', desc: 'はじめから|勢いが|高い', lb: 'スタート', v: e => fmtNum(e.bodies) + '人' },
+      book: { name: '分身の秘伝書', desc: '分身の|上限が|ふえる', lb: '最大', v: e => fmtNum(e.bodies) + '人' },
+    },
   },
 
   intro: { rival: 'ライバル', rec: 'ライバルの記録', unit: '回', best: 'ベスト', start: 'タップで スタート', back: 'もどる' },
@@ -270,6 +349,7 @@ const STR = {
     noteReplay: 'ライバルに|また 勝ちました。',
     noteEnd: '全大会|せいは！',
     retry: 'もう一回', toList: '大会の一覧', cont: 'つづける', share: 'Xで シェア',
+    tickets: '引換券', ticketGain: n => '+' + n, shop: '購買部',
   },
 
   // 宇宙大会に勝ったあと（Phase 3 で作り直す）
@@ -280,7 +360,7 @@ const STR = {
 
   // 測定中の画面（記録板・ふきだし・文字の演出）
   hud: {
-    banner: '体力測定', rec: '記録', real: n => 'ほんとうは ' + n + ' 回', left: 'のこり',
+    banner: '体力測定', rec: '記録', real: n => 'ほんとうは ' + n + ' 回', left: 'のこり', bodies: n => '分身 ' + n + '人',
     bubble: ['いーち、にー…', 'は、はやっ！', 'えっ…？ にー、よん…', 'ひとが ふえてる…', 'ゆ、ゆかが…！', 'でんたく でんたく…！', 'そ、測定不能…！'],
     bFinish: 'そこまで！ きろくします…', bOver: n => '…' + n + ' 回です。', bReady: 'よーい…',
     ready: 'よーい…', vs: 'VS', passed: '超えた！',
@@ -289,6 +369,7 @@ const STR = {
     start: 'スタート！', stumble: 'もつれた！', out: 'はみだした！', down: '勢い ダウン', end: 'そこまで！', pant: 'ゼーゼー',
     rival: 'ライバルを 超えた！',
     lv: ['', 'ぶんしん！', '4にん！', '8にん！！', '16にん！！', '32にん！！！', '測定不能！！！'],
+    lvN: n => fmtNum(n) + 'にん！！！',   // 段階 7 以上（分身の秘伝書）
     crowd: ['わー！', 'すげー！', 'はやっ！', 'なにあれ！', 'ぶんしん！？', 'えええ！', '2人いる！', '見えない！'],
   },
 
@@ -300,6 +381,31 @@ const STR = {
   },
 };
 const ph = s => s.replace(/\|/g, '');   // 「|」を取った普通の文字列
+
+// ===== 大きな数字の表示（ここ 1 か所。Phase 4 で英語の K / M / B を足すときは units と、読みを変えるところだけ）=====
+// 1 万未満はそのまま（3 桁ごとにカンマ）。1 万以上は 万・億・兆 を付けて、有効数字 4 桁まで（例 12.34万・123.4万・1234万・1.5億）
+STR.num = { units: [[1e4, '万'], [1e8, '億'], [1e12, '兆']], sep: ',', sig: 4 };
+function fmtNum(v) {
+  let n = Math.round(Number(v));
+  if (!Number.isFinite(n)) return '0';
+  const neg = n < 0; if (neg) n = -n;
+  const U = STR.num.units;
+  let out;
+  if (n < U[0][0]) {
+    out = String(n).replace(/\B(?=(\d{3})+(?!\d))/g, STR.num.sep);
+  } else {
+    let u = 0;
+    while (u + 1 < U.length && n >= U[u + 1][0]) u++;
+    const body = k => {   // 有効数字 sig 桁に丸めて、余分な 0 を落とす
+      const m = n / U[k][0], d = Math.max(0, STR.num.sig - 1 - Math.floor(Math.log10(m)));
+      return Number(m.toFixed(d));
+    };
+    let m = body(u);
+    if (m >= 10000 && u + 1 < U.length) { u++; m = body(u); }   // 9999.6万 → 1億 のような繰り上がり
+    out = String(m) + U[u][1];
+  }
+  return neg ? '-' + out : out;
+}
 // ===== ゲームのロジック（画面を使わない）=====
 const clamp = (v, a, b) => Math.max(a, Math.min(b, v));
 function mulberry32(a) {
@@ -317,7 +423,7 @@ const Game = {
   t: 0, readyT: 0, finT: 0, seed: 1, rand: null,
   pos: 1, lastSide: 0, xv: 0, stun: 0,
   stepTimes: [], rate: 0, lvl: 0, upT: 0, downT: 0,
-  rec: 0, steps: 0, trips: 0, maxN: 1, maxLvl: 0,
+  rec: 0, recF: 0, steps: 0, trips: 0, maxN: 1, maxLvl: 0,
   events: [],
 
   reset(seed) {
@@ -327,7 +433,7 @@ const Game = {
     this.t = 0; this.readyT = 0; this.finT = 0;
     this.pos = 1; this.lastSide = 0; this.xv = 0; this.stun = 0;
     this.stepTimes = []; this.rate = 0; this.lvl = 0; this.upT = 0; this.downT = 0;
-    this.rec = 0; this.steps = 0; this.trips = 0; this.maxN = 1; this.maxLvl = 0;
+    this.rec = 0; this.recF = 0; this.steps = 0; this.trips = 0; this.maxN = 1; this.maxLvl = 0;
     this.events = [];
   },
 
@@ -361,9 +467,12 @@ const Game = {
       if (this.pos === 1) { this.pos = 1 + side; this.lastSide = side; }
       else this.pos = 1;
       const n = this.bodies();
-      this.steps++; this.rec += n;
+      this.steps++;
+      this.recF += n * CFG.recMul;   // 記録の倍率（購買部）。小数のぶんは持ち越す
+      const gain = Math.floor(this.recF + 1e-9) - this.rec;
+      this.rec += gain;
       this.stepTimes.push(this.t);
-      this.events.push({ type: 'step', n, side, pos: this.pos });
+      this.events.push({ type: 'step', n, gain, side, pos: this.pos });
       return 'step';
     }
     const was = this.lvl;
@@ -388,7 +497,14 @@ const Game = {
     this.xv += ((this.pos - 1) - this.xv) * (1 - Math.exp(-dt * CFG.hopK));
     if (this.mode === 'ready') {
       this.readyT += dt;
-      if (this.readyT >= CFG.readySecs) { this.mode = 'play'; this.t = 0; this.events.push({ type: 'start' }); }
+      if (this.readyT >= CFG.readySecs) {
+        this.mode = 'play'; this.t = 0; this.events.push({ type: 'start' });
+        if (CFG.startLvl > 0) {   // 応援団：はじめから高い段階
+          this.lvl = Math.min(CFG.startLvl, CFG.levelRate.length - 1);
+          this.maxLvl = this.lvl; this.maxN = Math.max(this.maxN, this.bodies());
+          this.events.push({ type: 'lvl', up: true, lvl: this.lvl });
+        }
+      }
       return;
     }
     if (this.mode === 'finish') {
@@ -421,7 +537,8 @@ const Game = {
       }
     } else if (cand < this.lvl) {
       this.upT = 0;
-      if (this.stun <= 0) {
+      if (this.t < CFG.startGrace) this.downT = 0;   // はじめの少しのあいだは落ちない
+      else if (this.stun <= 0) {
         this.downT += dt;
         if (this.downT >= CFG.downHold) {
           this.lvl--; this.downT = 0;
@@ -444,12 +561,105 @@ function judgeFor(rec) {
   for (const [min, name] of CFG.judge) if (rec >= min) j = name;
   return j;
 }
+// ===== 購買部と引換券（画面を使わない）=====
+// 強化の段階は保存の up（品物ごと 0〜最大）。測定のはじめに Shop.apply(save) が CFG へ掛け算・足し算で反映する。
+// Shop.apply は「素の値」から計算し直すので、何度呼んでも重ならない。20-logic.js の仕組みは変えない
+const SHOP_IDS = ['shoes', 'clothes', 'fall', 'recorder', 'cheer', 'book'];
+
+const Shop = {
+  ids: SHOP_IDS,
+  // 強化なしの素の値（読み込み時に控えておく）
+  base: {
+    winFull: CFG.winFull, winEnd: CFG.winEnd, levelRate: CFG.levelRate.slice(), bodies: CFG.bodies.slice(),
+    stunSecs: CFG.stunSecs, stunDrop: CFG.stunDrop,
+  },
+
+  // 素の段階の体の数に、秘伝書で増えるぶんを足した一覧（表示用）
+  allBodies() { return this.base.bodies.concat(CFG.bodiesExtra); },
+  zeroUp() { const u = {}; for (const id of SHOP_IDS) u[id] = 0; return u; },
+  maxLevel(id) { return CFG.shop[id].price.length; },
+  level(save, id) { return clamp(Math.floor(Number(save.up && save.up[id])) || 0, 0, this.maxLevel(id)); },
+
+  // 次の段階の値段（もう最大なら null）
+  price(save, id) {
+    const lv = this.level(save, id);
+    return lv >= this.maxLevel(id) ? null : CFG.shop[id].price[lv];
+  },
+  // 次の段階を買うのに勝っておく大会の数（なければ 0）。秘伝書だけ
+  gate(save, id) {
+    const g = CFG.shop[id].gate;
+    return g ? g[this.level(save, id)] || 0 : 0;
+  },
+  // 'max' 最大 ／ 'locked' 大会に勝ちが足りない ／ 'poor' 引換券が足りない ／ 'ok' 買える
+  state(save, id) {
+    const p = this.price(save, id);
+    if (p == null) return 'max';
+    if (Tourney.wonCount(save) < this.gate(save, id)) return 'locked';
+    return (save.tickets || 0) >= p ? 'ok' : 'poor';
+  },
+  canBuy(save, id) { return this.state(save, id) === 'ok'; },
+  // 買う。足りない・ロック・最大なら何も変えず、理由を返す
+  buy(save, id) {
+    const st = this.state(save, id);
+    if (st !== 'ok') return { ok: false, reason: st };
+    const p = this.price(save, id);
+    save.tickets -= p;
+    save.up[id] = this.level(save, id) + 1;
+    return { ok: true, price: p, level: save.up[id] };
+  },
+  // いま買える中でいちばん安い品物（なければ null）。ボット用
+  cheapest(save) {
+    let best = null, bp = Infinity;
+    for (const id of SHOP_IDS) if (this.canBuy(save, id)) { const p = this.price(save, id); if (p < bp) { bp = p; best = id; } }
+    return best;
+  },
+
+  // 段階 lv のときの効果の値（画面の「いま → 次」の表示用）
+  effect(id, lv) {
+    const S = CFG.shop[id], B = this.base, k = lv - 1;
+    switch (id) {
+      case 'shoes': return { mul: lv > 0 ? S.mul[k] : 1 };
+      case 'clothes': return { mul: lv > 0 ? S.mul[k] : 1 };
+      case 'fall': return { drop: lv > 0 ? S.drop[k] : B.stunDrop, secs: lv > 0 ? S.secs[k] : B.stunSecs };
+      case 'recorder': return { mul: lv > 0 ? S.mul[k] : 1 };
+      case 'cheer': { const sl = lv > 0 ? S.lvl[k] : 0; return { lvl: sl, bodies: this.allBodies()[sl] }; }
+      case 'book': return { bodies: this.allBodies()[B.bodies.length - 1 + lv] };
+    }
+  },
+
+  // 強化を CFG に反映する（測定の前に毎回）
+  apply(save) {
+    const B = this.base, S = CFG.shop, lv = id => this.level(save, id);
+    const sh = lv('shoes') ? S.shoes.mul[lv('shoes') - 1] : 1;
+    CFG.winFull = B.winFull * sh; CFG.winEnd = B.winEnd * sh;
+    const cl = lv('clothes') ? S.clothes.mul[lv('clothes') - 1] : 1;
+    const tiers = lv('book');
+    CFG.bodies = B.bodies.concat(CFG.bodiesExtra.slice(0, tiers));
+    CFG.levelRate = B.levelRate.concat(CFG.levelRateExtra.slice(0, tiers)).map((r, i) => i === 0 ? 0 : r * cl);
+    const fl = lv('fall');
+    CFG.stunDrop = fl ? S.fall.drop[fl - 1] : B.stunDrop;
+    CFG.stunSecs = fl ? S.fall.secs[fl - 1] : B.stunSecs;
+    CFG.recMul = lv('recorder') ? S.recorder.mul[lv('recorder') - 1] : 1;
+    const ch = lv('cheer');
+    CFG.startLvl = ch ? Math.min(S.cheer.lvl[ch - 1], CFG.bodies.length - 1) : 0;
+    CFG.startGrace = ch ? S.cheer.grace : 0;
+  },
+  // 強化なしの素の値に戻す（検証用）
+  reset() { this.apply({ up: this.zeroUp() }); },
+
+  // 1回の引換券。記録の一部（勝つと多め）＋ まだ勝っていない大会の参加賞（大会の目標に比例。遅い人でも進めるように）
+  payout(rec, win, target, wasWon) {
+    let t = rec > 0 ? Math.max(1, Math.floor(rec * (win ? CFG.payWin : CFG.payLose))) : 0;
+    if (!wasWon && target > 0) t += Math.floor(target * CFG.payPart);
+    return t;
+  },
+};
 // ===== 大会のくり返し（画面を使わない）=====
 // 保存の形：{ v, unlocked（遊べる一番先の大会 0始まり）, won[大会ごとの勝ち], best[大会ごとのベスト] }
-// 強化（Phase 2）はここに項目を足す。知らない項目は読み書きしても消さない
+// Phase 2 で tickets（引換券の残り）と up（品物ごとの強化の段階）を足した。知らない項目は読み書きしても消さない
 const SAVE_KEY = 'hanpuku-yokotobi-save';
 const V1_BEST_KEY = 'hanpuku-yokotobi-best';   // v1 のベスト（引き継ぎ用に読むだけ）
-const SAVE_VER = 1;
+const SAVE_VER = 2;   // 1＝Phase 1（大会だけ）／2＝引換券と強化
 
 const Tourney = {
   count() { return CFG.targets.length; },
@@ -459,7 +669,7 @@ const Tourney = {
 
   newSave() {
     const n = this.count();
-    return { v: SAVE_VER, unlocked: 0, won: new Array(n).fill(false), best: new Array(n).fill(0) };
+    return { v: SAVE_VER, unlocked: 0, won: new Array(n).fill(false), best: new Array(n).fill(0), tickets: 0, up: Shop.zeroUp() };
   },
 
   // どんな値が来ても、使える形に直す（壊れた保存・古い保存・手で書き換えた保存）
@@ -478,6 +688,14 @@ const Tourney = {
     for (let i = 0; i < out.unlocked; i++) out.won[i] = true;
     for (let i = 0; i < n; i++) if (out.won[i]) out.unlocked = Math.max(out.unlocked, Math.min(i + 1, n - 1));
     for (let i = 0; i < out.unlocked; i++) out.won[i] = true;
+    // 引換券と強化（Phase 1 の保存にはないので、なければ 0）
+    const tk = Math.floor(Number(o.tickets));
+    out.tickets = Number.isFinite(tk) && tk > 0 ? tk : 0;
+    out.up = Shop.zeroUp();
+    for (const id of Shop.ids) {
+      const l = Math.floor(Number(o.up && o.up[id]));
+      out.up[id] = Number.isFinite(l) ? clamp(l, 0, Shop.maxLevel(id)) : 0;
+    }
     out.v = SAVE_VER;
     return out;
   },
@@ -493,19 +711,21 @@ const Tourney = {
 
   // 1回の結果を保存の形に反映する。勝てば次の大会が開く。遊べない大会は何も変えない
   record(save, i, rec) {
-    const none = { win: false, isBest: false, prevBest: save.best[i] || 0, firstWin: false, unlockedNext: false, ending: false };
+    const none = { win: false, isBest: false, prevBest: save.best[i] || 0, firstWin: false, unlockedNext: false, ending: false, gain: 0 };
     if (!this.playable(save, i)) return none;
     const prevBest = save.best[i] || 0;
     const isBest = rec > prevBest;
     if (isBest) save.best[i] = rec;
-    const win = this.beats(rec, i);
+    const win = this.beats(rec, i), wasWon = !!save.won[i];
     let firstWin = false, unlockedNext = false;
     if (win) {
       firstWin = !save.won[i];
       save.won[i] = true;
       if (i + 1 < this.count() && save.unlocked < i + 1) { save.unlocked = i + 1; unlockedNext = true; }
     }
-    return { win, isBest, prevBest, firstWin, unlockedNext, ending: firstWin && i === this.count() - 1 };
+    const gain = Shop.payout(rec, win, CFG.targets[i], wasWon);   // 負けても引換券はもらえる（勝つと多め）
+    save.tickets = (save.tickets || 0) + gain;
+    return { win, isBest, prevBest, firstWin, unlockedNext, ending: firstWin && i === this.count() - 1, gain };
   },
 
   // 保存の読み込み。v2 の保存がなければ v1 のベストを最初の大会のベストとして引き継ぐ。storage は getItem/setItem を持つもの
@@ -553,7 +773,8 @@ const easeOut = p => 1 - (1 - p) * (1 - p);
 const popups = [], smoke = [], hist = [];
 let hudPop = 0, flash = 0, shakeT = 0, tripAt = -99, lvlShown = 0, bubbleT = 0;
 let rivalPassed = false, rivalPassAt = -99;   // 測定中にライバルの記録を超えたか
-const CL = [];   // 分身 k=1..31 の見た目の状態
+let crowdAmt = 0;   // 奥の人だかりの量（0〜1）。分身が 48 人を超えると出てくる
+const CL = [];   // 分身 k=1..47 の見た目の状態
 for (let k = 0; k < 48; k++) CL.push({ app: 0 });
 
 function addPopup(text, x, y, size, color, life, rise, outline) {
@@ -818,6 +1039,43 @@ function drawBodies() {
   drawKid(cx, px2, Y0, KS, { lean: o.lean, hop: o.hop, ph, fall: pf, fallDir: -Game.lastSide || 1, sit, bob: breath, face, point });
 }
 
+// ---- 人だかり：分身が 48 人を超えたら、手前の 47 人はそのまま描き、奥へ小さな人の列を足す（描く数に上限）----
+function crowdTarget() {
+  const lv = Game.mode === 'play' ? Game.lvl : (Game.mode === 'finish' || Game.mode === 'over' ? lvlShown : 0);
+  const N = CFG.bodies[lv] || 1;
+  return N > 48 ? clamp(Math.log(N / 48) / Math.log(20000 / 48), 0.05, 1) : 0;
+}
+function drawCrowd() {
+  if (crowdAmt < 0.01) return;
+  const rows = 4 + Math.round(crowdAmt * 9), maxPer = 22 + Math.round(crowdAmt * 16), fill = 0.4 + 0.6 * crowdAmt;
+  const wide = EX1 - EX0 + 24;
+  cx.save(); cx.globalAlpha = 0.9 * Math.min(1, crowdAmt * 8);
+  for (let r = rows - 1; r >= 0; r--) {   // 奥の列から
+    const z = 18 + r * 3.2, s = sOf(z), y = yOf(s), sc = s * KS * 1.25;
+    const step = Math.max(8 * sc, wide / maxPer), n = Math.floor(wide / step);
+    const shift = histX(nowT - (48 + r * 6) * CFG.cloneDelay) * LS * s;   // 本人の動きに少し遅れてついていく
+    const x0 = EX0 - 12 + (r % 2 ? step * 0.5 : 0) + shift;
+    const dots = [];
+    for (let i = 0; i < n; i++) {
+      if (((i * 37 + r * 91) % 100) / 100 > fill) continue;
+      dots.push(x0 + i * step, y - Math.abs(Math.sin(nowT * 9 + i * 1.3 + r)) * 2.2 * sc);
+    }
+    const part = (col, f) => { cx.fillStyle = col; cx.beginPath(); for (let k = 0; k < dots.length; k += 2) f(dots[k], dots[k + 1]); cx.fill(); };
+    part('#f3c8a0', (x, yy) => { cx.rect(x - 3.6 * sc, yy - 10 * sc, 2.4 * sc, 10 * sc); cx.rect(x + 1.2 * sc, yy - 10 * sc, 2.4 * sc, 10 * sc); });
+    part('#2c4aa0', (x, yy) => cx.rect(x - 5.3 * sc, yy - 15.5 * sc, 10.6 * sc, 5.6 * sc));
+    part(r % 2 ? '#e4eaff' : '#ffffff', (x, yy) => cx.rect(x - 5.6 * sc, yy - 25.4 * sc, 11.2 * sc, 11.4 * sc));
+    part('#f3c8a0', (x, yy) => { cx.moveTo(x + 5.6 * sc, yy - 30.2 * sc); cx.arc(x, yy - 30.2 * sc, 5.6 * sc, 0, 6.283); });
+    part('#3a2a22', (x, yy) => { cx.moveTo(x + 5.9 * sc, yy - 30.6 * sc); cx.arc(x, yy - 30.6 * sc, 5.9 * sc, Math.PI, 6.283); });
+  }
+  cx.restore();
+}
+function drawCount() {   // 分身の人数を数字でも見せる
+  const lv = Game.mode === 'play' ? Game.lvl : (Game.mode === 'finish' || Game.mode === 'over' ? lvlShown : 0);
+  const N = CFG.bodies[lv] || 1;
+  if (N < 8 || App.screen === 'result') return;
+  fitTxt(STR.hud.bodies(fmtNum(N)), 50, 66, 6.6, 64, '#d2382f', { stroke: '#fff', sw: 1.3 });
+}
+
 // ---- 背景の効果 ----
 function drawRays() {
   const lv = Game.lvl;
@@ -886,7 +1144,7 @@ function drawHud() {
   txt(STR.hud.rec, 52, 8.6, 3.4, '#55608a');
   const pop = 1 + 0.16 * hudPop;
   cx.save(); cx.translate(52, 19.8); cx.scale(pop, pop);
-  txt(String(Game.rec), 0, 0, Game.rec >= 10000 ? 9.5 : 12, '#d2382f');
+  fitTxt(fmtNum(Game.rec), 0, 0, 12, 46, '#d2382f');   // 大きな数字は 万・億・兆 にして、枠に入る幅に縮める
   cx.restore();
   txt(STR.hud.real(Game.steps), 52, 27.6, 2.6, '#55608a');
   // 残り時間
@@ -897,7 +1155,7 @@ function drawHud() {
   cx.fillStyle = '#dde3f3'; rr(cx, 6, 34.7, 88, 1.5, 0.75); cx.fill();
   cx.fillStyle = left <= 5 ? '#e03030' : '#2c9a6a'; rr(cx, 6, 34.7, Math.max(1.5, 88 * left / CFG.duration), 1.5, 0.75); cx.fill();
   // 記録係のひとこと
-  let b = STR.hud.bubble[lv];
+  let b = STR.hud.bubble[Math.min(lv, STR.hud.bubble.length - 1)];
   if (Game.mode === 'finish') b = STR.hud.bFinish;
   else if (Game.mode === 'over') b = STR.hud.bOver(Game.rec);
   else if (Game.mode === 'title') b = STR.hud.bReady;
@@ -906,10 +1164,10 @@ function drawHud() {
 }
 
 // 文字が枠に入りきらないときは、その幅に縮める
-function fitTxt(s, x, y, size, maxW, fill) {
+function fitTxt(s, x, y, size, maxW, fill, o) {
   cx.font = 'bold ' + size + 'px ' + FONT;
   const w = cx.measureText(s).width;
-  txt(s, x, y, w > maxW ? size * maxW / w : size, fill);
+  txt(s, x, y, w > maxW ? size * maxW / w : size, fill, o);
 }
 // ライバルの札：記録板の下、右の端。記録に合わせて下から色が満ち、超えると金色になる
 function drawRival() {
@@ -953,11 +1211,13 @@ function render() {
   drawGym();
   drawLines();
   drawRays();
+  drawCrowd();
   drawSpectators();
   drawBodies();
   drawSmoke();
   cx.setTransform(DPR * U, 0, 0, DPR * U, DPR * OX, DPR * OY);
   if (App.screen !== 'result') drawHud();   // 記録用紙のあいだは、記録板をひっこめる
+  if (App.screen === 'play') drawCount();
   if (App.screen === 'play') drawRival();
   drawPopups();
   if (Game.mode === 'ready') {
@@ -974,6 +1234,8 @@ function render() {
 function updateVisual(dt) {
   pushHist();
   const N = CFG.bodies[Game.lvl];
+  crowdAmt += (crowdTarget() - crowdAmt) * Math.min(1, dt * 3);
+  if (crowdAmt < 0.005) crowdAmt = 0;
   for (let k = 1; k < CL.length; k++) {
     const c = CL[k];
     if (k < N) c.app = Math.min(1, c.app + dt * 4.5);
@@ -1096,7 +1358,7 @@ const Snd = (() => {
     // ざわめきの大きさを段階に合わせる
     murmur(l) {
       if (!ac) return;
-      murGain.gain.setTargetAtTime(l >= 3 ? 0.05 + 0.05 * (l - 3) : 0, now(), 0.3);
+      murGain.gain.setTargetAtTime(l >= 3 ? 0.05 + 0.05 * (Math.min(l, 6) - 3) : 0, now(), 0.3);
     },
     // ゼーゼー
     pant() {
@@ -1111,6 +1373,18 @@ const Snd = (() => {
       tone(1568, t + 0.09, 0.14, { type: 'square', gain: 0.07 });
       tone(2093, t + 0.18, 0.3, { type: 'square', gain: 0.08 });
       tone(3136, t + 0.18, 0.4, { type: 'sine', gain: 0.07 });
+    },
+    // 購買部：買えた（チャリン）／買えない
+    buy() {
+      if (!ac) return; const t = now();
+      tone(1568, t, 0.08, { type: 'square', gain: 0.06 });
+      tone(2093, t + 0.07, 0.25, { type: 'square', gain: 0.07 });
+      tone(3136, t + 0.07, 0.3, { type: 'sine', gain: 0.06 });
+    },
+    deny() {
+      if (!ac) return; const t = now();
+      tone(196, t, 0.12, { type: 'square', gain: 0.05 });
+      tone(165, t + 0.1, 0.16, { type: 'square', gain: 0.05 });
     },
     // 勝ち負けの判子のあと
     win() {
@@ -1132,7 +1406,7 @@ const Snd = (() => {
   };
 })();
 // ===== 画面の流れ・操作・ループ・結果・共有 =====
-const fmt = n => n.toLocaleString('ja-JP');
+const fmt = fmtNum;   // 大きな数字の表示は fmtNum（12-strings.js）1 か所
 const esc = s => s.replace(/[&<>"]/g, c => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;' }[c]));
 // 「|」で区切った言葉を、文節ごとに途中で改行しない塊にして HTML にする
 const phHtml = s => s.split('|').map(p => '<span class="nb">' + esc(p) + '</span>').join('');
@@ -1143,9 +1417,10 @@ const store = {
   setItem(k, v) { try { localStorage.setItem(k, v); } catch (_) {} },
 };
 let SAVE = Tourney.load(store);
+Shop.apply(SAVE);
 
 // 画面：title → list（大会の一覧）→ intro（ライバルの紹介）→ play（測定）→ result（記録用紙）→ list …。ending は宇宙大会に初めて勝ったあと
-const App = { screen: 'title', idx: 0, introAt: 0, res: null, pendingEnding: false };
+const App = { screen: 'title', idx: 0, introAt: 0, res: null, pendingEnding: false, shopFrom: 'list' };
 
 let shownResult = false, rollT = 1, stampDone = true, vsT = -1, last = 0, murLvl = -1;
 let crowdT = 0;
@@ -1161,6 +1436,7 @@ function setScreen(s) {
   App.screen = s;
   $('title').classList.toggle('hide', s !== 'title');
   $('list').classList.toggle('on', s === 'list');
+  $('shop').classList.toggle('on', s === 'shop');
   $('intro').classList.toggle('on', s === 'intro');
   $('ending').classList.toggle('on', s === 'ending');
   if (s !== 'result') $('result').classList.remove('show', 'wait');
@@ -1200,6 +1476,14 @@ function bindUI() {
   $('toList').addEventListener('click', () => { Snd.init(); if (App.pendingEnding) showEnding(); else openList(); });
   $('share').addEventListener('click', share);
   $('listBack').addEventListener('click', () => { resetRun(); setScreen('title'); });
+  $('toShop').addEventListener('click', () => { Snd.init(); openShop('list'); });
+  $('rShop').addEventListener('click', () => { Snd.init(); openShop('result'); });
+  $('shopBack').addEventListener('click', () => { Snd.init(); if (App.pendingEnding) showEnding(); else openList(); });
+  $('shopGo').addEventListener('click', () => { Snd.init(); startRun(); });
+  $('shopBody').addEventListener('click', e => {
+    const b = e.target.closest('.buy');
+    if (b) { Snd.init(); buyItem(b.closest('.it').dataset.id); }
+  });
   $('inBack').addEventListener('click', () => openList());
   $('endBtn').addEventListener('click', () => openList());
   $('listBody').addEventListener('click', e => {
@@ -1214,7 +1498,7 @@ function resetRun() {
   shownResult = false; stampDone = true; rollT = 1; vsT = -1;
   popups.length = 0; smoke.length = 0; hist.length = 0;
   for (const c of CL) c.app = 0;
-  lvlShown = 0; murLvl = -1; tripAt = -99; rivalPassed = false; rivalPassAt = -99;
+  lvlShown = 0; murLvl = -1; crowdAmt = 0; tripAt = -99; rivalPassed = false; rivalPassAt = -99;
   Snd.murmur(0);
   $('stamp').classList.remove('on'); $('vsStamp').classList.remove('on');
 }
@@ -1243,6 +1527,49 @@ function renderList() {
   }
   $('listBody').innerHTML = html;
   $('listProg').textContent = L.progress(Tourney.wonCount(SAVE), n);
+  $('listTk').textContent = fmt(SAVE.tickets);
+  $('toShop').classList.toggle('hot', anyBuyable());
+}
+
+// ---- 購買部 ----
+function anyBuyable() { return Shop.ids.some(id => Shop.canBuy(SAVE, id)); }
+
+// from：'list'（大会の一覧から）／'result'（記録用紙から。「もう一回」で続けて測れる）
+function openShop(from) {
+  App.shopFrom = from;
+  if (from !== 'result') resetRun();
+  renderShop();
+  $('shopGo').style.display = from === 'result' && !App.pendingEnding ? '' : 'none';
+  setScreen('shop');
+}
+
+function renderShop() {
+  const S = STR.shop;
+  let html = '';
+  for (const id of Shop.ids) {
+    const I = S.items[id], lv = Shop.level(SAVE, id), mx = Shop.maxLevel(id), st = Shop.state(SAVE, id);
+    const cur = (I.lb ? I.lb + ' ' : '') + I.v(Shop.effect(id, lv));
+    let fx = esc(st === 'max' ? cur : cur + S.arrow + I.v(Shop.effect(id, lv + 1)));
+    if (st === 'locked') fx = phHtml(S.gate(ph(STR.tournaments[Shop.gate(SAVE, id) - 1].name)));
+    let pips = '';
+    for (let k = 0; k < mx; k++) pips += '<i' + (k < lv ? ' class="on"' : '') + '>●</i>';
+    const label = st === 'max' ? S.soldOut : st === 'locked' ? S.lock : fmt(Shop.price(SAVE, id));
+    html += '<div class="it ' + st + '" data-id="' + id + '">'
+      + '<div class="mid"><div class="l1"><span class="nm">' + esc(I.name) + '</span><span class="pips">' + pips + '</span></div>'
+      + '<div class="ds">' + phHtml(I.desc) + '</div><div class="fx">' + fx + '</div></div>'
+      + '<button class="buy"' + (st === 'max' ? ' disabled' : '') + '>' + esc(label) + '</button></div>';
+  }
+  $('shopBody').innerHTML = html;
+  $('shopTk').textContent = fmt(SAVE.tickets);
+}
+
+function buyItem(id) {
+  const r = Shop.buy(SAVE, id);
+  if (r.ok) { Tourney.persist(store, SAVE); Snd.buy(); }
+  else if (r.reason !== 'max') Snd.deny();
+  renderShop();
+  const row = $('shopBody').querySelector('[data-id="' + id + '"]');
+  if (row && r.reason !== 'max') { row.classList.add(r.ok ? 'got' : 'no'); setTimeout(() => row.classList.remove('got', 'no'), 400); }
 }
 
 function openIntro(i) {
@@ -1262,6 +1589,7 @@ function openIntro(i) {
 // 測定をはじめる（「よーい」から）。結果からの「もう一回」もここ＝1タップ
 function startRun() {
   resetRun();
+  Shop.apply(SAVE);   // 買った強化を、この測定のぶん CFG に反映する
   setScreen('play');
   Game.begin();
 }
@@ -1280,7 +1608,9 @@ function resultInfo() {
 }
 
 // 長い数字は小さく（枠からはみ出さないように）
-function fitNum(el) { el.className = el.textContent.length > 9 ? 'l3' : el.textContent.length > 6 ? 'l2' : ''; }
+// 記録の大きな数字：長いときは文字を小さくして、判子や単位とぶつからないようにする
+function fitRec(el) { el.parentNode.style.fontSize = el.textContent.length > 5 ? '9.5cqw' : el.textContent.length > 4 ? '11cqw' : ''; }
+function fitNum(el) { el.className = el.textContent.length > 7 ? 'l3' : el.textContent.length > 5 ? 'l2' : ''; }
 
 function showResult() {
   shownResult = true;
@@ -1294,6 +1624,9 @@ function showResult() {
   $('rMaxN').textContent = fmt(r.maxN);
   $('rTrips').textContent = fmt(r.trips);
   $('rRec').textContent = '0';
+  fitRec($('rRec'));
+  $('rTk').textContent = S.ticketGain(fmt(info.gain));
+  $('rShop').classList.toggle('hot', anyBuyable());
   const st = $('stamp');
   st.textContent = r.judge;
   st.className = r.judge.length > 1 ? 'long' : '';
@@ -1324,7 +1657,7 @@ function updateResult(dt) {
   if (rollT < 1) {
     rollT = Math.min(1, rollT + dt / 0.9);
     const v = fmt(Math.round(Game.rec * easeOut(rollT)));
-    $('rRec').textContent = v;
+    $('rRec').textContent = v; fitRec($('rRec'));
     $('vsYou').textContent = v; fitNum($('vsYou'));
   } else if (!stampDone) {
     stampDone = true;
@@ -1368,9 +1701,9 @@ function reactToEvents() {
     } else if (e.type === 'lvl') {
       if (e.up) {
         Snd.levelUp(e.lvl);
-        const LV_COLOR = ['', '#2c4aa0', '#1f8f6a', '#e08a1a', '#e0502a', '#d2382f', '#b01a8a'];
-        flash = 0.12 + 0.05 * e.lvl; shakeT = 0.1;
-        addPopup(STR.pop.lv[e.lvl], 50, 84, 12 + e.lvl * 0.6, LV_COLOR[e.lvl], 1.1, 10, '#fff');
+        const LV_COLOR = ['', '#2c4aa0', '#1f8f6a', '#e08a1a', '#e0502a', '#d2382f', '#b01a8a', '#8a1ab0', '#5a1ab0', '#2a1ab0', '#0a3ad0'];
+        flash = 0.12 + 0.05 * Math.min(e.lvl, 8); shakeT = 0.1;
+        addPopup(STR.pop.lv[e.lvl] || STR.pop.lvN(CFG.bodies[e.lvl]), 50, 84, 12 + Math.min(e.lvl, 8) * 0.6, LV_COLOR[Math.min(e.lvl, 10)], 1.1, 10, '#fff');
         puffSmoke(e.lvl >= 4 ? 8 : 0);
       }
     } else if (e.type === 'end') {
@@ -1439,7 +1772,11 @@ function makeShareImage() {
     c.fillStyle = '#55608a'; c.font = '48px ' + FONT; c.textAlign = 'left'; c.fillText(K.kind, 160, 330);
     c.textAlign = 'right'; c.fillStyle = '#2b2b3a'; c.font = 'bold 54px ' + FONT; c.fillText(K.kindVal, Wd - 160, 330);
     c.textAlign = 'left'; c.fillStyle = '#55608a'; c.font = 'bold 52px ' + FONT; c.fillText(K.rec, 160, 520);
-    c.textAlign = 'right'; c.fillStyle = '#d2382f'; c.font = '900 200px ' + FONT; c.fillText(fmt(r.rec), Wd - 260, 560);
+    const recS = fmt(r.rec); let fs = 200;
+    c.font = '900 ' + fs + 'px ' + FONT;
+    const mw = c.measureText(recS).width;
+    if (mw > 560) { fs = Math.floor(fs * 560 / mw); c.font = '900 ' + fs + 'px ' + FONT; }   // 長い数字は、左の「記録」にぶつからない幅に縮める
+    c.textAlign = 'right'; c.fillStyle = '#d2382f'; c.fillText(recS, Wd - 260, 560);
     c.fillStyle = '#55608a'; c.font = 'bold 58px ' + FONT; c.fillText(K.unit, Wd - 160, 560);
     // 判定の判子
     c.save(); c.translate(Wd - 230, 360); c.rotate(-0.25);
