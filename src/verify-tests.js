@@ -430,6 +430,34 @@
   check('毎秒6回のボットは、少なくとも最初の大会に勝てる（遊び始めで詰まらない）', beaten(rec6) >= 1, 'rec=' + rec6 + ' 勝てる大会=' + beaten(rec6));
   check('強化なしでは、最後の大会には勝てない（毎秒10回でも宇宙大会には届かない）', beaten(rec9) < N && beaten(b11.rec) < N, 'rec9=' + rec9 + ' 勝てる大会=' + beaten(rec9) + ' ／ 最高速 rec=' + b11.rec);
 
+  // ===== v2 Phase 3：会場・記録係・ライバルの一言・エンディング =====
+  {
+    const NV = CFG.targets.length;
+    const strs = o => { const out = []; (function w(v) { if (typeof v === 'string') out.push(v); else if (Array.isArray(v)) v.forEach(w); else if (v && typeof v === 'object') Object.keys(v).forEach(k => w(v[k])); })(o); return out; };
+    check('会場の表：大会と同じ 9 つ（目標・名前・言葉と同じ数）', VENUES.length === 9 && NV === 9 && STR.tournaments.length === 9 && STR.venues.length === 9);
+    check('会場の表：番号と id が合っている（重なりなし）', VENUES.every((v, i) => v.i === i) && new Set(VENUES.map(v => v.id)).size === 9);
+    check('会場の表：必要な項目（kind・壁・床・小物・観客・記録係・音）が全部ある', VENUES.every(v => VENUE_KINDS.indexOf(v.kind) >= 0 && v.wall.length === 2 && v.floor.length === 2 && typeof v.floorStyle === 'string' && typeof v.bg === 'string'
+      && v.props.length > 0 && v.props.every(n => VENUE_PROPS.indexOf(n) >= 0) && CROWD_TYPES.indexOf(v.crowd.type) >= 0 && v.crowd.shirts.length > 0 && typeof v.crowd.pants === 'string'
+      && REC_TYPES.indexOf(v.recorder) >= 0 && typeof v.amb === 'string' && v.k > 0 && typeof v.lowG === 'boolean'));
+    check('会場の表：最初の 3 つは体育館・月面だけ低重力・記録係の絵は 9 会場ぜんぶ別', VENUES.slice(0, 3).every(v => v.kind === 'gym') && VENUES.filter(v => v.lowG).length === 1 && VENUES[7].lowG && new Set(VENUES.map(v => v.recorder)).size === 9);
+    check('会場の表：会場が上がるほど観客が大きく（クラス＜世界）、月面は静か', VENUES[6].k >= VENUES[0].k * 2 && VENUES[7].k < VENUES[0].k);
+    check('会場の言葉：9 つとも横断幕・待ち・終了・読み上げがある', STR.venues.every(v => v.banner && v.ready && v.fin && v.tag && typeof v.over(12) === 'string' && v.over(12).indexOf('12') >= 0));
+    check('記録係のひとこと：9 会場とも、勢いの段階 0〜10（秘伝書の 7〜10 も）に 1 つずつある', STR.venues.every(v => v.rec.length >= 7 + CFG.bodiesExtra.length && v.rec.every(x => typeof x === 'string' && x.length > 0)), '段階の数 ' + (7 + CFG.bodiesExtra.length));
+    check('記録係のひとこと：1 行に収まる長さ（16 文字まで）', STR.venues.every(v => v.rec.concat([v.ready, v.fin, v.over(99999)]).every(x => x.length <= 16)));
+    check('記録係のひとこと：会場ごとに言葉が違う（同じ文が 2 会場に出ない）', (() => { const all = [].concat(...STR.venues.map(v => v.rec)); return new Set(all).size === all.length; })());
+    check('ライバルの一言：9 人とも、勝ったとき・負けたときの 2 つがある', STR.tournaments.every(t => t.rival.win && t.rival.lose && t.rival.win !== t.rival.lose));
+    check('文節の区切り「|」：空の文節がない（画面の言葉全部）', strs(STR).every(x => x.indexOf('||') < 0 && x[0] !== '|' && x[x.length - 1] !== '|'));
+    check('エンディング：全体の長さは 10〜20 秒（3 場面ぶん）', endingTotal() >= 10 && endingTotal() <= 20 && Object.keys(ENDING_TIMES).length === 3 && Object.values(ENDING_TIMES).every(x => x > 3));
+    check('エンディング：字幕・先生のセリフ・記録用紙の言葉がそろっている', STR.ending.cap.galaxy.length >= 2 && STR.ending.cap.sheet.length >= 2 && STR.ending.teacher.length === 3 && strs(STR.ending.cert).every(x => x.length > 0) && STR.ending.teacher[1]('9,999').indexOf('9,999') >= 0);
+    check('エンディング：宇宙大会に初めて勝った 1 回だけ出る・見たあとは全大会が遊べて、ベストを伸ばせる', (() => {
+      const sv = Tourney.newSave();
+      for (let i = 0; i < NV - 1; i++) Tourney.record(sv, i, CFG.targets[i] + 1);
+      const a = Tourney.record(sv, NV - 1, CFG.targets[NV - 1] + 10), b = Tourney.record(sv, NV - 1, CFG.targets[NV - 1] + 99);
+      return a.ending === true && b.ending === false && b.isBest && sv.best[NV - 1] === CFG.targets[NV - 1] + 99 && sv.won.every(Boolean) && sv.won.every((_, i) => Tourney.playable(sv, i));
+    })());
+    check('保存：Phase 3 では形を変えない（版 2・項目は v・unlocked・won・best・tickets・up）', SAVE_VER === 2 && JSON.stringify(Object.keys(Tourney.newSave()).sort()) === JSON.stringify(['best', 'tickets', 'unlocked', 'up', 'v', 'won']));
+  }
+
   const s = document.createElement('h2');
   s.textContent = fail === 0 ? '全部 OK' : 'NG が ' + fail + ' 件';
   s.className = fail === 0 ? 'ok' : 'ng';

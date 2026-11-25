@@ -39,6 +39,7 @@ function tap(side) {
   Snd.init();
   if (App.screen === 'title') { openList(); return; }
   if (App.screen === 'intro') { if (nowT - App.introAt > 0.3) startRun(); return; }
+  if (App.screen === 'ending') { skipEnding(); return; }
   if (App.screen === 'play') Game.input(side);
 }
 
@@ -60,7 +61,7 @@ function bindUI() {
       else if (App.screen === 'list') openIntro(Tourney.focusIndex(SAVE));
       else if (App.screen === 'intro') { if (nowT - App.introAt > 0.3) startRun(); }
       else if (App.screen === 'result' && !$('result').classList.contains('wait')) retry();
-      else if (App.screen === 'ending') openList();
+      else if (App.screen === 'ending') { if (End.cert) openList(); else skipEnding(); }
     }
   });
   window.addEventListener('resize', resize);
@@ -78,7 +79,9 @@ function bindUI() {
     if (b) { Snd.init(); buyItem(b.closest('.it').dataset.id); }
   });
   $('inBack').addEventListener('click', () => openList());
-  $('endBtn').addEventListener('click', () => openList());
+  $('endBtn').addEventListener('click', () => { Snd.init(); End.on = false; openList(); });
+  $('endShare').addEventListener('click', shareEnding);
+  $('ending').addEventListener('click', e => { if (!End.cert && !e.target.closest('button')) { Snd.init(); skipEnding(); } });
   $('listBody').addEventListener('click', e => {
     const b = e.target.closest('.tn');
     if (b && !b.disabled) { Snd.init(); openIntro(+b.dataset.i); }
@@ -92,12 +95,14 @@ function resetRun() {
   popups.length = 0; smoke.length = 0; hist.length = 0;
   for (const c of CL) c.app = 0;
   lvlShown = 0; murLvl = -1; crowdAmt = 0; tripAt = -99; rivalPassed = false; rivalPassAt = -99;
-  Snd.murmur(0);
+  Snd.murmur(-1);
   $('stamp').classList.remove('on'); $('vsStamp').classList.remove('on');
 }
 
 function openList() {
   resetRun();
+  End.on = false;
+  Snd.setVenue(0);
   App.pendingEnding = false;
   renderList();
   setScreen('list');
@@ -169,6 +174,7 @@ function openIntro(i) {
   if (!Tourney.playable(SAVE, i)) return;
   resetRun();
   App.idx = i;
+  Snd.setVenue(i);
   const T = STR.tournaments[i], I = STR.intro;
   $('inName').textContent = ph(T.name);
   $('inRival').innerHTML = phHtml(T.rival.name);
@@ -190,9 +196,8 @@ function retry() { startRun(); }
 
 function showEnding() {
   App.pendingEnding = false;
-  $('endBest').textContent = STR.ending.best(fmt(SAVE.best[Tourney.count() - 1]));
-  $('endBtn').textContent = STR.ending.list;
   setScreen('ending');
+  startEnding(SAVE.best[Tourney.count() - 1]);
 }
 
 // ---- 結果 ----
@@ -239,6 +244,7 @@ function showResult() {
   else if (info.win) note = S.noteReplay;
   else note = S.noteLose(fmt(tg - r.rec + 1));
   $('vsNote').innerHTML = phHtml(note);
+  $('vsSay').innerHTML = '<span class="who">' + esc(T.rival.short) + '</span>' + phHtml(S.rivalSay(info.win ? T.rival.win : T.rival.lose));
   $('toList').textContent = info.ending ? S.cont : S.toList;
   const el = $('result');
   el.classList.add('show', 'wait');   // 指が離れる前にボタンを押してしまわないように、少しの間は触れない
@@ -310,7 +316,7 @@ function reactToEvents() {
   }
   Game.events.length = 0;
   // ざわめき
-  const m = Game.mode === 'play' ? Game.lvl : 0;
+  const m = Game.mode === 'play' ? Game.lvl : -1;
   if (m !== murLvl) { murLvl = m; Snd.murmur(m); }
 }
 
@@ -330,6 +336,7 @@ function frame(ts) {
   const dt = last ? Math.min((ts - last) / 1000, 0.1) : 0;
   last = ts; nowT += dt;
   Game.step(dt);
+  updateEnding(dt);
   reactToEvents();
   checkRival();
   if (Game.mode === 'over' && !shownResult && App.screen === 'play') showResult();
@@ -390,6 +397,11 @@ function makeShareImage() {
     c.fillText(shareUrl(), Wd / 2, Ht - 80);
     cc.toBlob(resolve, 'image/png');
   });
+}
+function shareEnding() {
+  const text = STR.ending.shareText(fmt(SAVE.best[Tourney.count() - 1])), url = shareUrl();
+  try { if (navigator.share) { navigator.share({ text, url }).catch(() => {}); return; } } catch (_) {}
+  window.open('https://twitter.com/intent/tweet?text=' + encodeURIComponent(text) + '&url=' + encodeURIComponent(url), '_blank', 'noopener');
 }
 async function share() {
   const text = shareText(), url = shareUrl();

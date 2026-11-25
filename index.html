@@ -113,11 +113,29 @@ body{display:flex;align-items:center;justify-content:center}
 #intro .go{font-size:6cqw;font-weight:bold;color:#fff;background:#e0356f;border-radius:6cqw;padding:2cqw 8cqw;box-shadow:0 1.2cqw 0 #a82350;
   white-space:nowrap;animation:blink 1.1s ease-in-out infinite}
 
-#ending{align-items:center;justify-content:center;text-align:center;gap:4cqw;background:#1c2160;box-shadow:0 0 0 100vmax #1c2160}
-#ending .big{font-size:12cqw;font-weight:900;line-height:1.15;color:#fff;-webkit-text-stroke:1.2cqw #213a86;paint-order:stroke fill;text-shadow:0 1.2cqw 0 #213a86}
-#ending .txt{font-size:5.4cqw;font-weight:bold;color:#fff}
-#ending .bst{font-size:4.2cqw;color:#cfd6ff;min-height:5.4cqw}
-#endBtn{height:14cqw;padding:0 9cqw;font-size:5.4cqw;white-space:nowrap;margin-top:3cqw}
+/* エンディング：最初の 3 場面は canvas に描く（この画面は透明でタップを受けるだけ）。そのあと宇宙記録の記録用紙が出る */
+#ending{align-items:center;justify-content:center;text-align:center;background:transparent;box-shadow:none;cursor:pointer;padding:5cqw}
+#endSkip{position:absolute;right:5cqw;bottom:3.4cqw;font-size:3.6cqw;font-weight:bold;color:#cfd6ff;opacity:.7;white-space:nowrap;letter-spacing:.3cqw}
+#ending.cert #endSkip{display:none}
+#cert{display:none;width:100%;margin-top:6cqw;padding:4cqw 5.5cqw 4.4cqw;background:#fffdf2;border:.7cqw solid #2c4aa0;border-radius:1.6cqw;
+  box-shadow:0 2cqw 0 #1c3170,0 3cqw 6cqw #0006;color:#2b2b3a;flex-direction:column;align-items:stretch;gap:1.7cqw;text-align:center;cursor:default}
+#ending.cert #cert{display:flex;animation:pop .35s cubic-bezier(.3,1.5,.5,1)}
+#cert .sub{align-self:center;font-size:4.4cqw;font-weight:900;color:#5a3d00;background:linear-gradient(#f9d878,#e0a828);border-radius:5cqw;padding:.7cqw 6cqw;letter-spacing:1cqw;margin-top:-8.4cqw;box-shadow:0 .7cqw 0 #a87810;white-space:nowrap}
+#cert .hd{font-size:5.4cqw;font-weight:bold;color:#2c4aa0;border-bottom:.5cqw solid #2c4aa0;padding-bottom:1.2cqw;letter-spacing:.5cqw;white-space:nowrap}
+#cert .ln{display:flex;justify-content:space-between;align-items:baseline;font-size:4.2cqw;border-bottom:.3cqw dashed #9aa7d0;padding-bottom:.8cqw;white-space:nowrap}
+#cert .ln span:first-child{color:#55608a}
+#cert .ln b{font-size:4.6cqw}
+#cert .big{position:relative;display:flex;justify-content:space-between;align-items:center;margin:.8cqw 0 2.2cqw}
+#cert .big .lb{font-size:4.8cqw;color:#55608a;font-weight:bold}
+#cert .big .num{font-size:12cqw;font-weight:900;line-height:1;color:#d2382f;font-variant-numeric:tabular-nums}
+#cert .big .num small{font-size:5cqw;color:#55608a;font-weight:bold;margin-left:.8cqw}
+#cStamp{position:absolute;left:15cqw;top:-2.4cqw;width:19cqw;height:19cqw;border:.9cqw solid #d2382f;border-radius:50%;color:#d2382f;font-weight:900;
+  display:flex;align-items:center;justify-content:center;text-align:center;line-height:1.15;transform:rotate(-14deg) scale(2.4);opacity:0;background:#fffdf277;font-size:4.8cqw}
+#cStamp.on{animation:stamp .28s cubic-bezier(.4,1.6,.6,1) forwards}
+#cert .note{font-size:4cqw;font-weight:bold;color:#2c4aa0;line-height:1.5}
+#endBtn{flex:1.2;height:12.5cqw;font-size:4.8cqw;white-space:nowrap}
+#endShare{flex:1;height:10cqw;font-size:3.5cqw;background:transparent;color:#2c4aa0;white-space:nowrap;padding:0 1.5cqw;border:.6cqw solid #2c4aa0;border-radius:3cqw;box-shadow:0 .6cqw 0 #2c4aa066}
+#endShare:active{transform:translateY(.5cqw)}
 
 /* 結果：体力測定の記録用紙 */
 #result{position:absolute;left:6cqw;right:6cqw;top:21cqw;z-index:30;padding:4cqw 5.5cqw 4.2cqw;
@@ -161,6 +179,8 @@ body{display:flex;align-items:center;justify-content:center}
 #vs.lose #vsStamp{color:#4a5a9a;border-color:#4a5a9a}
 #vsStamp.on{animation:vstamp .26s cubic-bezier(.4,1.6,.6,1) forwards}
 @keyframes vstamp{to{transform:rotate(-10deg) scale(1);opacity:1}}
+#vsSay{grid-column:1/-1;margin-top:1.4cqw;padding-top:1.3cqw;border-top:.3cqw dashed #9aa7d0;font-size:3.6cqw;color:#2b2b3a;text-align:center;line-height:1.35;min-height:4.8cqw}
+#vsSay .who{font-weight:900;color:#55608a;margin-right:1.2cqw}
 #vsNote{font-size:3.9cqw;font-weight:bold;color:#2c4aa0;min-height:5cqw}
 
 .row{display:flex;gap:3cqw;align-items:center;width:100%;margin-top:.6cqw}
@@ -223,6 +243,7 @@ body{display:flex;align-items:center;justify-content:center}
       <div class="col"><span id="vsRLb"></span><b id="vsRRec">0</b></div>
       <div class="mid"><span class="v" data-s="sheet.vs"></span><div id="vsStamp"></div></div>
       <div class="col you"><span data-s="sheet.you"></span><b id="vsYou">0</b></div>
+      <div id="vsSay"></div>
     </div>
     <div id="vsNote"></div>
     <div class="ln"><span data-s="sheet.tickets"></span><b id="rTk"></b></div>
@@ -240,11 +261,22 @@ body{display:flex;align-items:center;justify-content:center}
     </div>
   </div>
   <div id="ending" class="scr">
-    <div class="big" data-p="ending.head"></div>
-    <div class="txt" data-p="ending.body"></div>
-    <div class="bst" id="endBest"></div>
-    <div class="txt" data-s="ending.thanks"></div>
-    <button id="endBtn" class="btn"></button>
+    <div id="endSkip" data-s="ending.skip"></div>
+    <div id="cert">
+      <div class="sub" data-s="ending.cert.sub"></div>
+      <div class="hd" data-s="ending.cert.head"></div>
+      <div class="ln"><span data-s="ending.cert.kind"></span><b data-s="ending.cert.kindVal"></b></div>
+      <div class="ln"><span data-s="ending.cert.tn"></span><b data-s="ending.cert.tnVal"></b></div>
+      <div class="big">
+        <span class="lb" data-s="ending.cert.rec"></span>
+        <span class="num"><span id="cRec">0</span><small data-s="ending.cert.unit"></small></span>
+        <div id="cStamp" data-p="ending.cert.stamp"></div>
+      </div>
+      <div class="ln"><span data-s="ending.cert.who"></span><b data-s="ending.cert.whoVal"></b></div>
+      <div class="ln"><span data-s="ending.cert.witness"></span><b data-s="ending.cert.witnessVal"></b></div>
+      <div class="ln"><span data-s="ending.cert.note"></span><b class="note" data-p="ending.cert.noteVal"></b></div>
+      <div class="row"><button id="endBtn" class="btn" data-s="ending.list"></button><button id="endShare" class="btn" data-s="ending.share"></button></div>
+    </div>
   </div>
 </div>
 <script>
@@ -326,15 +358,15 @@ const STR = {
 
   // 大会 9 つ。順番が進む順番（CFG.targets と同じ並び）
   tournaments: [
-    { name: 'クラスの体力測定', rival: { name: '前の席の|田中', short: '田中', say: '去年と|同じ記録を|目指します。' } },
-    { name: '学年の体力測定', rival: { name: '学年1位の|鈴木', short: '鈴木', say: '毎朝|牛乳を|飲んでいます。' } },
-    { name: '校内大会', rival: { name: '体育委員長の|佐藤', short: '佐藤', say: '全校生徒が|見ていますが|気にしません。' } },
-    { name: '市大会', rival: { name: '市の代表の|高橋', short: '高橋', say: '言い訳は|すでに|用意してあります。' } },
-    { name: '県大会', rival: { name: '県王者の|伊藤', short: '伊藤', say: '優勝賞品の|お米を|待っています。' } },
-    { name: '全国大会', rival: { name: '全国2連覇の|渡辺', short: '渡辺', say: 'テレビに|映るので|髪を 整えました。' } },
-    { name: '世界大会', rival: { name: '世界王者の|ジャン', short: 'ジャン', say: '言葉は|通じませんが|記録は 通じます。' } },
-    { name: '月面大会', rival: { name: '宇宙飛行士の|山本', short: '山本', say: '重力が 小さいので|だいぶ|有利です。' } },
-    { name: '宇宙大会', rival: { name: '宇宙人の|ポポ', short: 'ポポ', say: '記録係は|腕が 6本|あります。' } },
+    { name: 'クラスの体力測定', rival: { name: '前の席の|田中', short: '田中', say: '去年と|同じ記録を|目指します。', win: '来年も|牛乳を|もらいます。', lose: '去年と|同じ記録で|勝ちました。' } },
+    { name: '学年の体力測定', rival: { name: '学年1位の|鈴木', short: '鈴木', say: '毎朝|牛乳を|飲んでいます。', win: '牛乳が|足りません|でした。', lose: '牛乳の|おかげです。' } },
+    { name: '校内大会', rival: { name: '体育委員長の|佐藤', short: '佐藤', say: '全校生徒が|見ていますが|気にしません。', win: '全校生徒の|前で|負けました。', lose: '全校生徒が|見ていた|ようですね。' } },
+    { name: '市大会', rival: { name: '市の代表の|高橋', short: '高橋', say: '言い訳は|すでに|用意してあります。', win: 'ここで|言い訳を|使います。', lose: '言い訳は|不要|でした。' } },
+    { name: '県大会', rival: { name: '県王者の|伊藤', short: '伊藤', say: '優勝賞品の|お米を|待っています。', win: 'お米は|差し上げます。', lose: 'お米は|いただき|ます。' } },
+    { name: '全国大会', rival: { name: '全国2連覇の|渡辺', short: '渡辺', say: 'テレビに|映るので|髪を 整えました。', win: '髪が|乱れました。', lose: '髪は|乱れて|いません。' } },
+    { name: '世界大会', rival: { name: '世界王者の|ジャン', short: 'ジャン', say: '言葉は|通じませんが|記録は 通じます。', win: '記録は|通じました。|完敗です。', lose: '記録が|通じ|ませんでしたね。' } },
+    { name: '月面大会', rival: { name: '宇宙飛行士の|山本', short: '山本', say: '重力が 小さいので|だいぶ|有利です。', win: '重力の|せいに|します。', lose: '重力が|味方に|なりました。' } },
+    { name: '宇宙大会', rival: { name: '宇宙人の|ポポ', short: 'ポポ', say: '記録係は|腕が 6本|あります。', win: '腕が 6本でも|数えきれ|ません。', lose: '腕が 6本|ありますので。' } },
   ],
 
   // 記録用紙
@@ -348,21 +380,64 @@ const STR = {
     noteUnlock: s => '「' + s + '」が|ひらきました！',
     noteReplay: 'ライバルに|また 勝ちました。',
     noteEnd: '全大会|せいは！',
+    rivalSay: s => '「' + s + '」',
     retry: 'もう一回', toList: '大会の一覧', cont: 'つづける', share: 'Xで シェア',
     tickets: '引換券', ticketGain: n => '+' + n, shop: '購買部',
   },
 
-  // 宇宙大会に勝ったあと（Phase 3 で作り直す）
+  // 会場ごとの言葉。banner＝壁の横断幕、sign＝看板、rec＝記録係のひとこと（勢いの段階 0〜10。段階 7〜10 は分身の秘伝書）、
+  // ready／fin／over＝「よーい」「そこまで」「記録の読み上げ」、tag＝記録係の呼び名（エンディングでも使う）
+  venues: [
+    { banner: '体力測定', sign: '', tag: '担任の先生', ready: 'よーい…', fin: 'そこまで！ きろくします…', over: n => '…' + n + ' 回です。',
+      rec: ['いーち、にー…', 'は、はやっ！', 'えっ…？ にー、よん…', 'ひとが ふえてる…', 'ゆ、ゆかが…！', 'でんたく でんたく…！', 'そ、測定不能…！',
+        '百人…？ 数えます！', '出席簿が 足りない…', '先生 校庭に 出ます', '先生 もう 帰っていい？'] },
+    { banner: '学年の体力測定', sign: '', tag: '学年の先生たち', ready: '三人で 見ます…', fin: 'そこまで！ 集計します', over: n => '学年記録は ' + n + ' 回です',
+      rec: ['一組の先生、数えて！', 'こっちの数と 合わない', '三人で 数えます！', '学年主任が 二人います', '体育の先生が 泣いてる', '電卓を 回してください', '会議にします！ 測定不能',
+        '全員で 数えますが…', '職員室から 応援を！', '教頭先生が 倒れました', '校長先生に 報告します'] },
+    { banner: '校内大会', sign: '', tag: '体育委員の先生', ready: '全校生徒、静かに…', fin: 'そこまで！ 全校に 発表', over: n => '校内記録 ' + n + ' 回！',
+      rec: ['全校生徒が 見ています', '静かに！ 見えません！', '体育委員、整列して！', '全校が ざわざわ…', '校長先生も 立ちました', '放送室！ 実況お願い！', '学校記録を 超えました',
+        '校庭が 分身だらけです', '近所からも 見ています', '来年の 校内大会は…？', '校歌を うたってください'] },
+    { banner: '市大会', sign: '市民体育館', tag: '審判', ready: '位置について…', fin: 'そこまで。記録 確認', over: n => '記録 ' + n + ' 回。有効。',
+      rec: ['位置について。', 'ただいまの 動作、有効。', '二名に 見えますが 有効', '競技者の数を 確認中', '競技規則に 前例なし', '審判長、協議します', '規定により 測定不能',
+        '分身は 登録外です', '市長に 連絡しました', '協議の結果 続行します', '審判を 増員します'] },
+    { banner: '県大会', sign: '', tag: '審査員', ready: '採点を はじめます…', fin: '採点 しめきります', over: n => '得点 ' + n + ' 回ぶん',
+      rec: ['審査員、採点 準備！', '一人目、7点！', '二人目、迷っています', '三人とも 札が 割れた', '採点が 追いつかない', '得点板が 足りない！', '満点を 超えました',
+        '審査員も 分身しました', '県知事が 立ちました', '採点は 天に まかせます', '審査規定を 書き直します'] },
+    { banner: '全国大会', sign: 'LIVE', tag: '実況アナウンサー', ready: '生中継、入ります…', fin: 'ここで 終了！ 結果は…', over: n => '記録は… ' + n + ' 回！',
+      rec: ['さあ 始まりました！', 'おっと！ 今 二人に！？', '解説の 田村さん これは？', '増えている！ 増えている！', '視聴率が 急上昇中！', '放送事故 寸前です！', 'カメラが 追えない！',
+        '全国の お茶の間が 騒然！', '番組を 延長します！', '歴史的瞬間を 目撃中！', 'CM… 入れません！'] },
+    { banner: '世界大会', sign: '', tag: '国際審判', ready: 'レディ…', fin: '終了。ジャッジ 協議', over: n => n + ' 回。公式記録。',
+      rec: ['ええと… レディ？', '通訳！ 通訳 来て！', 'ワンダフル…？ トゥー？', '世界記録の 予感です', '言葉は いりません', '各国の 審判が 協議中', 'ノーカウント…いや 数える',
+        '国連に 報告します', '全大陸が 見ています', 'ルールブックが 足りない', 'もう どこの国か 不明'] },
+    { banner: '月面大会', sign: '', tag: '宇宙飛行士', ready: '地球へ。開始します…', fin: '終了。データを 送信', over: n => '地球へ。' + n + ' 回です',
+      rec: ['地球へ。測定を 開始', '地球へ。二人に 見える', 'こちら 月。四人です', 'ザザッ… 増えてます', '砂ぼこりが 止まらない', '地球、応答を！ 数が…', '測定不能。通信 終了',
+        '百人を 確認。どうぞ', '五百人。酸素が たりない', '三千人。月が せまい', '地球へ。引っこします'] },
+    { banner: '宇宙大会', sign: '', tag: '宇宙人の ポポ', ready: 'ピポ。よーい…', fin: 'ピポ。おわりです', over: n => n + ' 回… たぶん',
+      rec: ['ピポ。いち…ですか？', 'に。あるいは 8ミリ', 'よん… いえ 九万です', 'ふえた。星 ふえた', '16 を 3 と よみました', '数え方を わすれました', 'ケタが 銀河を 超えた',
+        '百。つまり 青色です', '五百。おいしい におい', '三千。わが星の 人口', 'ポポ 数える 全部 すき'] },
+  ],
+
+  // 宇宙大会に初めて勝ったあと：エンディング（3 つの場面 → 宇宙記録の記録用紙）。cap の「|」は文節の切れ目
   ending: {
-    head: '全大会|せいは！', body: '宇宙大会に|勝ちました。', thanks: 'おめでとう！',
-    best: n => '宇宙大会 ベスト ' + n + ' 回', list: '大会の一覧へ',
+    cap: {
+      galaxy: ['あなたの|分身は|整列して|宇宙へ|飛び立ちました。', '銀河の|すみずみまで|ならんでいます。'],
+      sheet: ['記録係の|ポポが|6本の腕で|書きこみます。', '宇宙規模でも|書式は|いつもどおり。'],
+      teacher: ['そのころ、|体育館では。'],
+    },
+    sheetRow: { kind: '種目', kindVal: '反復横とび', rec: '記録', unit: '回', judge: '判定', judgeVal: '宇宙規模' },
+    teacher: ['…はい。|記録しました。', n => '宇宙記録、|' + n + '回。', '例年どおり|異常なし。'],
+    pop: 'そうはならんやろ',
+    cert: {
+      head: '体力測定 記録用紙', sub: '宇宙記録', kind: '種目', kindVal: '反復横とび', tn: '大会', tnVal: '宇宙大会', rec: '記録', unit: '回',
+      who: '記録係', whoVal: 'ポポ（腕 6本）', witness: '立会', witnessVal: '担任の先生', note: '備考', noteVal: '例年どおり|異常なし', stamp: '宇宙|規模',
+    },
+    skip: 'とばす ▶', list: '大会の一覧へ', share: 'Xで シェア',
+    shareText: (n) => '分身反復横とび「宇宙大会」に勝ちました！ 宇宙記録 ' + n + ' 回、備考「例年どおり異常なし」 #分身反復横とび',
   },
 
   // 測定中の画面（記録板・ふきだし・文字の演出）
   hud: {
-    banner: '体力測定', rec: '記録', real: n => 'ほんとうは ' + n + ' 回', left: 'のこり', bodies: n => '分身 ' + n + '人',
-    bubble: ['いーち、にー…', 'は、はやっ！', 'えっ…？ にー、よん…', 'ひとが ふえてる…', 'ゆ、ゆかが…！', 'でんたく でんたく…！', 'そ、測定不能…！'],
-    bFinish: 'そこまで！ きろくします…', bOver: n => '…' + n + ' 回です。', bReady: 'よーい…',
+    rec: '記録', real: n => 'ほんとうは ' + n + ' 回', left: 'のこり', bodies: n => '分身 ' + n + '人',
     ready: 'よーい…', vs: 'VS', passed: '超えた！',
   },
   pop: {
@@ -406,6 +481,72 @@ function fmtNum(v) {
   }
   return neg ? '-' + out : out;
 }
+// ===== 会場の表（画面を使わない。描き方は 42-venues-art.js、言葉は 12-strings.js の STR.venues）=====
+// 大会 9 つと同じ並び（CFG.targets・STR.tournaments・STR.venues と同じ番号）。
+//   kind   背景の描き方（gym 体育館／hall 市民体育館／arena 大きなアリーナ／tv テレビ中継の会場／stadium スタジアム／moon 月面／space 宇宙空間）
+//   wall   壁（空）の上と下の色　wain 腰壁　floor 床の上（奥）と下（手前）の色　floorStyle 床の模様
+//   props  この会場だけの小物（名前は VENUE_PROPS のどれか。描くのは PROP[名前]）
+//   crowd  見ている人（type＝絵の種類　shirts＝服の色の順番　pants＝ズボン）
+//   recorder  記録係の絵（記録板の顔）
+//   lowG   月面：跳ぶ弧がふわっと、ほこりがゆっくり（見た目だけ。ルールと時間は変えない）
+//   amb    効果音：会場の空気（50-audio.js）　k＝観客の大きさ（会場が上がるほど大きい）
+const VENUE_PROPS = [
+  'windows', 'banner', 'curtain', 'garlands', 'teachersRow', 'studentsRow',   // 体育館
+  'clerestory', 'bleachers', 'sign',                                          // 市民体育館
+  'trusses', 'tiers', 'judges',                                               // アリーナ
+  'ledwall', 'glowsticks', 'cameras', 'live',                                 // テレビ中継
+  'towers', 'worldFlags',                                                     // スタジアム
+  'stars', 'earth', 'hills', 'lander', 'moonFlag',                            // 月面
+  'nebula', 'planet', 'ufo', 'twinkle',                                       // 宇宙
+];
+const VENUE_KINDS = ['gym', 'hall', 'arena', 'tv', 'stadium', 'moon', 'space'];
+const REC_TYPES = ['teacher', 'teachers', 'megaphone', 'referee', 'judge', 'announcer', 'intl', 'astro', 'alien'];
+const CROWD_TYPES = ['kid', 'citizen', 'staff', 'athlete', 'astro', 'alien'];
+
+const GYM_WALL = { wall: ['#f6efd6', '#eadcb4'], wain: '#b79a62', wainLine: '#8a6e3e', floor: ['#d9b36a', '#c58f45'], floorStyle: 'planks', bg: '#e8d6a8' };
+const KID_SHIRTS = ['#f2a43a', '#58b0e0', '#e86a9a', '#7ac45a', '#8a5ad0', '#e04a4a'];
+
+const VENUES = [
+  // 1 クラスの体力測定：v1 の体育館・担任の先生
+  Object.assign({ id: 'class', kind: 'gym', props: ['windows', 'banner', 'curtain'], banner: ['#d2382f', '#f6c84c'],
+    crowd: { type: 'kid', shirts: KID_SHIRTS, pants: '#333b4d', whistle: true }, recorder: 'teacher', lowG: false, amb: 'gym', k: 0.8 }, GYM_WALL),
+  // 2 学年の体力測定：同じ体育館・先生たちが並んで見ている
+  Object.assign({ id: 'grade', kind: 'gym', props: ['windows', 'banner', 'curtain', 'teachersRow'], banner: ['#2c4aa0', '#f6c84c'],
+    crowd: { type: 'kid', shirts: KID_SHIRTS, pants: '#333b4d', whistle: true }, recorder: 'teachers', lowG: false, amb: 'gym', k: 0.9 }, GYM_WALL),
+  // 3 校内大会：同じ体育館・全校生徒が座って見ている・紙の飾り
+  Object.assign({ id: 'school', kind: 'gym', props: ['windows', 'garlands', 'banner', 'curtain', 'studentsRow', 'teachersRow'], banner: ['#e0356f', '#fff2a8'],
+    crowd: { type: 'kid', shirts: KID_SHIRTS, pants: '#333b4d', whistle: true }, recorder: 'megaphone', lowG: false, amb: 'gym', k: 1.15 }, GYM_WALL),
+  // 4 市大会：市民体育館・観客席・審判
+  { id: 'city', kind: 'hall', wall: ['#dbe6ec', '#b9ccd6'], wain: '#2f4a73', wainLine: '#1d3050', floor: ['#79a6cc', '#4f7fae'], floorStyle: 'court', bg: '#4f7fae',
+    props: ['clerestory', 'bleachers', 'banner', 'sign'], banner: ['#2f4a73', '#e8e8f2'], sign: ['#1d3050', '#ffe08a'],
+    crowd: { type: 'citizen', shirts: ['#e8e2d0', '#6aa5d8', '#e89a4a', '#8fc47a', '#d96a8a', '#b9b9c8'], pants: '#3b4a6b' }, recorder: 'referee', lowG: false, amb: 'hall', k: 1.0 },
+  // 5 県大会：大きなアリーナ・審査員の机・観客席が 2 段
+  { id: 'pref', kind: 'arena', wall: ['#1d2342', '#2c3560'], wain: '#10142c', wainLine: '#070a1c', floor: ['#62b184', '#3f8a60'], floorStyle: 'turf', bg: '#3f8a60',
+    props: ['trusses', 'tiers', 'banner', 'judges'], banner: ['#7a1f2e', '#f0c860'],
+    crowd: { type: 'staff', shirts: ['#26304f', '#3a2e57', '#2c4a5a', '#57364a', '#3a3f55'], pants: '#1a2038' }, recorder: 'judge', lowG: false, amb: 'arena', k: 1.3 },
+  // 6 全国大会：テレビ中継の会場・LED の壁・カメラ・LIVE
+  { id: 'nation', kind: 'tv', wall: ['#120a24', '#241446'], wain: '#0a0618', wainLine: '#00d8ff', floor: ['#4b3a86', '#2c2260'], floorStyle: 'glass', bg: '#2c2260',
+    props: ['glowsticks', 'ledwall', 'cameras', 'live'],
+    crowd: { type: 'staff', shirts: ['#111018', '#1d1a2e', '#2a2140', '#14202e', '#26142a'], pants: '#0d0b18', headset: true }, recorder: 'announcer', lowG: false, amb: 'tv', k: 1.5 },
+  // 7 世界大会：スタジアム・万国旗・赤い走路
+  { id: 'world', kind: 'stadium', wall: ['#0b1233', '#27407a'], wain: '#2a2f45', wainLine: '#10131f', floor: ['#d0583e', '#a63f2c'], floorStyle: 'track', bg: '#a63f2c',
+    props: ['stars', 'towers', 'tiers', 'worldFlags'], banner: ['#1f3a8a', '#ffffff'],
+    crowd: { type: 'athlete', shirts: ['#e04a4a', '#3a6ad0', '#f2c43a', '#2fa36a', '#f2f2f2', '#e86a9a'], pants: '#222a44' }, recorder: 'intl', lowG: false, amb: 'stadium', k: 1.8 },
+  // 8 月面大会：月面・地球・宇宙飛行士
+  { id: 'moon', kind: 'moon', wall: ['#000004', '#080b1a'], wain: '#55555f', wainLine: '#33333c', floor: ['#8d8d96', '#5c5c66'], floorStyle: 'regolith', bg: '#5c5c66',
+    props: ['stars', 'earth', 'hills', 'lander', 'moonFlag'],
+    crowd: { type: 'astro', shirts: ['#f2f2f6', '#f2f2f6', '#ffe9c0', '#f2f2f6'], pants: '#c9c9d4' }, recorder: 'astro', lowG: true, amb: 'moon', k: 0.5 },
+  // 9 宇宙大会：宇宙空間・星雲・宇宙人
+  { id: 'space', kind: 'space', wall: ['#0a0420', '#1d0b45'], wain: '#2a1d6a', wainLine: '#5cf0ff', floor: ['#2a1d6a', '#150f40'], floorStyle: 'grid', bg: '#150f40',
+    props: ['stars', 'nebula', 'planet', 'ufo', 'twinkle'],
+    crowd: { type: 'alien', shirts: ['#8fe07a', '#7ad0e8', '#e89ae0', '#f2d65a', '#b09af0'], pants: '#5a4a9a' }, recorder: 'alien', lowG: false, amb: 'space', k: 0.9 },
+];
+
+VENUES.forEach((v, i) => { v.i = i; });
+
+// エンディングの長さ（秒）。3 つの場面のあとに記録用紙（宇宙記録）が出る。タップでとばせる
+const ENDING_TIMES = { galaxy: 5.2, sheet: 5.2, teacher: 5.6 };
+const endingTotal = () => ENDING_TIMES.galaxy + ENDING_TIMES.sheet + ENDING_TIMES.teacher;
 // ===== ゲームのロジック（画面を使わない）=====
 const clamp = (v, a, b) => Math.max(a, Math.min(b, v));
 function mulberry32(a) {
@@ -747,7 +888,8 @@ const Tourney = {
 };
 // ===== 描画（Canvas 2D。単位は「遊ぶ場所の幅 = 100」）=====
 const $ = id => document.getElementById(id);
-const cv = $('cv'), cx = cv.getContext('2d');
+const cv = $('cv');
+let cx = cv.getContext('2d');   // 静かな背景を 1 枚の画像に描くときだけ、一時的に別の canvas に差し替える（42-venues-art.js）
 const FONT = '"Hiragino Maru Gothic ProN","Yu Gothic UI","Meiryo",sans-serif';
 let W = 0, H = 0, DPR = 1, U = 1, OX = 0, OY = 0;
 let EX0 = 0, EX1 = 100, EY0 = 0, EY1 = 177.78;   // 画面いっぱいの範囲（遊ぶ場所の単位で）
@@ -821,7 +963,7 @@ function drawKid(c, x, y, s, o) {
   const skin = o.skin || '#f3c8a0', hair = o.hair || '#3a2a22';
   const sp = 2.4 + Math.min(1, Math.abs(lean)) * 4.6;
   // 足
-  c.strokeStyle = skin; c.lineWidth = 3; c.lineCap = 'round';
+  c.strokeStyle = o.legs || skin; c.lineWidth = 3; c.lineCap = 'round';
   c.beginPath(); c.moveTo(-2, -11.5); c.lineTo(-sp, -0.8); c.moveTo(2, -11.5); c.lineTo(sp, -0.8); c.stroke();
   c.fillStyle = '#fff'; c.strokeStyle = '#d33'; c.lineWidth = 0.5;
   for (const sx of [-sp, sp]) { c.beginPath(); c.ellipse(sx, -0.5, 2.7, 1.3, 0, 0, 6.283); c.fill(); c.stroke(); }
@@ -832,7 +974,7 @@ function drawKid(c, x, y, s, o) {
   c.fillStyle = o.collar || '#2c4aa0'; c.fillRect(-3.2, -25.5, 6.4, 1.1);
   c.fillStyle = '#fff'; c.strokeStyle = '#9aa7d0'; c.lineWidth = 0.35; c.fillRect(-2.6, -21.6, 5.2, 3.6); c.strokeRect(-2.6, -21.6, 5.2, 3.6);   // ゼッケン
   // 腕
-  c.strokeStyle = skin; c.lineWidth = 2.5;
+  c.strokeStyle = o.arm || skin; c.lineWidth = 2.5;
   const sw = Math.min(1, 0.3 + Math.abs(lean)) * Math.sin((o.ph || 0));
   c.beginPath();
   if (o.cheer) {   // 万歳
@@ -875,51 +1017,7 @@ function drawKid(c, x, y, s, o) {
   c.restore();
 }
 
-// ---- 体育館 ----
-function drawGym() {
-  const lv = Game.lvl;
-  // 壁
-  let g = cx.createLinearGradient(0, EY0, 0, YH);
-  g.addColorStop(0, '#f6efd6'); g.addColorStop(1, '#eadcb4');
-  cx.fillStyle = g; cx.fillRect(EX0 - 5, EY0 - 5, EX1 - EX0 + 10, YH - EY0 + 5);
-  // 窓（4段階以上でガタガタ）
-  const rat = lv >= 4 ? Math.sin(nowT * 70) * (lv >= 6 ? 0.55 : 0.25) : 0;
-  const x0 = Math.floor((EX0 - 20) / 34) * 34 + 3;
-  for (let x = x0; x < EX1 + 20; x += 34) {
-    const jx = rat * Math.sin(x), jy = rat * Math.cos(x * 1.3);
-    cx.fillStyle = '#c8d6e6'; rr(cx, x + jx, 8 + jy, 26, 22, 1.2); cx.fill();
-    cx.fillStyle = '#9fd0f2'; cx.fillRect(x + 1.5 + jx, 9.5 + jy, 23, 19);
-    cx.fillStyle = '#d5ecfb'; cx.fillRect(x + 1.5 + jx, 9.5 + jy, 23, 8);
-    cx.fillStyle = '#c8d6e6'; cx.fillRect(x + 12.3 + jx, 9 + jy, 1.4, 20); cx.fillRect(x + jx, 18.5 + jy, 26, 1.4);
-  }
-  // 腰壁
-  cx.fillStyle = '#b79a62'; cx.fillRect(EX0 - 5, 52, EX1 - EX0 + 10, YH - 52);
-  cx.fillStyle = '#8a6e3e'; cx.fillRect(EX0 - 5, 52, EX1 - EX0 + 10, 0.9);
-  // 横断幕「体力測定」と舞台
-  cx.fillStyle = '#d2382f'; rr(cx, 22, 40.5, 56, 9, 1); cx.fill();
-  cx.fillStyle = '#f6c84c'; cx.fillRect(22, 40.5, 56, 0.8); cx.fillRect(22, 48.7, 56, 0.8);
-  txt(STR.hud.banner, 50, 45.2, 6.2, '#fff', { stroke: '#8f221c', sw: 1.1 });
-  cx.fillStyle = '#9a1f2a'; cx.fillRect(34, 50, 32, 7);   // 舞台の幕
-  const fl = Math.sin(nowT * (lv >= 6 ? 14 : 2)) * (lv >= 4 ? 0.7 : 0.1);
-  for (let i = 0; i < 8; i++) { cx.fillStyle = i % 2 ? '#b02a35' : '#8a1a24'; cx.fillRect(34 + i * 4 + fl * (i % 3 - 1), 50, 4, 7); }
-  cx.fillStyle = '#7a5a30'; cx.fillRect(30, 57, 40, 5);
-  // 床
-  g = cx.createLinearGradient(0, YH, 0, EY1);
-  g.addColorStop(0, '#d9b36a'); g.addColorStop(1, '#c58f45');
-  cx.fillStyle = g; cx.fillRect(EX0 - 5, YH, EX1 - EX0 + 10, EY1 - YH + 5);
-  // 床板（奥へ集まる筋）
-  cx.strokeStyle = 'rgba(120,80,30,.16)'; cx.lineWidth = 0.25;
-  cx.beginPath();
-  const reach = Math.max(EX1 - EX0, 200);
-  for (let i = -14; i <= 14; i++) { cx.moveTo(50, YH); cx.lineTo(50 + i * 14, YH + (EY1 - YH + 10) * 1.0 + Math.abs(i) * 0); }
-  cx.stroke();
-  // 床のつや
-  g = cx.createRadialGradient(50, 118, 5, 50, 118, 70);
-  g.addColorStop(0, 'rgba(255,245,210,.35)'); g.addColorStop(1, 'rgba(255,245,210,0)');
-  cx.fillStyle = g; cx.fillRect(EX0 - 5, YH, EX1 - EX0 + 10, EY1 - YH);
-  // 床と壁の境
-  cx.fillStyle = 'rgba(80,50,10,.25)'; cx.fillRect(EX0 - 5, YH - 0.3, EX1 - EX0 + 10, 0.9);
-}
+// ---- 会場の背景は 42-venues-art.js（drawVenue）----
 
 // 床のテープ線 3 本（手前へ広がる）。次に跳ぶ線をうっすら光らせる
 function lineQuad(wx, w0, s0, s1) {
@@ -964,16 +1062,22 @@ const SP = [
 SP.forEach((p, i) => { p.app = 0; p.ph = i * 1.7; });
 
 function drawSpectators() {
-  const lv = Game.lvl;
-  for (const p of SP) {
+  const lv = Game.lvl, V = curVenue(), C = V.crowd;
+  for (let i = 0; i < SP.length; i++) {
+    const p = SP[i];
     if (p.app <= 0.01) continue;
     const s = (p.y - YH) / (Y0 - YH) * 1.15;
-    const bounce = lv >= 4 ? Math.abs(Math.sin(nowT * 7 + p.ph)) * 1.6 : lv >= 3 ? Math.abs(Math.sin(nowT * 3 + p.ph)) * 0.5 : 0;
-    drawKid(cx, p.x, p.y, s * (0.6 + 0.4 * easeOut(Math.min(1, p.app))), {
-      shirt: p.col, shorts: '#333b4d', hair: p.hair, collar: '#fff', band: false, alpha: Math.min(1, p.app * 1.5),
-      cheer: lv >= 4, ph: nowT * 7 + p.ph, bob: bounce, face: 0,
+    const g = V.lowG ? 1.7 : 1;   // 月面：ふわっと高く弾む（見た目だけ）
+    const bounce = (lv >= 4 ? Math.abs(Math.sin(nowT * 7 / g + p.ph)) * 1.6 * g : lv >= 3 ? Math.abs(Math.sin(nowT * 3 + p.ph)) * 0.5 : 0);
+    const col = C.type === 'kid' ? p.col : C.shirts[i % C.shirts.length];
+    const sc = s * (0.6 + 0.4 * easeOut(Math.min(1, p.app))), al = Math.min(1, p.app * 1.5);
+    if (C.type === 'astro') drawAstro(cx, p.x, p.y, sc, { alpha: al, cheer: lv >= 4, ph: nowT * 7 + p.ph, bob: bounce, col, vis: i % 3 });
+    else if (C.type === 'alien') drawAlien(cx, p.x, p.y, sc, { alpha: al, cheer: lv >= 4, ph: nowT * 7 + p.ph, bob: bounce, col, eyes: 1 + (i % 3), horn: i % 2 });
+    else drawKid(cx, p.x, p.y, sc, {
+      shirt: col, shorts: C.pants, hair: p.hair, collar: C.type === 'kid' ? '#fff' : col, band: false, alpha: al,
+      cheer: lv >= 4, ph: nowT * 7 + p.ph, bob: bounce, face: 0, legs: C.type === 'kid' ? null : C.pants, arm: C.type === 'kid' ? null : col,
     });
-    if (p.teacher && p.app > 0.6) {   // 先生は笛
+    if (C.whistle && p.teacher && p.app > 0.6) {   // 先生は笛
       cx.fillStyle = '#e8c030'; cx.beginPath(); cx.arc(p.x + 0.8 * s, p.y - 23 * s, 0.9 * s, 0, 6.283); cx.fill();
     }
   }
@@ -994,7 +1098,7 @@ function fallAmt(delay, isPlayer) {
 function bodyOpts(tt, k, isPlayer, finishing) {
   const x = histX(tt), xp = histX(tt - 0.05);
   const sp = (x - xp) / 0.05;
-  return { x, lean: clamp(sp / 14, -1, 1), hop: finishing ? 0 : clamp(Math.abs(sp) / 22, 0, 1) };
+  return { x, lean: clamp(sp / 14, -1, 1), hop: finishing ? 0 : clamp(Math.abs(sp) / 22, 0, 1) * (curVenue().lowG ? 1.7 : 1) };   // 月面は弧がふわっと高い（見た目だけ）
 }
 
 function drawBodies() {
@@ -1091,56 +1195,22 @@ function drawRays() {
   cx.restore();
 }
 function drawSmoke() {
+  const k = curVenue().kind, rgb = k === 'moon' ? '188,188,200' : k === 'space' ? '150,225,255' : '250,250,250';   // 月面はほこり、宇宙は光のつぶ
   for (const p of smoke) {
     const q = p.life / p.max;
-    cx.fillStyle = 'rgba(250,250,250,' + (0.55 * (1 - q)) + ')';
+    cx.fillStyle = 'rgba(' + rgb + ',' + (0.55 * (1 - q)) + ')';
     cx.beginPath(); cx.arc(p.x, p.y, p.r * (0.6 + q * 1.6), 0, 6.283); cx.fill();
   }
 }
 
 // ---- 画面上のしるし（記録・時間・記録係）----
-function recorderFace(x, y, r) {
-  const lv = Game.lvl, fin = Game.mode === 'finish' || Game.mode === 'over';
-  cx.fillStyle = '#f3c8a0'; cx.beginPath(); cx.arc(x, y, r, 0, 6.283); cx.fill();
-  cx.fillStyle = '#2c4aa0'; cx.beginPath(); cx.arc(x, y - 0.5, r + 0.5, Math.PI * 1.02, Math.PI * 1.98); cx.closePath(); cx.fill();   // 帽子
-  cx.fillRect(x - r - 2.2, y - 0.6, r * 2 + 4.4, 1.3);
-  // 眼鏡
-  cx.strokeStyle = '#2b2b3a'; cx.lineWidth = 0.6; cx.fillStyle = '#fff';
-  const ey = y + 1.0, big = lv >= 2 ? 2.35 : 1.8;
-  cx.beginPath(); cx.arc(x - 2.6, ey, big, 0, 6.283); cx.moveTo(x + 2.6 + big, ey); cx.arc(x + 2.6, ey, big, 0, 6.283); cx.moveTo(x - 0.8, ey); cx.lineTo(x + 0.8, ey);
-  cx.fill(); cx.stroke();
-  cx.fillStyle = '#2b2b3a';
-  const wob = lv >= 4 ? Math.sin(nowT * 40) * 0.25 : 0;
-  cx.beginPath(); cx.arc(x - 2.6 + wob, ey, lv >= 2 ? 0.5 : 0.8, 0, 6.283); cx.arc(x + 2.6 + wob, ey, lv >= 2 ? 0.5 : 0.8, 0, 6.283); cx.fill();
-  // 口
-  cx.strokeStyle = '#2b2b3a'; cx.lineWidth = 0.6; cx.beginPath();
-  if (lv >= 5) { cx.fillStyle = '#7a2a2a'; cx.ellipse(x, y + 5.3, 1.6, 2.1, 0, 0, 6.283); cx.fill(); }
-  else if (lv >= 2) { cx.arc(x, y + 5, 1.1, 0, 6.283); cx.stroke(); }
-  else if (fin) { cx.moveTo(x - 1.4, y + 5); cx.lineTo(x + 1.4, y + 5); cx.stroke(); }
-  else { cx.arc(x, y + 3.9, 1.5, 0.2 * Math.PI, 0.8 * Math.PI); cx.stroke(); }
-  if (lv >= 3) {   // 汗
-    cx.fillStyle = '#7ad0ff'; cx.beginPath(); cx.moveTo(x + r - 0.4, y - 2); cx.quadraticCurveTo(x + r + 1.8, y + 1.5, x + r - 0.4, y + 2.3); cx.quadraticCurveTo(x + r - 2.4, y + 1.5, x + r - 0.4, y - 2); cx.fill();
-  }
-  // 笛とバインダー、段階5からは電卓
-  cx.fillStyle = '#e8c030'; cx.beginPath(); cx.arc(x - 3, y + 8.2, 1, 0, 6.283); cx.fill();
-  if (lv >= 5) {
-    cx.fillStyle = '#4a4f5c'; rr(cx, x + 1, y + 8, 7.5, 7.5, 0.8); cx.fill();
-    cx.fillStyle = '#9fe3b0'; cx.fillRect(x + 1.8, y + 8.7, 5.9, 2);
-    cx.fillStyle = '#e8e8e8';
-    for (let i = 0; i < 6; i++) cx.fillRect(x + 1.9 + (i % 3) * 2, y + 11.6 + Math.floor(i / 3) * 1.8, 1.5, 1.1);
-  } else {
-    cx.fillStyle = '#8a6a3a'; rr(cx, x + 1.5, y + 8, 6.2, 7.8, 0.8); cx.fill();
-    cx.fillStyle = '#fff'; cx.fillRect(x + 2.3, y + 9.2, 4.6, 6);
-  }
-}
-
 function drawHud() {
   const play = Game.mode === 'play', lv = Game.lvl;
   // 記録板
   cx.fillStyle = '#0003'; rr(cx, 3, 3.8, 94, 35, 3); cx.fill();
   cx.fillStyle = '#fffdf2'; rr(cx, 3, 2.4, 94, 35, 3); cx.fill();
   cx.strokeStyle = '#2c4aa0'; cx.lineWidth = 0.9; rr(cx, 3, 2.4, 94, 35, 3); cx.stroke();
-  recorderFace(15, 13.5, 6.3);
+  drawRecorder(15, 13.5, 6.3, curVenue().recorder);
   txt(STR.hud.rec, 52, 8.6, 3.4, '#55608a');
   const pop = 1 + 0.16 * hudPop;
   cx.save(); cx.translate(52, 19.8); cx.scale(pop, pop);
@@ -1155,12 +1225,12 @@ function drawHud() {
   cx.fillStyle = '#dde3f3'; rr(cx, 6, 34.7, 88, 1.5, 0.75); cx.fill();
   cx.fillStyle = left <= 5 ? '#e03030' : '#2c9a6a'; rr(cx, 6, 34.7, Math.max(1.5, 88 * left / CFG.duration), 1.5, 0.75); cx.fill();
   // 記録係のひとこと
-  let b = STR.hud.bubble[Math.min(lv, STR.hud.bubble.length - 1)];
-  if (Game.mode === 'finish') b = STR.hud.bFinish;
-  else if (Game.mode === 'over') b = STR.hud.bOver(Game.rec);
-  else if (Game.mode === 'title') b = STR.hud.bReady;
-  else if (Game.mode === 'ready') b = STR.hud.bReady;
-  txt(b, 52, 31.8, 2.8, '#2b2b3a', { align: 'center' });
+  const VS = STR.venues[venueIdx()];
+  let b = VS.rec[Math.min(lv, VS.rec.length - 1)];
+  if (Game.mode === 'finish') b = VS.fin;
+  else if (Game.mode === 'over') b = VS.over(fmt(Game.rec));
+  else if (Game.mode === 'title' || Game.mode === 'ready') b = VS.ready;
+  fitTxt(b, 52, 31.8, 2.8, 66, '#2b2b3a');
 }
 
 // 文字が枠に入りきらないときは、その幅に縮める
@@ -1202,13 +1272,14 @@ function drawPopups() {
 
 function render() {
   cx.setTransform(1, 0, 0, 1, 0, 0);
-  cx.fillStyle = '#e8d6a8'; cx.fillRect(0, 0, cv.width, cv.height);
+  cx.fillStyle = curVenue().bg; cx.fillRect(0, 0, cv.width, cv.height);
+  if (App.screen === 'ending') { cx.setTransform(DPR * U, 0, 0, DPR * U, DPR * OX, DPR * OY); drawEndingScene(); return; }
   const lv = Game.mode === 'play' ? Game.lvl : 0;
   const amp = lv >= 6 ? 0.9 : lv >= 5 ? 0.5 : lv >= 4 ? 0.22 : 0;
   const shx = amp ? (Math.random() - 0.5) * 2 * amp + (shakeT > 0 ? (Math.random() - 0.5) * shakeT * 6 : 0) : (shakeT > 0 ? (Math.random() - 0.5) * shakeT * 6 : 0);
   const shy = amp ? (Math.random() - 0.5) * 2 * amp : 0;
   cx.setTransform(DPR * U, 0, 0, DPR * U, DPR * (OX + shx * U), DPR * (OY + shy * U));
-  drawGym();
+  drawVenue();
   drawLines();
   drawRays();
   drawCrowd();
@@ -1258,12 +1329,931 @@ function updateVisual(dt) {
 function puffSmoke(n) {
   const px = xOf(Game.xv, 1);
   for (let i = 0; i < n; i++) {
-    smoke.push({ x: px + (Math.random() - 0.5) * 16, y: Y0 - 1 - Math.random() * 3, vx: (Math.random() - 0.5) * 6, vy: -6 - Math.random() * 9, r: 1.6 + Math.random() * 1.6, life: 0, max: 0.6 + Math.random() * 0.4 });
+    const g = curVenue().lowG ? 0.45 : 1;   // 月面：ほこりがゆっくり舞って、長く残る
+    smoke.push({ x: px + (Math.random() - 0.5) * 16, y: Y0 - 1 - Math.random() * 3, vx: (Math.random() - 0.5) * 6 * g, vy: (-6 - Math.random() * 9) * g, r: 1.6 + Math.random() * 1.6, life: 0, max: (0.6 + Math.random() * 0.4) / g });
   }
+}
+// ===== 会場の背景・小物・記録係の顔（会場の表 VENUES を見て描き分ける）=====
+// 動かない部分は画面の外の canvas に 1 枚描いて使い回す（大きさ・会場が変わったときだけ描き直す）。動く部分（窓のガタガタ・点滅・星のまたたき）だけ毎フレーム描く。
+// 見えるのは主に「記録板の下から床まで」（遊ぶ場所の高さ 38〜62）。ここに会場らしさをまとめる
+function venueIdx() { return App.screen === 'title' ? 0 : clamp(App.idx, 0, VENUES.length - 1); }
+function curVenue() { return VENUES[venueIdx()]; }
+
+const VCache = { cv: null, key: '' };
+function venueLayer(V) {
+  const key = V.i + '|' + W + 'x' + H + '|' + DPR;
+  if (VCache.key === key) return VCache.cv;
+  const w = EX1 - EX0 + 10, h = EY1 - EY0 + 10;
+  const pw = Math.max(1, Math.round(w * U * DPR)), phh = Math.max(1, Math.round(h * U * DPR));
+  if (!VCache.cv) VCache.cv = document.createElement('canvas');
+  VCache.cv.width = pw; VCache.cv.height = phh;
+  const oc = VCache.cv.getContext('2d');
+  oc.setTransform(pw / w, 0, 0, phh / h, -(EX0 - 5) * pw / w, -(EY0 - 5) * phh / h);
+  const real = cx; cx = oc;
+  try { paintStatic(V); } finally { cx = real; }
+  VCache.key = key;
+  return VCache.cv;
+}
+function drawVenue() {
+  const V = curVenue(), L = venueLayer(V);
+  cx.drawImage(L, EX0 - 5, EY0 - 5, EX1 - EX0 + 10, EY1 - EY0 + 10);
+  for (const name of V.props) { const P = PROP[name]; if (P && P.dyn) P.dyn(V); }
+}
+
+// ---- 共通の道具 ----
+const SKIN = ['#f3c8a0', '#e8b890', '#d9a578', '#c18a62', '#f6d4b4'];
+const HAIR = ['#2a1c16', '#3a2a22', '#5a3a22', '#1a1a1e', '#777', '#8a6a3a'];
+const WIDE = () => EX1 - EX0 + 10;
+function glow(x, y, r, rgb, a) {
+  const g = cx.createRadialGradient(x, y, 0, x, y, r);
+  g.addColorStop(0, 'rgba(' + rgb + ',' + a + ')'); g.addColorStop(1, 'rgba(' + rgb + ',0)');
+  cx.fillStyle = g; cx.fillRect(x - r, y - r, r * 2, r * 2);
+}
+// 観客席の人（頭と肩）。rows＝[{y（肩の下の高さ）, size, gap}]、奥の列から順に描く
+function standCrowd(rows, xa, xb, pal, seed, o) {
+  o = o || {};
+  const R = mulberry32(seed);
+  for (const r of rows) {
+    const sc = r.size;
+    for (let x = xa + R() * r.gap; x < xb; x += r.gap) {
+      const col = pal[(R() * pal.length) | 0], sk = SKIN[(R() * SKIN.length) | 0], hr = HAIR[(R() * HAIR.length) | 0];
+      const hy = r.y - 4.6 * sc, up = o.stick && R() < o.stick;
+      if (up) {   // 光る棒（ペンライト）
+        const c = ['#ff3fa0', '#3fe0ff', '#ffe03f', '#7aff6a'][(R() * 4) | 0];
+        cx.strokeStyle = c; cx.lineWidth = 0.55 * sc; cx.lineCap = 'round';
+        cx.beginPath(); cx.moveTo(x + 2.2 * sc, r.y - 3 * sc); cx.lineTo(x + 3.2 * sc, hy - 3.4 * sc); cx.stroke();
+        glow(x + 3.2 * sc, hy - 3.4 * sc, 2.6 * sc, '255,255,255', 0.35);
+      }
+      cx.fillStyle = col; rr(cx, x - 2.3 * sc, r.y - 4.2 * sc, 4.6 * sc, 4.2 * sc, 1.2 * sc); cx.fill();
+      cx.fillStyle = sk; cx.beginPath(); cx.arc(x, hy, 1.8 * sc, 0, 6.283); cx.fill();
+      cx.fillStyle = hr; cx.beginPath(); cx.arc(x, hy - 0.25 * sc, 1.9 * sc, Math.PI, 6.283); cx.fill();
+    }
+  }
+}
+function bands(col, n) {   // 手前ほど太い横しま（芝刈りの筋・床のつや）
+  cx.fillStyle = col;
+  const hh = EY1 - YH + 10;
+  for (let k = 0; k < n; k += 2) {
+    const a = Math.pow(k / n, 1.7), b = Math.pow((k + 1) / n, 1.7);
+    cx.fillRect(EX0 - 5, YH + a * hh, WIDE(), (b - a) * hh);
+  }
+}
+function fan(col, lw, step) {   // 奥の一点へ集まる筋
+  cx.strokeStyle = col; cx.lineWidth = lw; cx.beginPath();
+  for (let i = -30; i <= 30; i++) { cx.moveTo(50, YH); cx.lineTo(50 + i * step, EY1 + 8); }
+  cx.stroke();
+}
+function flagAt(x, y, w, h, d) {
+  const F = [
+    () => { ['#f4f4f4', '#2a4aa8', '#d0242a'].forEach((c, i) => { cx.fillStyle = c; cx.fillRect(x, y + h * i / 3, w, h / 3 + 0.05); }); },
+    () => { ['#1f9a52', '#f4f4f4', '#d0242a'].forEach((c, i) => { cx.fillStyle = c; cx.fillRect(x + w * i / 3, y, w / 3 + 0.05, h); }); },
+    () => { cx.fillStyle = '#f8f8f8'; cx.fillRect(x, y, w, h); cx.fillStyle = '#d0242a'; cx.beginPath(); cx.arc(x + w / 2, y + h / 2, h * 0.3, 0, 6.283); cx.fill(); },
+    () => { cx.fillStyle = '#d0242a'; cx.fillRect(x, y, w, h); cx.fillStyle = '#fff'; cx.fillRect(x + w * 0.3, y, w * 0.14, h); cx.fillRect(x, y + h * 0.42, w, h * 0.16); },
+    () => { for (let i = 0; i < 5; i++) { cx.fillStyle = i % 2 ? '#f4f4f4' : '#d0242a'; cx.fillRect(x, y + h * i / 5, w, h / 5 + 0.05); } cx.fillStyle = '#2a4aa8'; cx.fillRect(x, y, w * 0.45, h * 0.55); },
+    () => { ['#161616', '#f2c61e', '#d0242a'].forEach((c, i) => { cx.fillStyle = c; cx.fillRect(x, y + h * i / 3, w, h / 3 + 0.05); }); },
+    () => { cx.fillStyle = '#1f9a52'; cx.fillRect(x, y, w, h); cx.fillStyle = '#f2c61e'; cx.beginPath(); cx.moveTo(x + w / 2, y + h * 0.12); cx.lineTo(x + w * 0.88, y + h / 2); cx.lineTo(x + w / 2, y + h * 0.88); cx.lineTo(x + w * 0.12, y + h / 2); cx.closePath(); cx.fill(); },
+    () => { cx.fillStyle = '#2a4aa8'; cx.fillRect(x, y, w, h); cx.fillStyle = '#f2c61e'; cx.beginPath(); cx.arc(x + w / 2, y + h / 2, h * 0.28, 0, 6.283); cx.fill(); },
+  ];
+  F[d % F.length]();
+}
+
+// ---- 静かな部分をまとめて描く ----
+const LATE = { teachersRow: 1, studentsRow: 1, cameras: 1, judges: 1 };   // 床に足がつく小物は、床を描いたあとに
+function paintStatic(V) {
+  // 壁（空）
+  const top = EY0 - 5;
+  let g = cx.createLinearGradient(0, top, 0, YH);
+  g.addColorStop(0, V.wall[0]); g.addColorStop(1, V.wall[1]);
+  cx.fillStyle = g; cx.fillRect(EX0 - 5, top, WIDE(), YH - top + 0.5);
+  BACK[V.kind](V);
+  for (const n of V.props) if (!LATE[n] && PROP[n] && PROP[n].draw) PROP[n].draw(V);
+  paintFloor(V);
+  for (const n of V.props) if (LATE[n] && PROP[n] && PROP[n].draw) PROP[n].draw(V);
+  // 床と壁の境
+  cx.fillStyle = V.kind === 'space' || V.kind === 'tv' ? V.wainLine : 'rgba(0,0,0,.25)';
+  cx.globalAlpha = V.kind === 'space' || V.kind === 'tv' ? 0.85 : 1;
+  cx.fillRect(EX0 - 5, YH - 0.3, WIDE(), V.kind === 'space' || V.kind === 'tv' ? 0.6 : 0.9);
+  cx.globalAlpha = 1;
+  if (V.kind === 'space' || V.kind === 'tv') glow(50, YH, 70, V.kind === 'space' ? '92,240,255' : '0,216,255', 0.12);
+}
+const BACK = {
+  gym(V) {   // 腰壁
+    cx.fillStyle = V.wain; cx.fillRect(EX0 - 5, 52, WIDE(), YH - 52);
+    cx.fillStyle = V.wainLine; cx.fillRect(EX0 - 5, 52, WIDE(), 0.9);
+  },
+  hall(V) {
+    cx.fillStyle = 'rgba(40,70,100,.07)';
+    for (let x = Math.floor((EX0 - 5) / 9) * 9; x < EX1 + 5; x += 9) cx.fillRect(x, 38, 0.5, 18);
+    cx.fillStyle = V.wain; cx.fillRect(EX0 - 5, 56, WIDE(), YH - 56);
+    cx.fillStyle = V.wainLine; cx.fillRect(EX0 - 5, 56, WIDE(), 0.8);
+  },
+  arena(V) {
+    cx.fillStyle = V.wain; cx.fillRect(EX0 - 5, 58.5, WIDE(), YH - 58.5);
+    cx.fillStyle = 'rgba(240,200,96,.35)'; cx.fillRect(EX0 - 5, 37.6, WIDE(), 0.5);
+  },
+  tv(V) {
+    for (let x = Math.floor((EX0 - 5) / 12) * 12; x < EX1 + 5; x += 12) {
+      cx.fillStyle = (x / 12) % 2 ? 'rgba(255,63,160,.10)' : 'rgba(63,224,255,.10)'; cx.fillRect(x, 20, 0.6, 42);
+    }
+    cx.fillStyle = V.wain; cx.fillRect(EX0 - 5, 58.5, WIDE(), YH - 58.5);
+  },
+  stadium(V) {   // 夜空の下の観客席のうしろ
+    const g = cx.createLinearGradient(0, 36, 0, YH);
+    g.addColorStop(0, 'rgba(120,150,230,0)'); g.addColorStop(1, 'rgba(150,180,255,.35)');
+    cx.fillStyle = g; cx.fillRect(EX0 - 5, 36, WIDE(), YH - 36);
+    cx.fillStyle = V.wain; cx.fillRect(EX0 - 5, 58.5, WIDE(), YH - 58.5);
+  },
+  moon(V) {
+    const g = cx.createLinearGradient(0, 46, 0, YH);
+    g.addColorStop(0, 'rgba(120,120,140,0)'); g.addColorStop(1, 'rgba(120,120,140,.28)');
+    cx.fillStyle = g; cx.fillRect(EX0 - 5, 46, WIDE(), YH - 46);
+  },
+  space(V) {},
+};
+
+function paintFloor(V) {
+  const g = cx.createLinearGradient(0, YH, 0, EY1);
+  g.addColorStop(0, V.floor[0]); g.addColorStop(1, V.floor[1]);
+  cx.fillStyle = g; cx.fillRect(EX0 - 5, YH, WIDE(), EY1 - YH + 5);
+  const R = mulberry32(V.i * 977 + 5), hh = EY1 - YH;
+  switch (V.floorStyle) {
+    case 'planks':
+      fan('rgba(120,80,30,.16)', 0.25, 14);
+      glow(50, 118, 70, '255,245,210', 0.35);
+      break;
+    case 'court':
+      fan('rgba(255,255,255,.13)', 0.25, 14);
+      glow(50, 118, 70, '255,255,255', 0.28);
+      break;
+    case 'turf':
+      bands('rgba(0,0,0,.07)', 16);
+      glow(50, 118, 70, '240,255,220', 0.22);
+      break;
+    case 'glass':
+      glow(18, 100, 60, '255,63,160', 0.28); glow(82, 120, 60, '63,224,255', 0.25);
+      cx.fillStyle = 'rgba(255,255,255,.05)';
+      for (let k = 0; k < 6; k++) cx.fillRect(EX0 - 5, YH + hh * (0.1 + k * 0.16), WIDE(), 0.6 + k * 0.3);
+      break;
+    case 'track':
+      fan('rgba(255,255,255,.26)', 0.35, 26);
+      bands('rgba(0,0,0,.05)', 14);
+      glow(50, 118, 70, '255,220,200', 0.25);
+      break;
+    case 'regolith': {
+      for (let k = 0; k < 34; k++) {   // クレーター。奥ほど小さく
+        const z = Math.pow(R(), 0.8), y = YH + 2 + z * (hh - 2), s = 0.15 + z * 0.85, x = EX0 + R() * (EX1 - EX0), rw = (3 + R() * 7) * s * 2.2;
+        cx.fillStyle = 'rgba(30,30,40,.20)'; cx.beginPath(); cx.ellipse(x, y, rw, rw * 0.28, 0, 0, 6.283); cx.fill();
+        cx.strokeStyle = 'rgba(230,230,240,.22)'; cx.lineWidth = 0.35 * s + 0.1;
+        cx.beginPath(); cx.ellipse(x, y - rw * 0.04, rw, rw * 0.28, 0, 0.1 * Math.PI, 0.9 * Math.PI); cx.stroke();
+      }
+      cx.fillStyle = 'rgba(255,255,255,.10)';
+      for (let k = 0; k < 220; k++) { const z = R(); cx.fillRect(EX0 + R() * (EX1 - EX0), YH + 1 + z * (hh - 1), 0.25 + z * 0.35, 0.18 + z * 0.2); }
+      glow(50, 118, 80, '255,255,255', 0.12);
+      break;
+    }
+    case 'grid': {
+      cx.strokeStyle = 'rgba(92,240,255,.20)'; cx.lineWidth = 0.28;
+      cx.beginPath();
+      for (let k = 1; k < 16; k++) { const y = YH + hh * Math.pow(k / 15, 2) + 4; cx.moveTo(EX0 - 5, y); cx.lineTo(EX1 + 5, y); }
+      cx.stroke();
+      fan('rgba(92,240,255,.17)', 0.28, 16);
+      glow(50, 100, 90, '120,80,255', 0.20);
+      break;
+    }
+  }
+}
+
+// ---- 会場の小物 ----
+const PROP = {
+  // 体育館
+  windows: {   // 窓（段階 4 以上でガタガタ）
+    dyn() {
+      const lv = Game.lvl, rat = lv >= 4 ? Math.sin(nowT * 70) * (lv >= 6 ? 0.55 : 0.25) : 0;
+      const x0 = Math.floor((EX0 - 20) / 34) * 34 + 3;
+      for (let x = x0; x < EX1 + 20; x += 34) {
+        const jx = rat * Math.sin(x), jy = rat * Math.cos(x * 1.3);
+        cx.fillStyle = '#c8d6e6'; rr(cx, x + jx, 8 + jy, 26, 22, 1.2); cx.fill();
+        cx.fillStyle = '#9fd0f2'; cx.fillRect(x + 1.5 + jx, 9.5 + jy, 23, 19);
+        cx.fillStyle = '#d5ecfb'; cx.fillRect(x + 1.5 + jx, 9.5 + jy, 23, 8);
+        cx.fillStyle = '#c8d6e6'; cx.fillRect(x + 12.3 + jx, 9 + jy, 1.4, 20); cx.fillRect(x + jx, 18.5 + jy, 26, 1.4);
+      }
+    },
+  },
+  banner: {   // 横断幕
+    draw(V) {
+      const S = STR.venues[V.i], hall = V.kind === 'hall', x = hall ? 32 : 22, w = hall ? 36 : 56, y = 40.5;
+      cx.fillStyle = V.banner[0]; rr(cx, x, y, w, 9, 1); cx.fill();
+      cx.fillStyle = V.banner[1]; cx.fillRect(x, y, w, 0.8); cx.fillRect(x, y + 8.2, w, 0.8);
+      fitTxt(S.banner, 50, y + 4.7, 6.2, w - 6, '#fff', { stroke: 'rgba(0,0,0,.45)', sw: 1.1 });
+    },
+  },
+  curtain: {   // 舞台の幕と舞台
+    draw() {
+      cx.fillStyle = '#9a1f2a'; cx.fillRect(34, 50, 32, 7);
+      for (let i = 0; i < 8; i++) { cx.fillStyle = i % 2 ? '#b02a35' : '#8a1a24'; cx.fillRect(34 + i * 4, 50, 4, 7); }
+      cx.fillStyle = '#7a5a30'; cx.fillRect(30, 57, 40, 5);
+    },
+    dyn() {
+      const lv = Game.lvl; if (lv < 4) return;
+      const fl = Math.sin(nowT * (lv >= 6 ? 14 : 2)) * 0.7;
+      for (let i = 0; i < 8; i++) { cx.fillStyle = i % 2 ? '#b02a35' : '#8a1a24'; cx.fillRect(34 + i * 4 + fl * (i % 3 - 1), 50, 4, 7); }
+    },
+  },
+  garlands: {   // 紙の飾りと風船（校内大会）
+    draw() {
+      const pal = ['#e0356f', '#f6c84c', '#58b0e0', '#7ac45a', '#8a5ad0'];
+      for (let x0 = Math.floor((EX0 - 5) / 50) * 50; x0 < EX1 + 5; x0 += 50) {
+        cx.strokeStyle = 'rgba(80,60,40,.5)'; cx.lineWidth = 0.25; cx.beginPath(); cx.moveTo(x0, 38.5); cx.quadraticCurveTo(x0 + 25, 46, x0 + 50, 38.5); cx.stroke();
+        for (let k = 1; k < 11; k++) {
+          const t = k / 11, px = x0 + 50 * t, py = 38.5 + 15 * t * (1 - t);
+          cx.fillStyle = pal[(k + (x0 / 50 & 3)) % 5]; cx.beginPath(); cx.moveTo(px - 1.6, py); cx.lineTo(px + 1.6, py); cx.lineTo(px, py + 3.6); cx.closePath(); cx.fill();
+        }
+      }
+      for (const [bx, by, c] of [[3.5, 50, '#e0356f'], [9, 47, '#58b0e0'], [14, 51, '#f6c84c'], [86, 51, '#7ac45a'], [91, 47, '#8a5ad0'], [96.5, 50, '#e0356f']]) {
+        cx.strokeStyle = 'rgba(80,60,40,.45)'; cx.lineWidth = 0.2; cx.beginPath(); cx.moveTo(bx, by + 3); cx.lineTo(bx + 0.6, 60.5); cx.stroke();
+        cx.fillStyle = c; cx.beginPath(); cx.ellipse(bx, by, 2.5, 3.1, 0, 0, 6.283); cx.fill();
+        cx.fillStyle = 'rgba(255,255,255,.5)'; cx.beginPath(); cx.ellipse(bx - 0.8, by - 1.1, 0.7, 1, -0.5, 0, 6.283); cx.fill();
+      }
+    },
+  },
+  teachersRow: {   // 並んで見ている先生たち
+    draw() {
+      const xs = [5, 12.5, 20, 80, 87.5, 95], cols = ['#3a4256', '#4a3a56', '#2f4a5a'];
+      xs.forEach((x, i) => drawKid(cx, x, 62.6, 0.46, { shirt: cols[i % 3], shorts: '#2c3140', legs: '#2c3140', arm: cols[i % 3], hair: i % 2 ? '#8a8a92' : '#3a2a22', collar: '#fff', band: false, face: 0 }));
+    },
+  },
+  studentsRow: {   // 体育座りの全校生徒
+    draw() {
+      const R = mulberry32(31), cols = ['#f2a43a', '#58b0e0', '#e86a9a', '#7ac45a', '#8a5ad0', '#e04a4a'];
+      for (let r = 0; r < 2; r++) {
+        for (let x = EX0 - 4 + r * 2.6; x < EX1 + 4; x += 5.4) {
+          if (x > 29 && x < 71) continue;
+          drawKid(cx, x, 66.2 + r * 3.8, 0.34 + r * 0.035, { shirt: cols[(R() * 6) | 0], shorts: '#2c4aa0', hair: HAIR[(R() * 4) | 0], collar: '#fff', band: false, sit: 1, face: 0 });
+        }
+      }
+    },
+  },
+  // 市民体育館
+  clerestory: {
+    draw() {
+      for (let x = Math.floor((EX0 - 5) / 24) * 24 + 4; x < EX1 + 5; x += 24) {
+        cx.fillStyle = '#8aa6b8'; rr(cx, x, 5, 18, 12, 1); cx.fill();
+        cx.fillStyle = '#bfe0f4'; cx.fillRect(x + 1, 6, 16, 10); cx.fillStyle = '#8aa6b8'; cx.fillRect(x + 8.6, 5.5, 0.8, 11);
+      }
+    },
+  },
+  bleachers: {   // 観客席（左右）。ふつうの服の観客
+    draw(V) {
+      const sides = [[EX0 - 5, 30], [70, EX1 + 5]];
+      for (let t = 2; t >= 0; t--) {
+        const yb = 62 - 7 * t;
+        for (const [xa, xb] of sides) {
+          cx.fillStyle = '#3d5073'; cx.fillRect(xa, yb - 3, xb - xa, 3.2);
+          cx.fillStyle = '#5a6f8f'; cx.fillRect(xa, yb - 7, xb - xa, 4);
+          standCrowd([{ y: yb - 2.6, size: 1.0, gap: 4.2 }], xa + 1, xb - 1, V.crowd.shirts, 11 + t * 7 + (xa > 0 ? 3 : 0));
+        }
+      }
+      cx.fillStyle = '#c9d6e6'; for (const [xa, xb] of sides) cx.fillRect(xa, 40.6, xb - xa, 0.6);   // 手すり
+    },
+  },
+  sign: {   // 看板
+    draw(V) {
+      const S = STR.venues[V.i];
+      cx.fillStyle = V.sign[0]; rr(cx, 38, 51, 24, 5.4, 0.8); cx.fill();
+      fitTxt(S.sign, 50, 53.8, 3.4, 21, V.sign[1]);
+    },
+  },
+  // アリーナ
+  trusses: {   // 天井のライトの束
+    draw() {
+      cx.fillStyle = '#3a4060'; cx.fillRect(EX0 - 5, 3, WIDE(), 2.2);
+      for (let x = Math.floor((EX0 - 5) / 17) * 17 + 8; x < EX1 + 5; x += 17) {
+        const g = cx.createLinearGradient(0, 5, 0, 62);
+        g.addColorStop(0, 'rgba(255,248,210,.17)'); g.addColorStop(1, 'rgba(255,248,210,0)');
+        cx.fillStyle = g; cx.beginPath(); cx.moveTo(x - 1.2, 5); cx.lineTo(x + 1.2, 5); cx.lineTo(x + 11, 62); cx.lineTo(x - 11, 62); cx.closePath(); cx.fill();
+        cx.fillStyle = '#fff8d0'; cx.beginPath(); cx.arc(x, 5.6, 1.6, 0, 6.283); cx.fill();
+      }
+    },
+  },
+  tiers: {   // 観客席（正面、何段も）。アリーナは 2 段、スタジアムは 3 段
+    draw(V) {
+      const st = V.kind === 'stadium';
+      const rows = st ? [{ y: 52.5, size: 0.9, gap: 3.9 }, { y: 57.3, size: 1.0, gap: 4.3 }, { y: 62, size: 1.1, gap: 4.7 }]
+        : [{ y: 46, size: 0.8, gap: 3.5 }, { y: 50.5, size: 0.9, gap: 3.9 }, { y: 55, size: 1.0, gap: 4.3 }, { y: 59.5, size: 1.1, gap: 4.7 }, { y: 62.6, size: 1.2, gap: 5.2 }];
+      if (!st) { cx.fillStyle = 'rgba(0,0,0,.28)'; cx.fillRect(EX0 - 5, 49.6, WIDE(), 0.7); }
+      standCrowd(rows, EX0 - 5, EX1 + 5, V.crowd.shirts, 71 + V.i);
+      const g = cx.createLinearGradient(0, 38, 0, 62);   // 奥は暗く
+      g.addColorStop(0, 'rgba(8,10,30,' + (st ? 0.25 : 0.45) + ')'); g.addColorStop(1, 'rgba(8,10,30,0)');
+      cx.fillStyle = g; cx.fillRect(EX0 - 5, 38, WIDE(), 24);
+    },
+    dyn() {   // カメラのフラッシュ（段階 3 から）
+      if (Game.lvl < 3 || Game.mode !== 'play') return;
+      const f = Math.floor(nowT * 9);
+      for (let k = 0; k < 5; k++) {
+        const sd = f * 31 + k * 17, x = EX0 + (((sd * 7919) % 1000) / 1000) * (EX1 - EX0), y = 42 + (((sd * 104729) % 1000) / 1000) * 19;
+        cx.fillStyle = 'rgba(255,255,255,.9)'; cx.fillRect(x - 0.3, y - 1, 0.6, 2); cx.fillRect(x - 1, y - 0.3, 2, 0.6);
+      }
+    },
+  },
+  judges: {   // 審査員の机
+    draw() {
+      const xs = [33, 50, 67], nums = ['10', '9', '10'], hairs = ['#8a8a92', '#2a1c16', '#5a3a22'];
+      xs.forEach((x, i) => drawKid(cx, x, 62.2, 0.4, { shirt: '#222a44', shorts: '#222a44', legs: '#222a44', arm: '#222a44', hair: hairs[i], collar: '#fff', band: false, face: 0 }));
+      cx.fillStyle = '#f4f1e6'; cx.fillRect(19, 55.4, 62, 7.2);
+      cx.fillStyle = '#d8d2bf'; for (let x = 24; x < 80; x += 8) cx.fillRect(x, 56.2, 0.35, 6.4);
+      cx.fillStyle = '#7a1f2e'; cx.fillRect(19, 55, 62, 1.4);
+      xs.forEach((x, i) => {
+        cx.fillStyle = '#fff'; cx.strokeStyle = '#7a1f2e'; cx.lineWidth = 0.3; rr(cx, x + 3.4, 51.2, 5.4, 3.8, 0.5); cx.fill(); cx.stroke();
+        txt(nums[i], x + 6.1, 53.2, 2.8, '#d2242a');
+        cx.fillStyle = '#2c4aa0'; rr(cx, x - 3, 58.6, 6, 1.9, 0.4); cx.fill();
+      });
+    },
+  },
+  // テレビ中継の会場
+  ledwall: {   // LED の大画面
+    draw(V) {
+      const S = STR.venues[V.i], x = 16, y = 38.6, w = 68, h = 16.5;
+      cx.fillStyle = '#05030c'; rr(cx, x - 1, y - 1, w + 2, h + 2, 1.2); cx.fill();
+      const g = cx.createLinearGradient(x, 0, x + w, 0);
+      g.addColorStop(0, '#ff2fa8'); g.addColorStop(0.5, '#6a3cff'); g.addColorStop(1, '#00c8ff');
+      cx.fillStyle = g; cx.fillRect(x, y, w, h);
+      cx.fillStyle = 'rgba(0,0,0,.16)';
+      for (let i = 1; i < 48; i++) cx.fillRect(x + i * w / 48, y, 0.18, h);
+      for (let j = 1; j < 12; j++) cx.fillRect(x, y + j * h / 12, w, 0.18);
+      fitTxt(S.banner, 50, y + h * 0.5, 9, w - 14, '#fff', { stroke: 'rgba(60,0,120,.7)', sw: 1.4 });
+      cx.fillStyle = 'rgba(255,255,255,.16)'; cx.beginPath(); cx.moveTo(x, y); cx.lineTo(x + w * 0.5, y); cx.lineTo(x + w * 0.3, y + h); cx.lineTo(x, y + h); cx.closePath(); cx.fill();
+      glow(50, y + h / 2, 55, '170,90,255', 0.18);
+    },
+  },
+  glowsticks: {   // 光る棒をふる観客
+    draw(V) {
+      standCrowd([{ y: 52, size: 0.85, gap: 3.6 }, { y: 56.6, size: 0.95, gap: 4.1 }, { y: 61.4, size: 1.1, gap: 4.7 }], EX0 - 5, EX1 + 5, V.crowd.shirts, 91, { stick: 0.4 });
+    },
+  },
+  cameras: {   // テレビカメラとカメラマン
+    draw() {
+      for (const [x, dir] of [[10, 1], [90, -1]]) {
+        drawKid(cx, x - dir * 7.5, 66.5, 0.52, { shirt: '#14141c', shorts: '#14141c', legs: '#14141c', arm: '#14141c', hair: '#222', collar: '#14141c', band: false, face: 0 });
+        cx.strokeStyle = '#2a2f3a'; cx.lineWidth = 0.7; cx.lineCap = 'round';
+        cx.beginPath(); cx.moveTo(x, 57); cx.lineTo(x - 4, 66.8); cx.moveTo(x, 57); cx.lineTo(x + 4, 66.8); cx.moveTo(x, 57); cx.lineTo(x, 67.6); cx.stroke();
+        cx.fillStyle = '#2a2f3a'; rr(cx, x - 6, 50.2, 12, 7, 1); cx.fill();
+        cx.fillStyle = '#3a4150'; rr(cx, x - 4.5, 48.6, 9, 2.6, 0.8); cx.fill();
+        const lx = dir > 0 ? x + 5.4 : x - 9.2;
+        cx.fillStyle = '#14161c'; rr(cx, lx, 51.4, 3.8, 4.4, 0.6); cx.fill();
+        cx.fillStyle = '#7ad0ff'; cx.beginPath(); cx.arc(lx + (dir > 0 ? 3.6 : 0.2), 53.6, 1.15, 0, 6.283); cx.fill();
+      }
+    },
+  },
+  live: {   // 画面の「LIVE」マーク（点滅）
+    dyn(V) {
+      cx.fillStyle = '#d2242a'; rr(cx, 4, 39.6, 15.5, 5.2, 1); cx.fill();
+      cx.fillStyle = '#fff'; cx.globalAlpha = 0.55 + 0.45 * (Math.sin(nowT * 5) > 0 ? 1 : 0); cx.beginPath(); cx.arc(7.4, 42.2, 1, 0, 6.283); cx.fill(); cx.globalAlpha = 1;
+      txt(STR.venues[V.i].sign, 13.4, 42.3, 3.4, '#fff');
+    },
+  },
+  // スタジアム
+  towers: {   // ナイター照明
+    draw() {
+      for (const x of [6, 94, EX0 + 8, EX1 - 8]) {
+        cx.fillStyle = '#4a4f66'; cx.fillRect(x - 0.6, 34, 1.2, 28);
+        cx.fillStyle = '#d8dae6'; rr(cx, x - 5, 30, 10, 6, 0.8); cx.fill();
+        cx.fillStyle = '#fff';
+        for (let i = 0; i < 4; i++) for (let j = 0; j < 2; j++) { cx.beginPath(); cx.arc(x - 3.4 + i * 2.27, 31.8 + j * 2.3, 0.7, 0, 6.283); cx.fill(); }
+        glow(x, 33, 22, '230,240,255', 0.30);
+      }
+    },
+  },
+  worldFlags: {   // 万国旗
+    draw() {
+      cx.strokeStyle = 'rgba(200,210,240,.5)'; cx.lineWidth = 0.3; cx.beginPath(); cx.moveTo(EX0 - 5, 43.4); cx.lineTo(EX1 + 5, 43.4); cx.stroke();
+      let k = 0;
+      for (let x = Math.floor((EX0 - 5) / 8.4) * 8.4; x < EX1 + 5; x += 8.4, k++) { flagAt(x, 43.6, 7, 4.7, k * 3 + (k >> 2)); }
+    },
+  },
+  // 月面
+  stars: {
+    draw(V) {
+      const R = mulberry32(V.i * 131 + 7), n = V.kind === 'stadium' ? 70 : 190;
+      for (let k = 0; k < n; k++) {
+        const x = EX0 - 5 + R() * WIDE(), y = EY0 - 5 + R() * (V.kind === 'stadium' ? 40 - (EY0 - 5) : 62 - (EY0 - 5)), r = 0.12 + R() * 0.3;
+        cx.fillStyle = 'rgba(255,255,255,' + (0.35 + R() * 0.65) + ')'; cx.fillRect(x, y, r * 1.6, r * 1.6);
+      }
+    },
+  },
+  earth: {   // 地球
+    draw() {
+      const x = 17, y = 49.5, r = 8.8;
+      glow(x, y, r * 1.9, '120,170,255', 0.28);
+      const g = cx.createRadialGradient(x - r * 0.35, y - r * 0.35, r * 0.1, x, y, r);
+      g.addColorStop(0, '#6aa8ff'); g.addColorStop(1, '#14388a');
+      cx.fillStyle = g; cx.beginPath(); cx.arc(x, y, r, 0, 6.283); cx.fill();
+      cx.save(); cx.beginPath(); cx.arc(x, y, r, 0, 6.283); cx.clip();
+      cx.fillStyle = '#3f9a52';
+      cx.beginPath(); cx.ellipse(x - 2.6, y - 2, 3, 2.2, 0.5, 0, 6.283); cx.ellipse(x + 2.8, y + 1.8, 2.6, 3.2, -0.3, 0, 6.283); cx.ellipse(x - 1, y + 5, 2, 1.4, 0, 0, 6.283); cx.fill();
+      cx.fillStyle = 'rgba(255,255,255,.55)';
+      cx.beginPath(); cx.ellipse(x - 3, y + 0.4, 4, 0.9, -0.2, 0, 6.283); cx.ellipse(x + 2.2, y - 3.4, 3.2, 0.8, 0.3, 0, 6.283); cx.ellipse(x + 1, y + 3.6, 3.4, 0.8, -0.1, 0, 6.283); cx.fill();
+      cx.fillStyle = 'rgba(0,0,20,.42)'; cx.beginPath(); cx.arc(x + r * 0.55, y + r * 0.2, r * 1.05, 0, 6.283); cx.fill();
+      cx.restore();
+    },
+  },
+  hills: {   // 月のなだらかな山
+    draw() {
+      const R = mulberry32(77);
+      for (const [col, hmax, step] of [['#3b3b46', 6, 9], ['#4d4d59', 3.4, 6]]) {
+        cx.fillStyle = col; cx.beginPath(); cx.moveTo(EX0 - 5, YH + 0.5);
+        for (let x = EX0 - 5; x < EX1 + 8; x += step) cx.lineTo(x, YH - R() * hmax);
+        cx.lineTo(EX1 + 8, YH + 0.5); cx.closePath(); cx.fill();
+      }
+    },
+  },
+  lander: {   // 着陸船
+    draw() {
+      const x = 66;
+      cx.strokeStyle = '#9a9aa8'; cx.lineWidth = 0.6; cx.lineCap = 'round';
+      cx.beginPath(); cx.moveTo(x - 4, 58); cx.lineTo(x - 8, 62.2); cx.moveTo(x + 4, 58); cx.lineTo(x + 8, 62.2); cx.moveTo(x, 58.5); cx.lineTo(x, 62.2); cx.stroke();
+      cx.fillStyle = '#9a9aa8'; for (const dx of [-9, 0, 9]) cx.fillRect(x + dx - 1.2, 61.9, 2.4, 0.5);
+      cx.fillStyle = '#d9a93a'; rr(cx, x - 5.5, 52.5, 11, 6.2, 1.2); cx.fill();
+      cx.fillStyle = '#b9bcc8'; rr(cx, x - 3.8, 49.4, 7.6, 3.4, 1); cx.fill();
+      cx.fillStyle = '#2d3a66'; cx.beginPath(); cx.arc(x - 1, 51.2, 1, 0, 6.283); cx.fill();
+      cx.strokeStyle = '#b9bcc8'; cx.lineWidth = 0.3; cx.beginPath(); cx.moveTo(x + 3, 49.4); cx.lineTo(x + 4.6, 46.4); cx.stroke();
+      cx.beginPath(); cx.arc(x + 4.6, 46, 1.2, 0, 6.283); cx.stroke();
+    },
+  },
+  moonFlag: {   // 旗
+    draw() {
+      cx.strokeStyle = '#d8d8e0'; cx.lineWidth = 0.4; cx.beginPath(); cx.moveTo(40, 62.2); cx.lineTo(40, 49.6); cx.stroke();
+      cx.fillStyle = '#f8f8f8'; cx.fillRect(40.2, 50, 8.4, 5.6);
+      cx.fillStyle = '#d0242a'; cx.beginPath(); cx.arc(44.4, 52.8, 1.7, 0, 6.283); cx.fill();
+    },
+  },
+  // 宇宙
+  nebula: {
+    draw() {
+      cx.save(); cx.globalCompositeOperation = 'lighter';
+      for (const [x, y, r, rgb, a] of [[18, 46, 70, '255,63,160', 0.22], [78, 54, 80, '47,160,255', 0.20], [50, 30, 90, '122,63,255', 0.22], [EX1 - 10, 44, 70, '255,170,63', 0.14], [EX0 + 10, 40, 70, '63,255,200', 0.12]]) glow(x, y, r, rgb, a);
+      cx.restore();
+    },
+  },
+  planet: {   // 輪のある星
+    draw() {
+      const x = 16, y = 50, r = 7.2;
+      cx.save(); cx.translate(x, y); cx.rotate(-0.32);
+      cx.strokeStyle = 'rgba(240,216,154,.55)'; cx.lineWidth = 1.1; cx.beginPath(); cx.ellipse(0, 0, 13, 3.4, 0, Math.PI, 6.283); cx.stroke();   // うしろ半分
+      cx.restore();
+      const g = cx.createRadialGradient(x - 2.5, y - 2.5, 1, x, y, r);
+      g.addColorStop(0, '#f2c27a'); g.addColorStop(1, '#8a4a2a');
+      cx.fillStyle = g; cx.beginPath(); cx.arc(x, y, r, 0, 6.283); cx.fill();
+      cx.save(); cx.beginPath(); cx.arc(x, y, r, 0, 6.283); cx.clip();
+      cx.fillStyle = 'rgba(120,50,30,.3)'; cx.fillRect(x - r, y - 2, r * 2, 1.3); cx.fillRect(x - r, y + 2, r * 2, 1.7);
+      cx.fillStyle = 'rgba(0,0,20,.38)'; cx.beginPath(); cx.arc(x + r * 0.55, y + r * 0.3, r * 1.05, 0, 6.283); cx.fill();
+      cx.restore();
+      cx.save(); cx.translate(x, y); cx.rotate(-0.32);
+      cx.strokeStyle = 'rgba(240,216,154,.9)'; cx.lineWidth = 1.1; cx.beginPath(); cx.ellipse(0, 0, 13, 3.4, 0, 0, Math.PI); cx.stroke();   // 手前半分
+      cx.restore();
+    },
+  },
+  ufo: {   // 円盤（ゆっくり動く）
+    dyn() {
+      const x = 62 + Math.sin(nowT * 0.6) * 7, y = 47 + Math.sin(nowT * 1.3) * 1.2;
+      cx.fillStyle = 'rgba(255,240,150,.10)'; cx.beginPath(); cx.moveTo(x - 2.4, y + 2); cx.lineTo(x + 2.4, y + 2); cx.lineTo(x + 9, 61); cx.lineTo(x - 9, 61); cx.closePath(); cx.fill();
+      cx.fillStyle = '#7ad0e8'; cx.beginPath(); cx.ellipse(x, y - 0.6, 3.6, 3, 0, Math.PI, 6.283); cx.fill();
+      cx.fillStyle = '#b9c0d8'; cx.beginPath(); cx.ellipse(x, y + 0.6, 8, 2.3, 0, 0, 6.283); cx.fill();
+      cx.fillStyle = '#8a92b0'; cx.beginPath(); cx.ellipse(x, y + 1.2, 6.6, 1.3, 0, 0, Math.PI); cx.fill();
+      for (let i = 0; i < 5; i++) { cx.fillStyle = (Math.floor(nowT * 4) + i) % 2 ? '#ffe03f' : '#ff3fa0'; cx.beginPath(); cx.arc(x - 5 + i * 2.5, y + 0.9, 0.5, 0, 6.283); cx.fill(); }
+    },
+  },
+  twinkle: {   // またたく星
+    dyn() {
+      for (let i = 0; i < 46; i++) {
+        const x = EX0 + ((i * 7919) % 1000) / 1000 * (EX1 - EX0), y = EY0 + ((i * 104729) % 1000) / 1000 * (60 - EY0);
+        const a = 0.25 + 0.75 * Math.abs(Math.sin(nowT * (1.2 + (i % 5) * 0.5) + i));
+        cx.fillStyle = 'rgba(255,255,255,' + a + ')'; cx.fillRect(x - 0.35, y - 0.12, 0.7, 0.24); cx.fillRect(x - 0.12, y - 0.35, 0.24, 0.7);
+      }
+    },
+  },
+};
+
+// ---- 月面の宇宙飛行士・宇宙人（見ている人）----
+function drawAstro(c, x, y, s, o) {
+  o = o || {};
+  c.save(); c.globalAlpha = o.alpha == null ? 1 : o.alpha;
+  c.translate(x, y); c.scale(s, s);
+  c.fillStyle = 'rgba(0,0,0,.28)'; c.beginPath(); c.ellipse(0, 0.6, 7, 2, 0, 0, 6.283); c.fill();
+  c.translate(0, -(o.hop || 0) * 5.5 - (o.bob || 0));
+  c.strokeStyle = '#dcdce6'; c.lineWidth = 3.4; c.lineCap = 'round';
+  c.beginPath(); c.moveTo(-2, -11.5); c.lineTo(-3, -1.6); c.moveTo(2, -11.5); c.lineTo(3, -1.6); c.stroke();
+  c.fillStyle = '#7a7a88'; c.fillRect(-5, -2, 4, 2); c.fillRect(1, -2, 4, 2);
+  c.fillStyle = '#c8c8d4'; rr(c, -7.6, -26.5, 3.4, 13, 1); c.fill();
+  c.fillStyle = o.col || '#f2f2f6'; c.strokeStyle = '#b8bccc'; c.lineWidth = 0.5; rr(c, -5.8, -26, 11.6, 13.5, 3); c.fill(); c.stroke();
+  c.fillStyle = '#3a6ad0'; rr(c, -2.8, -23.6, 5.6, 3.4, 0.6); c.fill();
+  c.fillStyle = '#ff6a4a'; c.fillRect(-1.6, -22.6, 1.1, 1.1); c.fillStyle = '#7ae070'; c.fillRect(0.6, -22.6, 1.1, 1.1);
+  c.strokeStyle = '#eeeef4'; c.lineWidth = 2.8;
+  c.beginPath();
+  if (o.cheer) { const b = Math.sin(o.ph || 0) * 2; c.moveTo(-5.2, -23.5); c.lineTo(-8.6, -31 - b); c.moveTo(5.2, -23.5); c.lineTo(8.6, -31 + b); }
+  else { c.moveTo(-5.2, -23.5); c.lineTo(-8.8, -16.5); c.moveTo(5.2, -23.5); c.lineTo(8.8, -16.5); }
+  c.stroke();
+  c.fillStyle = '#8a8a98'; c.beginPath(); if (o.cheer) { const b = Math.sin(o.ph || 0) * 2; c.arc(-8.6, -31 - b, 1.5, 0, 6.283); c.moveTo(10.1, -31 + b); c.arc(8.6, -31 + b, 1.5, 0, 6.283); } else { c.arc(-8.8, -16.5, 1.5, 0, 6.283); c.moveTo(10.3, -16.5); c.arc(8.8, -16.5, 1.5, 0, 6.283); } c.fill();
+  const hy = -31;
+  c.fillStyle = '#f4f4f8'; c.strokeStyle = '#b8bccc'; c.lineWidth = 0.5; c.beginPath(); c.arc(0, hy, 6.7, 0, 6.283); c.fill(); c.stroke();
+  c.fillStyle = ['#e8b040', '#2d3a66', '#3a9aaa'][o.vis || 0]; c.beginPath(); c.ellipse(0.5, hy + 0.3, 5, 4.3, 0, 0, 6.283); c.fill();
+  c.strokeStyle = 'rgba(255,255,255,.7)'; c.lineWidth = 0.6; c.beginPath(); c.arc(0.5, hy + 0.3, 3.4, 3.6, 4.5); c.stroke();
+  c.restore();
+}
+function drawAlien(c, x, y, s, o) {
+  o = o || {};
+  const col = o.col || '#8fe07a';
+  c.save(); c.globalAlpha = o.alpha == null ? 1 : o.alpha;
+  c.translate(x, y); c.scale(s, s);
+  c.fillStyle = 'rgba(0,0,0,.28)'; c.beginPath(); c.ellipse(0, 0.6, 6.5, 2, 0, 0, 6.283); c.fill();
+  c.translate(0, -(o.hop || 0) * 5.5 - (o.bob || 0));
+  c.strokeStyle = col; c.lineCap = 'round'; c.lineWidth = 1.8;
+  c.beginPath(); c.moveTo(-2, -11); c.lineTo(-3.4, -1); c.moveTo(2, -11); c.lineTo(3.4, -1); c.stroke();
+  c.fillStyle = col; c.beginPath(); c.ellipse(-3.8, -0.6, 2.2, 1, 0, 0, 6.283); c.ellipse(3.8, -0.6, 2.2, 1, 0, 0, 6.283); c.fill();
+  c.fillStyle = col; c.beginPath(); c.ellipse(0, -18.5, 5, 8, 0, 0, 6.283); c.fill();
+  c.fillStyle = 'rgba(255,255,255,.25)'; c.beginPath(); c.ellipse(0, -17, 3, 5, 0, 0, 6.283); c.fill();
+  c.strokeStyle = col; c.lineWidth = 1.7; c.beginPath();
+  if (o.cheer) { const b = Math.sin(o.ph || 0) * 2; c.moveTo(-4.4, -22); c.lineTo(-9, -29 - b); c.moveTo(4.4, -22); c.lineTo(9, -29 + b); }
+  else { c.moveTo(-4.4, -22); c.lineTo(-8.5, -15); c.moveTo(4.4, -22); c.lineTo(8.5, -15); }
+  c.stroke();
+  const hy = -31;
+  c.fillStyle = col; c.beginPath(); c.ellipse(0, hy, 6.8, 7.2, 0, 0, 6.283); c.fill();
+  c.strokeStyle = col; c.lineWidth = 0.7; c.beginPath(); c.moveTo(-2.4, hy - 6.4); c.lineTo(-4.6, hy - 11.4); c.moveTo(2.4, hy - 6.4); c.lineTo(4.6, hy - 11.4); c.stroke();
+  c.fillStyle = '#ff5a9a'; c.beginPath(); c.arc(-4.6, hy - 11.6, 1.3, 0, 6.283); c.arc(4.6, hy - 11.6, 1.3, 0, 6.283); c.fill();
+  const n = o.eyes || 2, xs = n === 1 ? [0] : n === 2 ? [-2.8, 2.8] : [-3.6, 0, 3.6];
+  for (const ex of xs) {
+    c.fillStyle = '#1a1030'; c.beginPath(); c.ellipse(ex, hy + 0.5, n === 1 ? 2.6 : 1.7, n === 1 ? 3.3 : 2.4, 0, 0, 6.283); c.fill();
+    c.fillStyle = '#fff'; c.beginPath(); c.arc(ex - 0.5, hy - 0.4, 0.6, 0, 6.283); c.fill();
+  }
+  c.strokeStyle = '#1a1030'; c.lineWidth = 0.55; c.beginPath(); c.arc(0, hy + 4.2, 1.3, 0.15 * Math.PI, 0.85 * Math.PI); c.stroke();
+  c.restore();
+}
+
+// ---- 記録係の顔（記録板の左。会場ごとに別人。段階が上がると表情が崩れていく）----
+const recGlass = (x, y, lv, col) => {   // 眼鏡と目（段階 2 でまん丸、4 でふるえる）
+  const ey = y + 1.0, big = lv >= 2 ? 2.35 : 1.8, wob = lv >= 4 ? Math.sin(nowT * 40) * 0.25 : 0;
+  cx.strokeStyle = col || '#2b2b3a'; cx.lineWidth = 0.6; cx.fillStyle = '#fff';
+  cx.beginPath(); cx.arc(x - 2.6, ey, big, 0, 6.283); cx.moveTo(x + 2.6 + big, ey); cx.arc(x + 2.6, ey, big, 0, 6.283); cx.moveTo(x - 0.8, ey); cx.lineTo(x + 0.8, ey);
+  cx.fill(); cx.stroke();
+  cx.fillStyle = '#2b2b3a';
+  cx.beginPath(); cx.arc(x - 2.6 + wob, ey, lv >= 2 ? 0.5 : 0.8, 0, 6.283); cx.arc(x + 2.6 + wob, ey, lv >= 2 ? 0.5 : 0.8, 0, 6.283); cx.fill();
+};
+const recDots = (x, y, lv, brow) => {   // 眼鏡なしの目（まゆ毛つき）
+  const wob = lv >= 4 ? Math.sin(nowT * 40) * 0.25 : 0, ey = y + 1.0, rr_ = lv >= 2 ? 1.15 : 0.85;
+  cx.fillStyle = '#2b2b3a'; cx.beginPath(); cx.arc(x - 2.6 + wob, ey, rr_, 0, 6.283); cx.arc(x + 2.6 + wob, ey, rr_, 0, 6.283); cx.fill();
+  cx.strokeStyle = '#2b2b3a'; cx.lineWidth = 0.6; cx.lineCap = 'round'; cx.beginPath();
+  const up = lv >= 2 ? -1.6 : 0, tilt = brow ? 0.9 : 0;
+  cx.moveTo(x - 4.2, ey - 2.2 + up + tilt); cx.lineTo(x - 1.2, ey - 2.4 + up - tilt); cx.moveTo(x + 4.2, ey - 2.2 + up + tilt); cx.lineTo(x + 1.2, ey - 2.4 + up - tilt); cx.stroke();
+};
+const recMouth = (x, y, lv, fin) => {
+  cx.strokeStyle = '#2b2b3a'; cx.lineWidth = 0.6; cx.beginPath();
+  if (lv >= 5) { cx.fillStyle = '#7a2a2a'; cx.ellipse(x, y + 5.3, 1.6, 2.1, 0, 0, 6.283); cx.fill(); }
+  else if (lv >= 2) { cx.arc(x, y + 5, 1.1, 0, 6.283); cx.stroke(); }
+  else if (fin) { cx.moveTo(x - 1.4, y + 5); cx.lineTo(x + 1.4, y + 5); cx.stroke(); }
+  else { cx.arc(x, y + 3.9, 1.5, 0.2 * Math.PI, 0.8 * Math.PI); cx.stroke(); }
+};
+const recSweat = (x, y, r, lv) => {
+  if (lv < 3) return;
+  cx.fillStyle = '#7ad0ff'; cx.beginPath(); cx.moveTo(x + r - 0.4, y - 2); cx.quadraticCurveTo(x + r + 1.8, y + 1.5, x + r - 0.4, y + 2.3); cx.quadraticCurveTo(x + r - 2.4, y + 1.5, x + r - 0.4, y - 2); cx.fill();
+};
+const recWhistle = (x, y) => { cx.fillStyle = '#e8c030'; cx.beginPath(); cx.arc(x - 3, y + 8.2, 1, 0, 6.283); cx.fill(); };
+const recBinder = (x, y, lv) => {   // バインダー、段階 5 からは電卓
+  if (lv >= 5) {
+    cx.fillStyle = '#4a4f5c'; rr(cx, x + 1, y + 8, 7.5, 7.5, 0.8); cx.fill();
+    cx.fillStyle = '#9fe3b0'; cx.fillRect(x + 1.8, y + 8.7, 5.9, 2);
+    cx.fillStyle = '#e8e8e8';
+    for (let i = 0; i < 6; i++) cx.fillRect(x + 1.9 + (i % 3) * 2, y + 11.6 + Math.floor(i / 3) * 1.8, 1.5, 1.1);
+  } else {
+    cx.fillStyle = '#8a6a3a'; rr(cx, x + 1.5, y + 8, 6.2, 7.8, 0.8); cx.fill();
+    cx.fillStyle = '#fff'; cx.fillRect(x + 2.3, y + 9.2, 4.6, 6);
+  }
+};
+const recHead = (x, y, r, skin) => { cx.fillStyle = skin || '#f3c8a0'; cx.beginPath(); cx.arc(x, y, r, 0, 6.283); cx.fill(); };
+const recHair = (x, y, r, col) => { cx.fillStyle = col; cx.beginPath(); cx.arc(x, y - 0.5, r + 0.4, Math.PI * 1.02, Math.PI * 1.98); cx.closePath(); cx.fill(); };
+const recSuit = (x, y, col, tie) => {   // 肩とえり
+  cx.fillStyle = col; rr(cx, x - 7, y + 8.2, 14, 6.4, 2); cx.fill();
+  cx.fillStyle = '#fff'; cx.beginPath(); cx.moveTo(x - 2.4, y + 8.2); cx.lineTo(x, y + 11.6); cx.lineTo(x + 2.4, y + 8.2); cx.closePath(); cx.fill();
+  if (tie) { cx.fillStyle = tie; cx.beginPath(); cx.moveTo(x - 0.8, y + 9); cx.lineTo(x + 0.8, y + 9); cx.lineTo(x + 1.1, y + 13); cx.lineTo(x, y + 14); cx.lineTo(x - 1.1, y + 13); cx.closePath(); cx.fill(); }
+};
+
+const REC_DRAW = {
+  teacher(x, y, r, lv, fin) {   // 担任の先生（v1 のまま）
+    recHead(x, y, r);
+    cx.fillStyle = '#2c4aa0'; cx.beginPath(); cx.arc(x, y - 0.5, r + 0.5, Math.PI * 1.02, Math.PI * 1.98); cx.closePath(); cx.fill();
+    cx.fillRect(x - r - 2.2, y - 0.6, r * 2 + 4.4, 1.3);
+    recGlass(x, y, lv); recMouth(x, y, lv, fin); recSweat(x, y, r, lv); recWhistle(x, y); recBinder(x, y, lv);
+  },
+  teachers(x, y, r, lv, fin) {   // 学年の先生たち：うしろから、ほかの先生がのぞく
+    for (const [dx, dy, hc] of [[-8.6, 2.6, '#777'], [8.8, -0.6, '#3a2a22']]) {
+      recHead(x + dx, y + dy, r * 0.74, '#e9bd94'); recHair(x + dx, y + dy, r * 0.74, hc);
+      cx.fillStyle = '#2b2b3a'; cx.beginPath(); cx.arc(x + dx - 1.7, y + dy + 0.8, 0.55, 0, 6.283); cx.arc(x + dx + 1.7, y + dy + 0.8, 0.55, 0, 6.283); cx.fill();
+      cx.strokeStyle = '#2b2b3a'; cx.lineWidth = 0.45; cx.beginPath(); cx.arc(x + dx, y + dy + 3.4, lv >= 2 ? 1 : 0.9, 0, lv >= 2 ? 6.283 : Math.PI); cx.stroke();
+    }
+    recHead(x, y, r); recHair(x, y, r, '#8a8a92');
+    recGlass(x, y, lv); recMouth(x, y, lv, fin); recSweat(x, y, r, lv); recWhistle(x, y); recBinder(x, y, lv);
+  },
+  megaphone(x, y, r, lv, fin) {   // 校内大会：メガホンの先生
+    recHead(x, y, r);
+    cx.fillStyle = '#d2382f'; cx.beginPath(); cx.arc(x, y - 0.5, r + 0.5, Math.PI * 1.02, Math.PI * 1.98); cx.closePath(); cx.fill();
+    cx.fillRect(x - r - 2.2, y - 0.6, r * 2 + 4.4, 1.3);
+    recGlass(x, y, lv); recMouth(x, y, lv, fin); recSweat(x, y, r, lv); recWhistle(x, y);
+    cx.fillStyle = '#f4f4f4'; cx.beginPath(); cx.moveTo(x + 1.2, y + 10.2); cx.lineTo(x + 9.6, y + 6.6); cx.lineTo(x + 9.6, y + 14.6); cx.closePath(); cx.fill();
+    cx.fillStyle = '#d2382f'; cx.beginPath(); cx.moveTo(x + 5.4, y + 8.4); cx.lineTo(x + 9.6, y + 6.6); cx.lineTo(x + 9.6, y + 14.6); cx.lineTo(x + 5.4, y + 12.4); cx.closePath(); cx.fill();
+  },
+  referee(x, y, r, lv, fin) {   // 審判：黒い帽子・笛・しま模様・カード
+    recHead(x, y, r);
+    cx.fillStyle = '#1b1b22'; cx.beginPath(); cx.arc(x, y - 0.6, r + 0.5, Math.PI * 1.02, Math.PI * 1.98); cx.closePath(); cx.fill();
+    cx.fillRect(x - r - 2.6, y - 0.6, r * 2 + 5.2, 1.5);
+    recDots(x, y, lv, true); recMouth(x, y, lv, fin); recSweat(x, y, r, lv);
+    cx.fillStyle = '#e8c030'; cx.beginPath(); cx.arc(x + 1.4, y + 4.4, 1.1, 0, 6.283); cx.fill(); cx.fillRect(x + 1.2, y + 3.8, 3.4, 1.1);
+    cx.fillStyle = '#f2f2f2'; rr(cx, x - 6.5, y + 8.2, 13, 6.4, 2); cx.fill();
+    cx.fillStyle = '#1b1b22'; for (let i = 0; i < 6; i++) cx.fillRect(x - 5.4 + i * 2.1, y + 8.4, 1, 6);
+    cx.fillStyle = '#f2c61e'; rr(cx, x + 5.2, y + 8, 3.2, 4.6, 0.4); cx.fill();
+    cx.fillStyle = '#d2242a'; cx.save(); cx.translate(x + 8.8, y + 9); cx.rotate(0.25); rr(cx, 0, 0, 3.2, 4.6, 0.4); cx.fill(); cx.restore();
+  },
+  judge(x, y, r, lv, fin) {   // 審査員：白髪・金の眼鏡・蝶ネクタイ・採点札
+    recHead(x, y, r); recHair(x, y, r, '#a0a0ae');
+    recGlass(x, y, lv, '#9a7a2a'); recMouth(x, y, lv, fin); recSweat(x, y, r, lv);
+    recSuit(x, y, '#222a44', null);
+    cx.fillStyle = '#d2242a'; cx.beginPath(); cx.moveTo(x, y + 9.6); cx.lineTo(x - 2.4, y + 8.4); cx.lineTo(x - 2.4, y + 10.8); cx.closePath(); cx.moveTo(x, y + 9.6); cx.lineTo(x + 2.4, y + 8.4); cx.lineTo(x + 2.4, y + 10.8); cx.closePath(); cx.fill();
+    cx.fillStyle = '#fff'; cx.strokeStyle = '#7a1f2e'; cx.lineWidth = 0.4; rr(cx, x + 3.6, y + 7.6, 6.4, 5.2, 0.6); cx.fill(); cx.stroke();
+    txt(lv >= 5 ? '0' : '10', x + 6.8, y + 10.3, 3.2, '#d2242a');
+  },
+  announcer(x, y, r, lv, fin) {   // 実況アナウンサー：ヘッドセットとマイク・髪型バッチリ
+    recHead(x, y, r); recHair(x, y, r, '#5a3a22');
+    cx.fillStyle = '#5a3a22'; cx.beginPath(); cx.arc(x + 2.6, y - r - 0.3, 2.6, 0, 6.283); cx.fill();
+    recDots(x, y, lv, false);
+    cx.fillStyle = '#fff'; cx.beginPath(); cx.arc(x - 3.0, y + 0.5, 0.35, 0, 6.283); cx.arc(x + 2.2, y + 0.5, 0.35, 0, 6.283); cx.fill();
+    cx.strokeStyle = '#222'; cx.lineWidth = 0.9; cx.beginPath(); cx.arc(x, y - 0.4, r + 0.9, Math.PI * 1.05, Math.PI * 1.95); cx.stroke();
+    cx.fillStyle = '#222'; cx.beginPath(); cx.arc(x - r - 0.6, y + 1, 1.5, 0, 6.283); cx.fill();
+    cx.lineWidth = 0.6; cx.beginPath(); cx.moveTo(x - r - 0.6, y + 2.2); cx.quadraticCurveTo(x - r, y + 6, x - 3, y + 5.4); cx.stroke();
+    cx.fillStyle = '#e0356f'; cx.beginPath(); cx.arc(x - 3, y + 5.4, 0.95, 0, 6.283); cx.fill();
+    recMouth(x, y - 0.3, lv, fin);
+    recSweat(x, y, r, lv);
+    recSuit(x, y, '#2a3a7a', '#e0356f');
+    cx.fillStyle = '#222'; rr(cx, x + 3.4, y + 9.6, 2.4, 5.6, 1); cx.fill();
+    cx.fillStyle = '#e0356f'; cx.beginPath(); cx.arc(x + 4.6, y + 9, 1.9, 0, 6.283); cx.fill();
+  },
+  intl(x, y, r, lv, fin) {   // 国際審判：イヤホン・ルールブック・ネクタイ
+    recHead(x, y, r, '#e8b890'); recHair(x, y, r, '#2a1c16');
+    recGlass(x, y, lv, '#4a4a58'); recMouth(x, y, lv, fin); recSweat(x, y, r, lv);
+    cx.fillStyle = '#e8d8c0'; cx.beginPath(); cx.arc(x + r - 0.1, y + 1.4, 1, 0, 6.283); cx.fill();
+    cx.strokeStyle = '#e8d8c0'; cx.lineWidth = 0.35; cx.beginPath(); cx.moveTo(x + r, y + 2.4); cx.quadraticCurveTo(x + r + 2, y + 7, x + 6, y + 9); cx.stroke();
+    recSuit(x, y, '#1c1c28', '#2c4aa0');
+    cx.fillStyle = '#2c4aa0'; rr(cx, x + 1.8, y + 8.4, 7.8, 8.6, 0.8); cx.fill();
+    cx.fillStyle = '#f6f2e0'; cx.fillRect(x + 2.8, y + 15.6, 6.2, 1.1);
+    cx.strokeStyle = '#f2c61e'; cx.lineWidth = 0.4; cx.beginPath(); cx.arc(x + 5.7, y + 12, 2.2, 0, 6.283); cx.moveTo(x + 3.5, y + 12); cx.lineTo(x + 7.9, y + 12); cx.moveTo(x + 5.7, y + 9.8); cx.lineTo(x + 5.7, y + 14.2); cx.stroke();
+  },
+  astro(x, y, r, lv, fin) {   // 宇宙飛行士：ヘルメット・無線・タブレット
+    cx.strokeStyle = '#c8c8d4'; cx.lineWidth = 0.5; cx.beginPath(); cx.moveTo(x + r + 0.6, y - r + 0.4); cx.lineTo(x + r + 3.4, y - r - 4); cx.stroke();
+    cx.fillStyle = Math.sin(nowT * 6) > 0 ? '#ff5a4a' : '#7a2a2a'; cx.beginPath(); cx.arc(x + r + 3.4, y - r - 4.2, 0.9, 0, 6.283); cx.fill();
+    cx.fillStyle = '#f4f4f8'; cx.strokeStyle = '#b8bccc'; cx.lineWidth = 0.5; cx.beginPath(); cx.arc(x, y, r + 1.9, 0, 6.283); cx.fill(); cx.stroke();
+    cx.fillStyle = '#f3c8a0'; cx.beginPath(); cx.ellipse(x, y + 0.3, r * 0.92, r * 0.88, 0, 0, 6.283); cx.fill();
+    recDots(x, y, lv, false); recMouth(x, y, lv, fin);
+    cx.fillStyle = 'rgba(232,176,64,.42)'; cx.beginPath(); cx.ellipse(x, y + 0.3, r * 0.95, r * 0.9, 0, 0, 6.283); cx.fill();
+    cx.strokeStyle = 'rgba(255,255,255,.8)'; cx.lineWidth = 0.6; cx.beginPath(); cx.arc(x, y + 0.3, r * 0.7, 3.5, 4.5); cx.stroke();
+    recSweat(x + 1.4, y, r, lv);
+    cx.fillStyle = '#e8e8ee'; rr(cx, x - 6.6, y + 8.4, 13, 6.4, 2); cx.fill();
+    cx.fillStyle = '#3a6ad0'; cx.fillRect(x - 3.6, y + 10, 4.6, 2.6);
+    cx.fillStyle = Math.sin(nowT * 4) > 0 ? '#ff5a4a' : '#7a2a2a'; cx.beginPath(); cx.arc(x + 3, y + 11.3, 0.8, 0, 6.283); cx.fill();
+    cx.fillStyle = '#2b2f40'; rr(cx, x + 2.6, y + 9, 7.4, 6.4, 0.8); cx.fill();
+    cx.fillStyle = '#9fe3b0'; cx.fillRect(x + 3.4, y + 9.8, 5.8, 4.6);
+    cx.strokeStyle = '#2b2f40'; cx.lineWidth = 0.4; cx.beginPath(); cx.moveTo(x + 4.2, y + 12); cx.lineTo(x + 8.4, y + 12); cx.stroke();
+  },
+  alien(x, y, r, lv, fin) {   // 宇宙人のポポ：腕が 6本。ケタを読み間違える
+    const col = '#8fe07a', wob = lv >= 4 ? Math.sin(nowT * 40) * 0.3 : 0;
+    cx.strokeStyle = col; cx.lineWidth = 1.1; cx.lineCap = 'round';
+    cx.fillStyle = '#6ac85a'; cx.beginPath(); cx.ellipse(x, y + 12, 5.4, 4.4, 0, 0, 6.283); cx.fill();
+    cx.beginPath();   // 左の腕 3本
+    for (const [ex, ey] of [[-9.4, 8], [-8.2, 12.6], [-10.4, 15.6]]) { cx.moveTo(x - 4, y + 10.4); cx.quadraticCurveTo(x - 7, y + 12, x + ex * 0.9, y + ey); }
+    cx.stroke();
+    cx.beginPath(); cx.moveTo(x - 2.6, y - r - 0.4); cx.lineTo(x - 5, y - r - 4.4); cx.moveTo(x + 2.6, y - r - 0.4); cx.lineTo(x + 5, y - r - 4.4); cx.stroke();
+    cx.fillStyle = '#ff5a9a'; cx.beginPath(); cx.arc(x - 5, y - r - 4.6, 1.2, 0, 6.283); cx.arc(x + 5, y - r - 4.6, 1.2, 0, 6.283); cx.fill();
+    cx.fillStyle = col; cx.beginPath(); cx.ellipse(x, y, r * 1.08, r * 1.1, 0, 0, 6.283); cx.fill();
+    cx.fillStyle = 'rgba(255,255,255,.25)'; cx.beginPath(); cx.ellipse(x - 1.6, y - 2.6, 2.6, 1.4, -0.4, 0, 6.283); cx.fill();
+    const big = lv >= 2 ? 1.25 : 1;
+    for (const ex of [-3.6, 0, 3.6]) {
+      cx.fillStyle = '#1a1030'; cx.beginPath(); cx.ellipse(x + ex + wob, y + 0.6, 1.5 * big, 2.2 * big, 0, 0, 6.283); cx.fill();
+      cx.fillStyle = '#fff'; cx.beginPath(); cx.arc(x + ex - 0.4 + wob, y - 0.2, 0.5, 0, 6.283); cx.fill();
+    }
+    cx.strokeStyle = '#1a1030'; cx.lineWidth = 0.55; cx.beginPath();
+    if (lv >= 5) { cx.fillStyle = '#5a1a4a'; cx.ellipse(x, y + 5.2, 1.5, 1.9, 0, 0, 6.283); cx.fill(); }
+    else if (lv >= 2) { cx.arc(x, y + 5, 1, 0, 6.283); cx.stroke(); }
+    else { cx.arc(x, y + 3.9, 1.5, 0.2 * Math.PI, 0.8 * Math.PI); cx.stroke(); }
+    recSweat(x, y, r + 0.4, lv);
+    cx.strokeStyle = col; cx.lineWidth = 1.1;   // 右の腕 3本が持つもの
+    cx.beginPath(); cx.moveTo(x + 4, y + 10.4); cx.lineTo(x + 3, y + 12); cx.moveTo(x + 4.6, y + 11.6); cx.lineTo(x + 8, y + 13); cx.moveTo(x + 4.4, y + 13); cx.lineTo(x + 10, y + 17); cx.stroke();
+    recBinder(x + 1.2, y + 0.4, lv);
+    cx.fillStyle = '#d2242a'; cx.beginPath(); cx.arc(x + 10.4, y + 17.4, 1.2, 0, 6.283); cx.fill();
+  },
+};
+function drawRecorder(x, y, r, type) {
+  const lv = Game.lvl, fin = Game.mode === 'finish' || Game.mode === 'over';
+  (REC_DRAW[type] || REC_DRAW.teacher)(x, y, r, lv, fin);
+}
+// ===== エンディング（宇宙大会に初めて勝ったあと。約 16 秒・タップでとばせる）=====
+// 流れ：①分身が整列して銀河へ ②宇宙人の記録係が宇宙記録の記録用紙に書きこむ ③そのころ、体育館で担任の先生が落ち着いて読み上げる
+//       →「そうはならんやろ」→ 記録用紙（宇宙記録）→ 大会の一覧へ。v1 の「途中まで普通なのに、最後に そうはならんやろ」と同じ味
+const End = { on: false, t: 0, cert: false, rec: 0, f: {}, stars: null, flashAt: -9 };
+
+// 「|」の切れ目だけで改行する文字の並べ（途中で言葉を割らない）
+function chunkLines(s, size, maxW) {
+  cx.font = 'bold ' + size + 'px ' + FONT;
+  const lines = []; let cur = '';
+  for (const p of s.split('|')) {
+    if (cur && cx.measureText(cur + p).width > maxW) { lines.push(cur); cur = p; } else cur += p;
+  }
+  lines.push(cur);
+  return lines;
+}
+function drawChunks(s, x, y, size, maxW, fill, o) {
+  const ls = chunkLines(s, size, maxW), lh = size * 1.32;
+  ls.forEach((l, i) => txt(l, x, y + (i - (ls.length - 1) / 2) * lh, size, fill, o));
+}
+
+function startEnding(rec) {
+  resetRun();
+  End.on = true; End.t = 0; End.cert = false; End.rec = rec; End.f = {}; End.flashAt = -9;
+  $('ending').classList.remove('cert');
+  $('cStamp').classList.remove('on');
+  Snd.setVenue(8); Snd.endSweep();
+}
+function skipEnding() { if (End.on && !End.cert && End.t > 0.25) End.t = endingTotal(); }
+function endingPhase() {
+  const T = ENDING_TIMES;
+  if (End.t < T.galaxy) return 'galaxy';
+  if (End.t < T.galaxy + T.sheet) return 'sheet';
+  if (End.t < endingTotal()) return 'teacher';
+  return 'cert';
+}
+function once(key, cond, fn) { if (cond && !End.f[key]) { End.f[key] = 1; fn(); } }
+
+function updateEnding(dt) {
+  if (!End.on) return;
+  End.t += dt;
+  const T = ENDING_TIMES, s0 = T.galaxy, s1 = T.galaxy + T.sheet, t = End.t;
+  once('b1', t > 1.8, () => Snd.blip(3));
+  once('b2', t > 3.6, () => Snd.blip(5));
+  once('r1', t > s0 + 0.7, () => Snd.endType());
+  once('r2', t > s0 + 1.3, () => Snd.endType());
+  if (t > s0 + 1.3 && t < s0 + 3.0) { End.f.tk = (End.f.tk || 0) + dt; if (End.f.tk > 0.11) { End.f.tk = 0; Snd.endType(); } }
+  once('st', t > s0 + 3.3, () => { Snd.stamp(); Snd.blip(2); });
+  once('t1', t > s1 + 0.5, () => Snd.endType());
+  once('t2', t > s1 + 2.3, () => Snd.endType());
+  once('t3', t > s1 + 4.0, () => Snd.endType());
+  once('so', t > s1 + 4.4, () => { Snd.sonna(); End.flashAt = nowT; });
+  if (!End.cert && t >= endingTotal()) {
+    End.cert = true; End.flashAt = nowT;
+    $('cRec').textContent = fmt(End.rec); fitRec($('cRec'));
+    $('ending').classList.add('cert');
+    Snd.endJingle();
+    setTimeout(() => { $('cStamp').classList.add('on'); Snd.stamp(); }, 700);
+  }
+}
+
+// ---- 絵 ----
+function endStars() {
+  if (!End.stars) {
+    const R = mulberry32(5); End.stars = [];
+    for (let i = 0; i < 360; i++) End.stars.push({ x: -300 + R() * 700, y: -120 + R() * 420, r: 0.15 + R() * 0.4, a: 0.3 + R() * 0.7, f: 1 + R() * 3 });
+  }
+  return End.stars;
+}
+function spaceBg() {
+  const g = cx.createLinearGradient(0, EY0, 0, EY1);
+  g.addColorStop(0, '#0a0420'); g.addColorStop(1, '#1d0b45');
+  cx.fillStyle = g; cx.fillRect(EX0 - 5, EY0 - 5, EX1 - EX0 + 10, EY1 - EY0 + 10);
+  cx.save(); cx.globalCompositeOperation = 'lighter';
+  for (const [x, y, r, rgb, a] of [[18, 46, 80, '255,63,160', 0.2], [82, 120, 90, '47,160,255', 0.2], [50, 90, 100, '122,63,255', 0.22], [EX1 - 10, 40, 80, '255,170,63', 0.12], [EX0 + 10, 150, 80, '63,255,200', 0.1]]) glow(x, y, r, rgb, a);
+  cx.restore();
+  for (const s of endStars()) {
+    if (s.x < EX0 - 2 || s.x > EX1 + 2 || s.y < EY0 - 2 || s.y > EY1 + 2) continue;
+    cx.fillStyle = 'rgba(255,255,255,' + (s.a * (0.65 + 0.35 * Math.sin(End.t * s.f + s.x))) + ')'; cx.fillRect(s.x, s.y, s.r * 1.6, s.r * 1.6);
+  }
+}
+const eIO = q => q < 0.5 ? 2 * q * q : 1 - Math.pow(-2 * q + 2, 2) / 2;
+function endCaption(s, y, a) {
+  cx.save(); cx.globalAlpha = clamp(a, 0, 1);
+  drawChunks(s, 50, y, 6.4, 84, '#fff', { stroke: '#1a1050', sw: 1.5 });
+  cx.restore();
+}
+
+// ① 分身が整列して、銀河へ散らばっていく
+function sceneGalaxy(t, caps) {
+  const N = 84, q = eIO(clamp((t - 1.8) / 1.6, 0, 1)), ex = Math.max(0, t - 3.6);
+  for (let i = 0; i < N; i++) {
+    const col = i % 12, row = (i / 12) | 0;
+    const fx = 12 + col * 7.1 + Math.sin(t * 9 + (row % 2) * 3.14) * 1.8 * (1 - q), fy = 82 + row * 11;
+    const ang = i * 0.42 + t * 0.5, rad = (6 + i * 0.95) * (1 + ex * 0.35);
+    const sx = 50 + Math.cos(ang) * rad, sy = 112 + Math.sin(ang) * rad * 0.55;
+    const x = fx + (sx - fx) * q, y = fy + (sy - fy) * q;
+    const a = clamp((t - i * 0.012) / 0.3, 0, 1) * (1 - 0.45 * clamp(ex / 1.6, 0, 1));
+    if (a <= 0.01 || x < EX0 - 12 || x > EX1 + 12) continue;
+    const sc = (0.3 - 0.1 * q) * (1 - Math.min(0.4, ex * 0.12));
+    drawKid(cx, x, y, sc, { hop: (1 - q) * (0.5 + 0.5 * Math.sin(t * 9 + i)), lean: (1 - q) * Math.cos(t * 9 + (row % 2) * 3.14), ph: t * 14 + i, alpha: a, face: 0 });
+  }
+  if (caps) {
+    const T = ENDING_TIMES.galaxy;
+    if (t > 0.3 && t < 2.7) endCaption(STR.ending.cap.galaxy[0], 160, Math.min((t - 0.3) / 0.4, (2.7 - t) / 0.4));
+    if (t > 2.9 && t < T) endCaption(STR.ending.cap.galaxy[1], 160, Math.min((t - 2.9) / 0.4, (T - t) / 0.3));
+  }
+}
+
+// ② 宇宙人の記録係が、宇宙記録の記録用紙に書きこむ
+function sceneSheet(t) {
+  const S = STR.ending.sheetRow, W0 = 10, Wd = 80, Y0s = 24;
+  cx.fillStyle = 'rgba(0,0,0,.35)'; rr(cx, W0 + 1, Y0s + 2.4, Wd, 80, 2); cx.fill();
+  cx.fillStyle = '#fffdf2'; rr(cx, W0, Y0s, Wd, 80, 2); cx.fill();
+  cx.strokeStyle = '#2c4aa0'; cx.lineWidth = 0.9; rr(cx, W0, Y0s, Wd, 80, 2); cx.stroke();
+  const show = (a, fn) => { cx.save(); cx.globalAlpha = clamp((t - a) / 0.25, 0, 1); fn(); cx.restore(); };
+  show(0.2, () => { txt(STR.ending.cert.head, 50, 34, 6, '#2c4aa0'); cx.fillStyle = '#2c4aa0'; cx.fillRect(16, 39, 68, 0.6); });
+  show(0.7, () => { txt(S.kind, 17, 50, 4.2, '#55608a', { align: 'left' }); txt(S.kindVal, 83, 50, 5, '#2b2b3a', { align: 'right' }); cx.fillStyle = '#9aa7d0'; cx.fillRect(16, 54, 68, 0.3); });
+  show(1.3, () => {
+    txt(S.rec, 17, 70, 4.6, '#55608a', { align: 'left' });
+    const v = fmt(Math.round(End.rec * easeOut(clamp((t - 1.3) / 1.7, 0, 1))));
+    cx.font = '900 15px ' + FONT; const w = cx.measureText(v).width, fs = w > 44 ? 15 * 44 / w : 15;
+    txt(v, 70, 70, fs, '#d2382f', { weight: '900', align: 'right' }); txt(S.unit, 83, 72, 4.4, '#55608a', { align: 'right' });
+    cx.fillStyle = '#9aa7d0'; cx.fillRect(16, 79, 68, 0.3);
+  });
+  show(1.9, () => { txt(S.judge, 17, 92, 4.6, '#55608a', { align: 'left' }); });
+  if (t > 3.3) {   // 判子
+    const q = clamp((t - 3.3) / 0.28, 0, 1), sc = 2.4 - 1.4 * easeOut(q);
+    cx.save(); cx.globalAlpha = q; cx.translate(62, 92); cx.rotate(-0.25); cx.scale(sc, sc);
+    cx.strokeStyle = '#d2382f'; cx.lineWidth = 1.2; cx.beginPath(); cx.arc(0, 0, 10.5, 0, 6.283); cx.stroke();
+    drawChunks('宇宙|規模', 0, 0, 5.2, 18, '#d2382f', { weight: '900' });
+    cx.restore();
+  }
+  // 宇宙人の記録係：腕が 6本。ペン・はんこ・電卓・バインダー…を持って、いそがしい
+  const ax = 50, ay = 176, sc = 1.0, wv = Math.sin(t * 8);
+  cx.strokeStyle = '#8fe07a'; cx.lineWidth = 1.5; cx.lineCap = 'round';
+  const arms = [[-1, 0, '#e8e8e8'], [-1, 1, '#d2242a'], [-1, 2, '#4a4f5c'], [1, 0, '#8a6a3a'], [1, 1, '#3a6ad0'], [1, 2, '#f2c61e']];
+  arms.forEach(([d, k, c], i) => {
+    const bx = ax + d * 4, by = ay - 21 * sc + k * 2.4, tx = ax + d * (11 + k * 4), ty = ay - 32 * sc + k * 4.5 + Math.sin(t * 8 + i * 1.7) * 2.2;
+    cx.beginPath(); cx.moveTo(bx, by); cx.quadraticCurveTo(ax + d * 9, by - 4, tx, ty); cx.stroke();
+    cx.fillStyle = c; rr(cx, tx - 1.5 + (d > 0 ? 0 : -1.5), ty - 2, 4, 4, 0.6); cx.fill();
+  });
+  drawAlien(cx, ax, ay, sc, { eyes: 3, ph: t * 7, cheer: false });
+  if (t > 0.4 && t < 2.6) endCaption(STR.ending.cap.sheet[0], 116, Math.min((t - 0.4) / 0.4, (2.6 - t) / 0.3));
+  if (t > 3.0) endCaption(STR.ending.cap.sheet[1], 116, Math.min((t - 3.0) / 0.4, (ENDING_TIMES.sheet - t) / 0.3));
+}
+
+// ③ そのころ、体育館で。担任の先生が、落ち着いて読み上げる
+function sceneTeacher(t) {
+  const V = VENUES[0];
+  cx.drawImage(venueLayer(V), EX0 - 5, EY0 - 5, EX1 - EX0 + 10, EY1 - EY0 + 10);
+  PROP.windows.dyn(V);
+  const s = 2.3, x = 50, y = 166, hy = y - 30.2 * s;
+  drawKid(cx, x, y, s, { shirt: '#3a8f5a', shorts: '#2c3140', legs: '#2c3140', hair: '#777', collar: '#fff', band: false, face: 0, ph: 0 });
+  cx.strokeStyle = '#2b2b3a'; cx.lineWidth = 0.55; cx.beginPath();   // 眼鏡
+  cx.arc(x - 2.2 * s, hy + 0.9 * s, 1.6 * s, 0, 6.283); cx.moveTo(x + 2.2 * s + 1.6 * s, hy + 0.9 * s); cx.arc(x + 2.2 * s, hy + 0.9 * s, 1.6 * s, 0, 6.283); cx.moveTo(x - 0.6 * s, hy + 0.9 * s); cx.lineTo(x + 0.6 * s, hy + 0.9 * s); cx.stroke();
+  cx.fillStyle = '#e8c030'; cx.beginPath(); cx.arc(x - 2.4 * s, y - 24 * s, 1.1 * s, 0, 6.283); cx.fill();   // 笛
+  cx.save(); cx.translate(x + 9 * s, y - 16 * s); cx.rotate(-0.12);   // バインダー
+  cx.fillStyle = '#8a6a3a'; rr(cx, -5.5, -9, 11, 14, 1); cx.fill(); cx.fillStyle = '#fff'; cx.fillRect(-4.2, -7.2, 8.4, 10.5);
+  cx.fillStyle = '#9aa7d0'; for (let i = 0; i < 4; i++) cx.fillRect(-3.4, -5.6 + i * 2.3, 6.8, 0.3);
+  cx.restore();
+  const T = STR.ending.teacher;
+  let line = null;
+  if (t > 0.5 && t < 2.2) line = T[0]; else if (t >= 2.3 && t < 3.9) line = T[1](fmt(End.rec)); else if (t >= 4.0) line = T[2];
+  if (t < 1.9) { cx.fillStyle = 'rgba(0,0,0,.55)'; rr(cx, 22, 30, 56, 13, 2); cx.fill(); drawChunks(STR.ending.cap.teacher[0], 50, 36.5, 5.6, 52, '#fff'); }
+  if (line) {
+    cx.fillStyle = '#fff'; cx.strokeStyle = '#2b2b3a'; cx.lineWidth = 0.7;
+    rr(cx, 11, 46, 78, 36, 3); cx.fill(); cx.stroke();
+    cx.beginPath(); cx.moveTo(43, 82); cx.lineTo(50, hy - 9); cx.lineTo(57, 82); cx.closePath(); cx.fill();
+    cx.beginPath(); cx.moveTo(43.4, 82.4); cx.lineTo(50, hy - 9); cx.lineTo(56.6, 82.4); cx.stroke();
+    cx.fillStyle = '#fff'; cx.fillRect(43.6, 81.4, 12.8, 1.6);
+    drawChunks(line, 50, 64, 7.4, 70, '#2b2b3a');
+  }
+  if (t > 4.5) {   // そうはならんやろ
+    const q = clamp((t - 4.5) / 0.22, 0, 1), sc = 1 + 0.5 * (1 - easeOut(q));
+    cx.save(); cx.translate(50, 128); cx.rotate(-0.07); cx.scale(sc, sc); cx.globalAlpha = q;
+    fitTxt(STR.ending.pop, 0, 0, 11, 82, '#e0356f', { stroke: '#fff', sw: 2.4 });
+    cx.restore();
+  }
+}
+
+// 記録用紙（宇宙記録）のうしろ：ゆっくり回る銀河と分身
+function sceneCert() { sceneGalaxy(4.2 + (End.t - endingTotal()) * 0.25, false); }
+
+function drawEndingScene() {
+  const ph = endingPhase(), T = ENDING_TIMES, t = End.t;
+  spaceBg();
+  if (ph === 'galaxy') sceneGalaxy(t, true);
+  else if (ph === 'sheet') sceneSheet(t - T.galaxy);
+  else if (ph === 'teacher') sceneTeacher(t - T.galaxy - T.sheet);
+  else sceneCert();
+  // 場面のつなぎ目は、いったん暗くして入る
+  for (const b of [T.galaxy, T.galaxy + T.sheet]) {
+    const d = t - b;
+    if (d > -0.2 && d < 0.35) { cx.fillStyle = 'rgba(0,0,0,' + (d < 0 ? (d + 0.2) / 0.2 : 1 - d / 0.35) + ')'; cx.fillRect(EX0 - 5, EY0 - 5, EX1 - EX0 + 10, EY1 - EY0 + 10); }
+  }
+  const f = clamp(1 - (nowT - End.flashAt) / 0.5, 0, 1);
+  if (f > 0) { cx.fillStyle = 'rgba(255,255,255,' + f * 0.85 + ')'; cx.fillRect(EX0 - 5, EY0 - 5, EX1 - EX0 + 10, EY1 - EY0 + 10); }
 }
 // ===== 効果音（WebAudio で合成。音声ファイルなし・BGMなし。キュッキュッのリズムが音楽の代わり）=====
 const Snd = (() => {
-  let ac = null, master = null, noiseBuf = null, murGain = null, lastSq = -1, lastTone = 0;
+  let ac = null, master = null, noiseBuf = null, murGain = null, murFl = null, droneGain = null, lastSq = -1, lastTone = 0;
+  let ven = VENUES[0];   // いまの会場（空気・観客の大きさ・角笛・無線・ピコピコを変える）
+  const AMB_F = { gym: 800, hall: 700, arena: 600, tv: 650, stadium: 480, moon: 3600, space: 240 };   // 会場の空気の音の高さ
+  const kk = () => ven.k / 0.8;   // 観客の大きさ（体育館 = 1）
 
   function init() {
     if (!ac) {
@@ -1281,8 +2271,13 @@ const Snd = (() => {
         // ざわめき（体育館の人の声）。段階が上がると大きくなる
         const src = ac.createBufferSource(); src.buffer = noiseBuf; src.loop = true;
         const fl = ac.createBiquadFilter(); fl.type = 'bandpass'; fl.frequency.value = 800; fl.Q.value = 0.7;
+        murFl = fl;
         murGain = ac.createGain(); murGain.gain.value = 0;
         src.connect(fl); fl.connect(murGain); murGain.connect(master); src.start();
+        // 宇宙のうなり（月面と宇宙だけ。低い 2 つの音）
+        droneGain = ac.createGain(); droneGain.gain.value = 0; droneGain.connect(master);
+        for (const f of [55, 82.6]) { const o = ac.createOscillator(); o.type = 'sine'; o.frequency.value = f; o.connect(droneGain); o.start(); }
+        murFl.frequency.value = AMB_F[ven.amb] || 800;
       } catch (_) { ac = null; return; }
     }
     if (ac.state === 'suspended') ac.resume();
@@ -1330,12 +2325,52 @@ const Snd = (() => {
       if (!ac) return; const t = now();
       if (t - lastSq < 0.03) return;   // 重なりすぎたら間引く
       lastSq = t;
+      if (ven.amb === 'moon') {   // 月面：キュッではなく、ふわっとした足音
+        noise(t, 0.09, { f: 320, type: 'lowpass', gain: 0.16, env: [[0, 0], [0.2, 1], [1, 0]] });
+        tone(150 + Math.random() * 40, t, 0.1, { gain: 0.03, f2: 110 });
+        return;
+      }
+      if (ven.amb === 'space') {   // 宇宙：ピコッ
+        const f = 700 + Math.random() * 900;
+        tone(f, t, 0.07, { gain: 0.035, f2: f * 1.5 });
+        return;
+      }
       const f = 1500 + Math.random() * 800;
       noise(t, 0.075, { f, f2: f * 1.9, q: 7, gain: 0.2, env: [[0, 0], [0.12, 1], [1, 0]] });
       tone(f * 0.55, t, 0.05, { type: 'triangle', gain: 0.035, f2: f });
     },
-    whistleStart() { if (ac) whistle(now(), 0.2); },
-    whistleEnd() { if (ac) whistle(now(), 1.1); },
+    // 会場の音：スタジアムの角笛・月面の無線・宇宙のピコピコ
+    setVenue(i) {
+      ven = VENUES[clamp(i | 0, 0, VENUES.length - 1)];
+      if (ac && murFl) murFl.frequency.setTargetAtTime(AMB_F[ven.amb] || 800, now(), 0.05);
+    },
+    horn(t0, dur) {   // 角笛：低い 3 つの音をぶあつく
+      for (const f of [233, 294, 349]) tone(f, t0, dur, { type: 'sawtooth', gain: 0.032, attack: 0.03 });
+      noise(t0, dur, { f: 700, q: 0.8, gain: 0.05, env: [[0, 0], [0.1, 1], [0.8, 0.7], [1, 0]] });
+    },
+    radio(long) {   // 無線のピッ（交信の終わりの音）とザザッ
+      if (!ac) return; const t = now();
+      noise(t, 0.1, { f: 4200, type: 'highpass', gain: 0.07, env: [[0, 0], [0.1, 1], [1, 0]] });
+      tone(2525, t + 0.03, long ? 0.22 : 0.1, { gain: 0.045 });
+    },
+    blip(n) {   // 宇宙のピコピコ。n 個の高い音が上がっていく
+      if (!ac) return; const t = now();
+      for (let i = 0; i < (n || 3); i++) { const f = 660 * Math.pow(2, ((i * 3 + Math.floor(Math.random() * 3)) % 12) / 12); tone(f, t + i * 0.07, 0.11, { gain: 0.045, f2: f * 1.6 }); }
+    },
+    whistleStart() {
+      if (!ac) return;
+      whistle(now(), 0.2);
+      if (ven.amb === 'arena' || ven.amb === 'tv' || ven.amb === 'stadium') this.horn(now() + 0.08, ven.amb === 'stadium' ? 0.55 : 0.32);
+      else if (ven.amb === 'moon') this.radio(false);
+      else if (ven.amb === 'space') this.blip(3);
+    },
+    whistleEnd() {
+      if (!ac) return;
+      whistle(now(), 1.1);
+      if (ven.amb === 'stadium') this.horn(now() + 0.15, 0.9);
+      else if (ven.amb === 'moon') this.radio(true);
+      else if (ven.amb === 'space') this.blip(5);
+    },
     // 転ぶ：ドサッ
     trip() {
       if (!ac) return; const t = now();
@@ -1348,17 +2383,21 @@ const Snd = (() => {
       const semis = [0, 2, 4, 7, 9, 12, 16];
       const n = Math.min(l + 1, 6);
       for (let i = 0; i < n; i++) tone(523.3 * Math.pow(2, semis[i] / 12), t + i * 0.055, 0.18, { type: 'triangle', gain: 0.11 });
+      if (ven.amb === 'moon') this.radio(false);
+      else if (ven.amb === 'space') this.blip(2 + Math.min(l, 4));
+      else if (ven.amb === 'stadium' && l >= 5) this.horn(t + 0.05, 0.35);
       this.cheer(l, l >= 5);
     },
     cheer(n, big) {
-      if (!ac) return; const t = now(), k = 0.3 + 0.07 * Math.min(n || 1, 8), len = big ? 1.4 : 0.7;
+      if (!ac) return; const t = now(), k = (0.3 + 0.07 * Math.min(n || 1, 8)) * Math.min(1.7, kk()), len = big ? 1.4 : 0.7;   // 会場が大きいほど観客も大きい
       noise(t, len, { f: 900, q: 0.8, gain: 0.45 * k, env: [[0, 0], [0.12, 1], [0.6, 0.7], [1, 0]] });
       noise(t, len, { f: 1700, f2: 2100, q: 1.4, gain: 0.25 * k, env: [[0, 0], [0.18, 1], [0.7, 0.6], [1, 0]] });
     },
     // ざわめきの大きさを段階に合わせる
-    murmur(l) {
+    murmur(l) {   // l＝測定中の段階（-1＝測定中ではない）
       if (!ac) return;
-      murGain.gain.setTargetAtTime(l >= 3 ? 0.05 + 0.05 * (Math.min(l, 6) - 3) : 0, now(), 0.3);
+      murGain.gain.setTargetAtTime(l >= 3 ? (0.05 + 0.05 * (Math.min(l, 6) - 3)) * Math.min(1.7, kk()) : 0, now(), 0.3);
+      droneGain.gain.setTargetAtTime(l >= 0 ? (ven.amb === 'space' ? 0.03 : ven.amb === 'moon' ? 0.012 : 0) : 0, now(), 0.4);
     },
     // ゼーゼー
     pant() {
@@ -1403,6 +2442,31 @@ const Snd = (() => {
       tone(150, t, 0.16, { gain: 0.5, f2: 55 });
       noise(t, 0.08, { f: 700, type: 'lowpass', gain: 0.3 });
     },
+    // エンディング：宇宙へ上がる音・ピコピコ・「そうはならんやろ」のずっこけ音・記録用紙のファンファーレ
+    endSweep() {
+      if (!ac) return; const t = now();
+      tone(110, t, 2.4, { type: 'sawtooth', gain: 0.03, f2: 880, attack: 0.4 });
+      tone(165, t, 2.4, { type: 'sine', gain: 0.05, f2: 1320, attack: 0.4 });
+      noise(t, 2.4, { f: 400, f2: 5000, q: 1.2, gain: 0.05, env: [[0, 0], [0.7, 1], [1, 0]] });
+    },
+    endType() {   // 記録用紙に書きこむ「ピッ」
+      if (!ac) return; const t = now();
+      tone(1320 + Math.random() * 300, t, 0.05, { type: 'square', gain: 0.035 });
+    },
+    sonna() {   // ずっこけ：下がっていくトロンボーン風
+      if (!ac) return; const t = now();
+      tone(392, t, 0.2, { type: 'sawtooth', gain: 0.07, f2: 349 });
+      tone(349, t + 0.22, 0.2, { type: 'sawtooth', gain: 0.07, f2: 311 });
+      tone(311, t + 0.44, 0.7, { type: 'sawtooth', gain: 0.08, f2: 130 });
+    },
+    endJingle() {   // ファンファーレ。記録用紙が出るとき
+      if (!ac) return; const t = now();
+      [[523.3, 0], [659.3, 0.14], [784, 0.28], [1046.5, 0.42]].forEach(([f, d]) => tone(f, t + d, 0.3, { type: 'triangle', gain: 0.13 }));
+      [[784, 0.7], [988, 0.7], [1318.5, 0.7]].forEach(([f, d]) => tone(f, t + d, 1.2, { type: 'triangle', gain: 0.1 }));
+      tone(1568, t + 0.7, 1.4, { type: 'sine', gain: 0.05 });
+      this.cheer(6, true);
+      this.blip(4);
+    },
   };
 })();
 // ===== 画面の流れ・操作・ループ・結果・共有 =====
@@ -1446,6 +2510,7 @@ function tap(side) {
   Snd.init();
   if (App.screen === 'title') { openList(); return; }
   if (App.screen === 'intro') { if (nowT - App.introAt > 0.3) startRun(); return; }
+  if (App.screen === 'ending') { skipEnding(); return; }
   if (App.screen === 'play') Game.input(side);
 }
 
@@ -1467,7 +2532,7 @@ function bindUI() {
       else if (App.screen === 'list') openIntro(Tourney.focusIndex(SAVE));
       else if (App.screen === 'intro') { if (nowT - App.introAt > 0.3) startRun(); }
       else if (App.screen === 'result' && !$('result').classList.contains('wait')) retry();
-      else if (App.screen === 'ending') openList();
+      else if (App.screen === 'ending') { if (End.cert) openList(); else skipEnding(); }
     }
   });
   window.addEventListener('resize', resize);
@@ -1485,7 +2550,9 @@ function bindUI() {
     if (b) { Snd.init(); buyItem(b.closest('.it').dataset.id); }
   });
   $('inBack').addEventListener('click', () => openList());
-  $('endBtn').addEventListener('click', () => openList());
+  $('endBtn').addEventListener('click', () => { Snd.init(); End.on = false; openList(); });
+  $('endShare').addEventListener('click', shareEnding);
+  $('ending').addEventListener('click', e => { if (!End.cert && !e.target.closest('button')) { Snd.init(); skipEnding(); } });
   $('listBody').addEventListener('click', e => {
     const b = e.target.closest('.tn');
     if (b && !b.disabled) { Snd.init(); openIntro(+b.dataset.i); }
@@ -1499,12 +2566,14 @@ function resetRun() {
   popups.length = 0; smoke.length = 0; hist.length = 0;
   for (const c of CL) c.app = 0;
   lvlShown = 0; murLvl = -1; crowdAmt = 0; tripAt = -99; rivalPassed = false; rivalPassAt = -99;
-  Snd.murmur(0);
+  Snd.murmur(-1);
   $('stamp').classList.remove('on'); $('vsStamp').classList.remove('on');
 }
 
 function openList() {
   resetRun();
+  End.on = false;
+  Snd.setVenue(0);
   App.pendingEnding = false;
   renderList();
   setScreen('list');
@@ -1576,6 +2645,7 @@ function openIntro(i) {
   if (!Tourney.playable(SAVE, i)) return;
   resetRun();
   App.idx = i;
+  Snd.setVenue(i);
   const T = STR.tournaments[i], I = STR.intro;
   $('inName').textContent = ph(T.name);
   $('inRival').innerHTML = phHtml(T.rival.name);
@@ -1597,9 +2667,8 @@ function retry() { startRun(); }
 
 function showEnding() {
   App.pendingEnding = false;
-  $('endBest').textContent = STR.ending.best(fmt(SAVE.best[Tourney.count() - 1]));
-  $('endBtn').textContent = STR.ending.list;
   setScreen('ending');
+  startEnding(SAVE.best[Tourney.count() - 1]);
 }
 
 // ---- 結果 ----
@@ -1646,6 +2715,7 @@ function showResult() {
   else if (info.win) note = S.noteReplay;
   else note = S.noteLose(fmt(tg - r.rec + 1));
   $('vsNote').innerHTML = phHtml(note);
+  $('vsSay').innerHTML = '<span class="who">' + esc(T.rival.short) + '</span>' + phHtml(S.rivalSay(info.win ? T.rival.win : T.rival.lose));
   $('toList').textContent = info.ending ? S.cont : S.toList;
   const el = $('result');
   el.classList.add('show', 'wait');   // 指が離れる前にボタンを押してしまわないように、少しの間は触れない
@@ -1717,7 +2787,7 @@ function reactToEvents() {
   }
   Game.events.length = 0;
   // ざわめき
-  const m = Game.mode === 'play' ? Game.lvl : 0;
+  const m = Game.mode === 'play' ? Game.lvl : -1;
   if (m !== murLvl) { murLvl = m; Snd.murmur(m); }
 }
 
@@ -1737,6 +2807,7 @@ function frame(ts) {
   const dt = last ? Math.min((ts - last) / 1000, 0.1) : 0;
   last = ts; nowT += dt;
   Game.step(dt);
+  updateEnding(dt);
   reactToEvents();
   checkRival();
   if (Game.mode === 'over' && !shownResult && App.screen === 'play') showResult();
@@ -1797,6 +2868,11 @@ function makeShareImage() {
     c.fillText(shareUrl(), Wd / 2, Ht - 80);
     cc.toBlob(resolve, 'image/png');
   });
+}
+function shareEnding() {
+  const text = STR.ending.shareText(fmt(SAVE.best[Tourney.count() - 1])), url = shareUrl();
+  try { if (navigator.share) { navigator.share({ text, url }).catch(() => {}); return; } } catch (_) {}
+  window.open('https://twitter.com/intent/tweet?text=' + encodeURIComponent(text) + '&url=' + encodeURIComponent(url), '_blank', 'noopener');
 }
 async function share() {
   const text = shareText(), url = shareUrl();

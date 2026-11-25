@@ -1,6 +1,9 @@
 // ===== 効果音（WebAudio で合成。音声ファイルなし・BGMなし。キュッキュッのリズムが音楽の代わり）=====
 const Snd = (() => {
-  let ac = null, master = null, noiseBuf = null, murGain = null, lastSq = -1, lastTone = 0;
+  let ac = null, master = null, noiseBuf = null, murGain = null, murFl = null, droneGain = null, lastSq = -1, lastTone = 0;
+  let ven = VENUES[0];   // いまの会場（空気・観客の大きさ・角笛・無線・ピコピコを変える）
+  const AMB_F = { gym: 800, hall: 700, arena: 600, tv: 650, stadium: 480, moon: 3600, space: 240 };   // 会場の空気の音の高さ
+  const kk = () => ven.k / 0.8;   // 観客の大きさ（体育館 = 1）
 
   function init() {
     if (!ac) {
@@ -18,8 +21,13 @@ const Snd = (() => {
         // ざわめき（体育館の人の声）。段階が上がると大きくなる
         const src = ac.createBufferSource(); src.buffer = noiseBuf; src.loop = true;
         const fl = ac.createBiquadFilter(); fl.type = 'bandpass'; fl.frequency.value = 800; fl.Q.value = 0.7;
+        murFl = fl;
         murGain = ac.createGain(); murGain.gain.value = 0;
         src.connect(fl); fl.connect(murGain); murGain.connect(master); src.start();
+        // 宇宙のうなり（月面と宇宙だけ。低い 2 つの音）
+        droneGain = ac.createGain(); droneGain.gain.value = 0; droneGain.connect(master);
+        for (const f of [55, 82.6]) { const o = ac.createOscillator(); o.type = 'sine'; o.frequency.value = f; o.connect(droneGain); o.start(); }
+        murFl.frequency.value = AMB_F[ven.amb] || 800;
       } catch (_) { ac = null; return; }
     }
     if (ac.state === 'suspended') ac.resume();
@@ -67,12 +75,52 @@ const Snd = (() => {
       if (!ac) return; const t = now();
       if (t - lastSq < 0.03) return;   // 重なりすぎたら間引く
       lastSq = t;
+      if (ven.amb === 'moon') {   // 月面：キュッではなく、ふわっとした足音
+        noise(t, 0.09, { f: 320, type: 'lowpass', gain: 0.16, env: [[0, 0], [0.2, 1], [1, 0]] });
+        tone(150 + Math.random() * 40, t, 0.1, { gain: 0.03, f2: 110 });
+        return;
+      }
+      if (ven.amb === 'space') {   // 宇宙：ピコッ
+        const f = 700 + Math.random() * 900;
+        tone(f, t, 0.07, { gain: 0.035, f2: f * 1.5 });
+        return;
+      }
       const f = 1500 + Math.random() * 800;
       noise(t, 0.075, { f, f2: f * 1.9, q: 7, gain: 0.2, env: [[0, 0], [0.12, 1], [1, 0]] });
       tone(f * 0.55, t, 0.05, { type: 'triangle', gain: 0.035, f2: f });
     },
-    whistleStart() { if (ac) whistle(now(), 0.2); },
-    whistleEnd() { if (ac) whistle(now(), 1.1); },
+    // 会場の音：スタジアムの角笛・月面の無線・宇宙のピコピコ
+    setVenue(i) {
+      ven = VENUES[clamp(i | 0, 0, VENUES.length - 1)];
+      if (ac && murFl) murFl.frequency.setTargetAtTime(AMB_F[ven.amb] || 800, now(), 0.05);
+    },
+    horn(t0, dur) {   // 角笛：低い 3 つの音をぶあつく
+      for (const f of [233, 294, 349]) tone(f, t0, dur, { type: 'sawtooth', gain: 0.032, attack: 0.03 });
+      noise(t0, dur, { f: 700, q: 0.8, gain: 0.05, env: [[0, 0], [0.1, 1], [0.8, 0.7], [1, 0]] });
+    },
+    radio(long) {   // 無線のピッ（交信の終わりの音）とザザッ
+      if (!ac) return; const t = now();
+      noise(t, 0.1, { f: 4200, type: 'highpass', gain: 0.07, env: [[0, 0], [0.1, 1], [1, 0]] });
+      tone(2525, t + 0.03, long ? 0.22 : 0.1, { gain: 0.045 });
+    },
+    blip(n) {   // 宇宙のピコピコ。n 個の高い音が上がっていく
+      if (!ac) return; const t = now();
+      for (let i = 0; i < (n || 3); i++) { const f = 660 * Math.pow(2, ((i * 3 + Math.floor(Math.random() * 3)) % 12) / 12); tone(f, t + i * 0.07, 0.11, { gain: 0.045, f2: f * 1.6 }); }
+    },
+    whistleStart() {
+      if (!ac) return;
+      whistle(now(), 0.2);
+      if (ven.amb === 'arena' || ven.amb === 'tv' || ven.amb === 'stadium') this.horn(now() + 0.08, ven.amb === 'stadium' ? 0.55 : 0.32);
+      else if (ven.amb === 'moon') this.radio(false);
+      else if (ven.amb === 'space') this.blip(3);
+    },
+    whistleEnd() {
+      if (!ac) return;
+      whistle(now(), 1.1);
+      if (ven.amb === 'stadium') this.horn(now() + 0.15, 0.9);
+      else if (ven.amb === 'moon') this.radio(true);
+      else if (ven.amb === 'space') this.blip(5);
+    },
     // 転ぶ：ドサッ
     trip() {
       if (!ac) return; const t = now();
@@ -85,17 +133,21 @@ const Snd = (() => {
       const semis = [0, 2, 4, 7, 9, 12, 16];
       const n = Math.min(l + 1, 6);
       for (let i = 0; i < n; i++) tone(523.3 * Math.pow(2, semis[i] / 12), t + i * 0.055, 0.18, { type: 'triangle', gain: 0.11 });
+      if (ven.amb === 'moon') this.radio(false);
+      else if (ven.amb === 'space') this.blip(2 + Math.min(l, 4));
+      else if (ven.amb === 'stadium' && l >= 5) this.horn(t + 0.05, 0.35);
       this.cheer(l, l >= 5);
     },
     cheer(n, big) {
-      if (!ac) return; const t = now(), k = 0.3 + 0.07 * Math.min(n || 1, 8), len = big ? 1.4 : 0.7;
+      if (!ac) return; const t = now(), k = (0.3 + 0.07 * Math.min(n || 1, 8)) * Math.min(1.7, kk()), len = big ? 1.4 : 0.7;   // 会場が大きいほど観客も大きい
       noise(t, len, { f: 900, q: 0.8, gain: 0.45 * k, env: [[0, 0], [0.12, 1], [0.6, 0.7], [1, 0]] });
       noise(t, len, { f: 1700, f2: 2100, q: 1.4, gain: 0.25 * k, env: [[0, 0], [0.18, 1], [0.7, 0.6], [1, 0]] });
     },
     // ざわめきの大きさを段階に合わせる
-    murmur(l) {
+    murmur(l) {   // l＝測定中の段階（-1＝測定中ではない）
       if (!ac) return;
-      murGain.gain.setTargetAtTime(l >= 3 ? 0.05 + 0.05 * (Math.min(l, 6) - 3) : 0, now(), 0.3);
+      murGain.gain.setTargetAtTime(l >= 3 ? (0.05 + 0.05 * (Math.min(l, 6) - 3)) * Math.min(1.7, kk()) : 0, now(), 0.3);
+      droneGain.gain.setTargetAtTime(l >= 0 ? (ven.amb === 'space' ? 0.03 : ven.amb === 'moon' ? 0.012 : 0) : 0, now(), 0.4);
     },
     // ゼーゼー
     pant() {
@@ -139,6 +191,31 @@ const Snd = (() => {
       if (!ac) return; const t = now();
       tone(150, t, 0.16, { gain: 0.5, f2: 55 });
       noise(t, 0.08, { f: 700, type: 'lowpass', gain: 0.3 });
+    },
+    // エンディング：宇宙へ上がる音・ピコピコ・「そうはならんやろ」のずっこけ音・記録用紙のファンファーレ
+    endSweep() {
+      if (!ac) return; const t = now();
+      tone(110, t, 2.4, { type: 'sawtooth', gain: 0.03, f2: 880, attack: 0.4 });
+      tone(165, t, 2.4, { type: 'sine', gain: 0.05, f2: 1320, attack: 0.4 });
+      noise(t, 2.4, { f: 400, f2: 5000, q: 1.2, gain: 0.05, env: [[0, 0], [0.7, 1], [1, 0]] });
+    },
+    endType() {   // 記録用紙に書きこむ「ピッ」
+      if (!ac) return; const t = now();
+      tone(1320 + Math.random() * 300, t, 0.05, { type: 'square', gain: 0.035 });
+    },
+    sonna() {   // ずっこけ：下がっていくトロンボーン風
+      if (!ac) return; const t = now();
+      tone(392, t, 0.2, { type: 'sawtooth', gain: 0.07, f2: 349 });
+      tone(349, t + 0.22, 0.2, { type: 'sawtooth', gain: 0.07, f2: 311 });
+      tone(311, t + 0.44, 0.7, { type: 'sawtooth', gain: 0.08, f2: 130 });
+    },
+    endJingle() {   // ファンファーレ。記録用紙が出るとき
+      if (!ac) return; const t = now();
+      [[523.3, 0], [659.3, 0.14], [784, 0.28], [1046.5, 0.42]].forEach(([f, d]) => tone(f, t + d, 0.3, { type: 'triangle', gain: 0.13 }));
+      [[784, 0.7], [988, 0.7], [1318.5, 0.7]].forEach(([f, d]) => tone(f, t + d, 1.2, { type: 'triangle', gain: 0.1 }));
+      tone(1568, t + 0.7, 1.4, { type: 'sine', gain: 0.05 });
+      this.cheer(6, true);
+      this.blip(4);
     },
   };
 })();

@@ -81,15 +81,15 @@ const STR = {
 
   // 大会 9 つ。順番が進む順番（CFG.targets と同じ並び）
   tournaments: [
-    { name: 'クラスの体力測定', rival: { name: '前の席の|田中', short: '田中', say: '去年と|同じ記録を|目指します。' } },
-    { name: '学年の体力測定', rival: { name: '学年1位の|鈴木', short: '鈴木', say: '毎朝|牛乳を|飲んでいます。' } },
-    { name: '校内大会', rival: { name: '体育委員長の|佐藤', short: '佐藤', say: '全校生徒が|見ていますが|気にしません。' } },
-    { name: '市大会', rival: { name: '市の代表の|高橋', short: '高橋', say: '言い訳は|すでに|用意してあります。' } },
-    { name: '県大会', rival: { name: '県王者の|伊藤', short: '伊藤', say: '優勝賞品の|お米を|待っています。' } },
-    { name: '全国大会', rival: { name: '全国2連覇の|渡辺', short: '渡辺', say: 'テレビに|映るので|髪を 整えました。' } },
-    { name: '世界大会', rival: { name: '世界王者の|ジャン', short: 'ジャン', say: '言葉は|通じませんが|記録は 通じます。' } },
-    { name: '月面大会', rival: { name: '宇宙飛行士の|山本', short: '山本', say: '重力が 小さいので|だいぶ|有利です。' } },
-    { name: '宇宙大会', rival: { name: '宇宙人の|ポポ', short: 'ポポ', say: '記録係は|腕が 6本|あります。' } },
+    { name: 'クラスの体力測定', rival: { name: '前の席の|田中', short: '田中', say: '去年と|同じ記録を|目指します。', win: '来年も|牛乳を|もらいます。', lose: '去年と|同じ記録で|勝ちました。' } },
+    { name: '学年の体力測定', rival: { name: '学年1位の|鈴木', short: '鈴木', say: '毎朝|牛乳を|飲んでいます。', win: '牛乳が|足りません|でした。', lose: '牛乳の|おかげです。' } },
+    { name: '校内大会', rival: { name: '体育委員長の|佐藤', short: '佐藤', say: '全校生徒が|見ていますが|気にしません。', win: '全校生徒の|前で|負けました。', lose: '全校生徒が|見ていた|ようですね。' } },
+    { name: '市大会', rival: { name: '市の代表の|高橋', short: '高橋', say: '言い訳は|すでに|用意してあります。', win: 'ここで|言い訳を|使います。', lose: '言い訳は|不要|でした。' } },
+    { name: '県大会', rival: { name: '県王者の|伊藤', short: '伊藤', say: '優勝賞品の|お米を|待っています。', win: 'お米は|差し上げます。', lose: 'お米は|いただき|ます。' } },
+    { name: '全国大会', rival: { name: '全国2連覇の|渡辺', short: '渡辺', say: 'テレビに|映るので|髪を 整えました。', win: '髪が|乱れました。', lose: '髪は|乱れて|いません。' } },
+    { name: '世界大会', rival: { name: '世界王者の|ジャン', short: 'ジャン', say: '言葉は|通じませんが|記録は 通じます。', win: '記録は|通じました。|完敗です。', lose: '記録が|通じ|ませんでしたね。' } },
+    { name: '月面大会', rival: { name: '宇宙飛行士の|山本', short: '山本', say: '重力が 小さいので|だいぶ|有利です。', win: '重力の|せいに|します。', lose: '重力が|味方に|なりました。' } },
+    { name: '宇宙大会', rival: { name: '宇宙人の|ポポ', short: 'ポポ', say: '記録係は|腕が 6本|あります。', win: '腕が 6本でも|数えきれ|ません。', lose: '腕が 6本|ありますので。' } },
   ],
 
   // 記録用紙
@@ -103,21 +103,64 @@ const STR = {
     noteUnlock: s => '「' + s + '」が|ひらきました！',
     noteReplay: 'ライバルに|また 勝ちました。',
     noteEnd: '全大会|せいは！',
+    rivalSay: s => '「' + s + '」',
     retry: 'もう一回', toList: '大会の一覧', cont: 'つづける', share: 'Xで シェア',
     tickets: '引換券', ticketGain: n => '+' + n, shop: '購買部',
   },
 
-  // 宇宙大会に勝ったあと（Phase 3 で作り直す）
+  // 会場ごとの言葉。banner＝壁の横断幕、sign＝看板、rec＝記録係のひとこと（勢いの段階 0〜10。段階 7〜10 は分身の秘伝書）、
+  // ready／fin／over＝「よーい」「そこまで」「記録の読み上げ」、tag＝記録係の呼び名（エンディングでも使う）
+  venues: [
+    { banner: '体力測定', sign: '', tag: '担任の先生', ready: 'よーい…', fin: 'そこまで！ きろくします…', over: n => '…' + n + ' 回です。',
+      rec: ['いーち、にー…', 'は、はやっ！', 'えっ…？ にー、よん…', 'ひとが ふえてる…', 'ゆ、ゆかが…！', 'でんたく でんたく…！', 'そ、測定不能…！',
+        '百人…？ 数えます！', '出席簿が 足りない…', '先生 校庭に 出ます', '先生 もう 帰っていい？'] },
+    { banner: '学年の体力測定', sign: '', tag: '学年の先生たち', ready: '三人で 見ます…', fin: 'そこまで！ 集計します', over: n => '学年記録は ' + n + ' 回です',
+      rec: ['一組の先生、数えて！', 'こっちの数と 合わない', '三人で 数えます！', '学年主任が 二人います', '体育の先生が 泣いてる', '電卓を 回してください', '会議にします！ 測定不能',
+        '全員で 数えますが…', '職員室から 応援を！', '教頭先生が 倒れました', '校長先生に 報告します'] },
+    { banner: '校内大会', sign: '', tag: '体育委員の先生', ready: '全校生徒、静かに…', fin: 'そこまで！ 全校に 発表', over: n => '校内記録 ' + n + ' 回！',
+      rec: ['全校生徒が 見ています', '静かに！ 見えません！', '体育委員、整列して！', '全校が ざわざわ…', '校長先生も 立ちました', '放送室！ 実況お願い！', '学校記録を 超えました',
+        '校庭が 分身だらけです', '近所からも 見ています', '来年の 校内大会は…？', '校歌を うたってください'] },
+    { banner: '市大会', sign: '市民体育館', tag: '審判', ready: '位置について…', fin: 'そこまで。記録 確認', over: n => '記録 ' + n + ' 回。有効。',
+      rec: ['位置について。', 'ただいまの 動作、有効。', '二名に 見えますが 有効', '競技者の数を 確認中', '競技規則に 前例なし', '審判長、協議します', '規定により 測定不能',
+        '分身は 登録外です', '市長に 連絡しました', '協議の結果 続行します', '審判を 増員します'] },
+    { banner: '県大会', sign: '', tag: '審査員', ready: '採点を はじめます…', fin: '採点 しめきります', over: n => '得点 ' + n + ' 回ぶん',
+      rec: ['審査員、採点 準備！', '一人目、7点！', '二人目、迷っています', '三人とも 札が 割れた', '採点が 追いつかない', '得点板が 足りない！', '満点を 超えました',
+        '審査員も 分身しました', '県知事が 立ちました', '採点は 天に まかせます', '審査規定を 書き直します'] },
+    { banner: '全国大会', sign: 'LIVE', tag: '実況アナウンサー', ready: '生中継、入ります…', fin: 'ここで 終了！ 結果は…', over: n => '記録は… ' + n + ' 回！',
+      rec: ['さあ 始まりました！', 'おっと！ 今 二人に！？', '解説の 田村さん これは？', '増えている！ 増えている！', '視聴率が 急上昇中！', '放送事故 寸前です！', 'カメラが 追えない！',
+        '全国の お茶の間が 騒然！', '番組を 延長します！', '歴史的瞬間を 目撃中！', 'CM… 入れません！'] },
+    { banner: '世界大会', sign: '', tag: '国際審判', ready: 'レディ…', fin: '終了。ジャッジ 協議', over: n => n + ' 回。公式記録。',
+      rec: ['ええと… レディ？', '通訳！ 通訳 来て！', 'ワンダフル…？ トゥー？', '世界記録の 予感です', '言葉は いりません', '各国の 審判が 協議中', 'ノーカウント…いや 数える',
+        '国連に 報告します', '全大陸が 見ています', 'ルールブックが 足りない', 'もう どこの国か 不明'] },
+    { banner: '月面大会', sign: '', tag: '宇宙飛行士', ready: '地球へ。開始します…', fin: '終了。データを 送信', over: n => '地球へ。' + n + ' 回です',
+      rec: ['地球へ。測定を 開始', '地球へ。二人に 見える', 'こちら 月。四人です', 'ザザッ… 増えてます', '砂ぼこりが 止まらない', '地球、応答を！ 数が…', '測定不能。通信 終了',
+        '百人を 確認。どうぞ', '五百人。酸素が たりない', '三千人。月が せまい', '地球へ。引っこします'] },
+    { banner: '宇宙大会', sign: '', tag: '宇宙人の ポポ', ready: 'ピポ。よーい…', fin: 'ピポ。おわりです', over: n => n + ' 回… たぶん',
+      rec: ['ピポ。いち…ですか？', 'に。あるいは 8ミリ', 'よん… いえ 九万です', 'ふえた。星 ふえた', '16 を 3 と よみました', '数え方を わすれました', 'ケタが 銀河を 超えた',
+        '百。つまり 青色です', '五百。おいしい におい', '三千。わが星の 人口', 'ポポ 数える 全部 すき'] },
+  ],
+
+  // 宇宙大会に初めて勝ったあと：エンディング（3 つの場面 → 宇宙記録の記録用紙）。cap の「|」は文節の切れ目
   ending: {
-    head: '全大会|せいは！', body: '宇宙大会に|勝ちました。', thanks: 'おめでとう！',
-    best: n => '宇宙大会 ベスト ' + n + ' 回', list: '大会の一覧へ',
+    cap: {
+      galaxy: ['あなたの|分身は|整列して|宇宙へ|飛び立ちました。', '銀河の|すみずみまで|ならんでいます。'],
+      sheet: ['記録係の|ポポが|6本の腕で|書きこみます。', '宇宙規模でも|書式は|いつもどおり。'],
+      teacher: ['そのころ、|体育館では。'],
+    },
+    sheetRow: { kind: '種目', kindVal: '反復横とび', rec: '記録', unit: '回', judge: '判定', judgeVal: '宇宙規模' },
+    teacher: ['…はい。|記録しました。', n => '宇宙記録、|' + n + '回。', '例年どおり|異常なし。'],
+    pop: 'そうはならんやろ',
+    cert: {
+      head: '体力測定 記録用紙', sub: '宇宙記録', kind: '種目', kindVal: '反復横とび', tn: '大会', tnVal: '宇宙大会', rec: '記録', unit: '回',
+      who: '記録係', whoVal: 'ポポ（腕 6本）', witness: '立会', witnessVal: '担任の先生', note: '備考', noteVal: '例年どおり|異常なし', stamp: '宇宙|規模',
+    },
+    skip: 'とばす ▶', list: '大会の一覧へ', share: 'Xで シェア',
+    shareText: (n) => '分身反復横とび「宇宙大会」に勝ちました！ 宇宙記録 ' + n + ' 回、備考「例年どおり異常なし」 #分身反復横とび',
   },
 
   // 測定中の画面（記録板・ふきだし・文字の演出）
   hud: {
-    banner: '体力測定', rec: '記録', real: n => 'ほんとうは ' + n + ' 回', left: 'のこり', bodies: n => '分身 ' + n + '人',
-    bubble: ['いーち、にー…', 'は、はやっ！', 'えっ…？ にー、よん…', 'ひとが ふえてる…', 'ゆ、ゆかが…！', 'でんたく でんたく…！', 'そ、測定不能…！'],
-    bFinish: 'そこまで！ きろくします…', bOver: n => '…' + n + ' 回です。', bReady: 'よーい…',
+    rec: '記録', real: n => 'ほんとうは ' + n + ' 回', left: 'のこり', bodies: n => '分身 ' + n + '人',
     ready: 'よーい…', vs: 'VS', passed: '超えた！',
   },
   pop: {
@@ -161,6 +204,72 @@ function fmtNum(v) {
   }
   return neg ? '-' + out : out;
 }
+// ===== 会場の表（画面を使わない。描き方は 42-venues-art.js、言葉は 12-strings.js の STR.venues）=====
+// 大会 9 つと同じ並び（CFG.targets・STR.tournaments・STR.venues と同じ番号）。
+//   kind   背景の描き方（gym 体育館／hall 市民体育館／arena 大きなアリーナ／tv テレビ中継の会場／stadium スタジアム／moon 月面／space 宇宙空間）
+//   wall   壁（空）の上と下の色　wain 腰壁　floor 床の上（奥）と下（手前）の色　floorStyle 床の模様
+//   props  この会場だけの小物（名前は VENUE_PROPS のどれか。描くのは PROP[名前]）
+//   crowd  見ている人（type＝絵の種類　shirts＝服の色の順番　pants＝ズボン）
+//   recorder  記録係の絵（記録板の顔）
+//   lowG   月面：跳ぶ弧がふわっと、ほこりがゆっくり（見た目だけ。ルールと時間は変えない）
+//   amb    効果音：会場の空気（50-audio.js）　k＝観客の大きさ（会場が上がるほど大きい）
+const VENUE_PROPS = [
+  'windows', 'banner', 'curtain', 'garlands', 'teachersRow', 'studentsRow',   // 体育館
+  'clerestory', 'bleachers', 'sign',                                          // 市民体育館
+  'trusses', 'tiers', 'judges',                                               // アリーナ
+  'ledwall', 'glowsticks', 'cameras', 'live',                                 // テレビ中継
+  'towers', 'worldFlags',                                                     // スタジアム
+  'stars', 'earth', 'hills', 'lander', 'moonFlag',                            // 月面
+  'nebula', 'planet', 'ufo', 'twinkle',                                       // 宇宙
+];
+const VENUE_KINDS = ['gym', 'hall', 'arena', 'tv', 'stadium', 'moon', 'space'];
+const REC_TYPES = ['teacher', 'teachers', 'megaphone', 'referee', 'judge', 'announcer', 'intl', 'astro', 'alien'];
+const CROWD_TYPES = ['kid', 'citizen', 'staff', 'athlete', 'astro', 'alien'];
+
+const GYM_WALL = { wall: ['#f6efd6', '#eadcb4'], wain: '#b79a62', wainLine: '#8a6e3e', floor: ['#d9b36a', '#c58f45'], floorStyle: 'planks', bg: '#e8d6a8' };
+const KID_SHIRTS = ['#f2a43a', '#58b0e0', '#e86a9a', '#7ac45a', '#8a5ad0', '#e04a4a'];
+
+const VENUES = [
+  // 1 クラスの体力測定：v1 の体育館・担任の先生
+  Object.assign({ id: 'class', kind: 'gym', props: ['windows', 'banner', 'curtain'], banner: ['#d2382f', '#f6c84c'],
+    crowd: { type: 'kid', shirts: KID_SHIRTS, pants: '#333b4d', whistle: true }, recorder: 'teacher', lowG: false, amb: 'gym', k: 0.8 }, GYM_WALL),
+  // 2 学年の体力測定：同じ体育館・先生たちが並んで見ている
+  Object.assign({ id: 'grade', kind: 'gym', props: ['windows', 'banner', 'curtain', 'teachersRow'], banner: ['#2c4aa0', '#f6c84c'],
+    crowd: { type: 'kid', shirts: KID_SHIRTS, pants: '#333b4d', whistle: true }, recorder: 'teachers', lowG: false, amb: 'gym', k: 0.9 }, GYM_WALL),
+  // 3 校内大会：同じ体育館・全校生徒が座って見ている・紙の飾り
+  Object.assign({ id: 'school', kind: 'gym', props: ['windows', 'garlands', 'banner', 'curtain', 'studentsRow', 'teachersRow'], banner: ['#e0356f', '#fff2a8'],
+    crowd: { type: 'kid', shirts: KID_SHIRTS, pants: '#333b4d', whistle: true }, recorder: 'megaphone', lowG: false, amb: 'gym', k: 1.15 }, GYM_WALL),
+  // 4 市大会：市民体育館・観客席・審判
+  { id: 'city', kind: 'hall', wall: ['#dbe6ec', '#b9ccd6'], wain: '#2f4a73', wainLine: '#1d3050', floor: ['#79a6cc', '#4f7fae'], floorStyle: 'court', bg: '#4f7fae',
+    props: ['clerestory', 'bleachers', 'banner', 'sign'], banner: ['#2f4a73', '#e8e8f2'], sign: ['#1d3050', '#ffe08a'],
+    crowd: { type: 'citizen', shirts: ['#e8e2d0', '#6aa5d8', '#e89a4a', '#8fc47a', '#d96a8a', '#b9b9c8'], pants: '#3b4a6b' }, recorder: 'referee', lowG: false, amb: 'hall', k: 1.0 },
+  // 5 県大会：大きなアリーナ・審査員の机・観客席が 2 段
+  { id: 'pref', kind: 'arena', wall: ['#1d2342', '#2c3560'], wain: '#10142c', wainLine: '#070a1c', floor: ['#62b184', '#3f8a60'], floorStyle: 'turf', bg: '#3f8a60',
+    props: ['trusses', 'tiers', 'banner', 'judges'], banner: ['#7a1f2e', '#f0c860'],
+    crowd: { type: 'staff', shirts: ['#26304f', '#3a2e57', '#2c4a5a', '#57364a', '#3a3f55'], pants: '#1a2038' }, recorder: 'judge', lowG: false, amb: 'arena', k: 1.3 },
+  // 6 全国大会：テレビ中継の会場・LED の壁・カメラ・LIVE
+  { id: 'nation', kind: 'tv', wall: ['#120a24', '#241446'], wain: '#0a0618', wainLine: '#00d8ff', floor: ['#4b3a86', '#2c2260'], floorStyle: 'glass', bg: '#2c2260',
+    props: ['glowsticks', 'ledwall', 'cameras', 'live'],
+    crowd: { type: 'staff', shirts: ['#111018', '#1d1a2e', '#2a2140', '#14202e', '#26142a'], pants: '#0d0b18', headset: true }, recorder: 'announcer', lowG: false, amb: 'tv', k: 1.5 },
+  // 7 世界大会：スタジアム・万国旗・赤い走路
+  { id: 'world', kind: 'stadium', wall: ['#0b1233', '#27407a'], wain: '#2a2f45', wainLine: '#10131f', floor: ['#d0583e', '#a63f2c'], floorStyle: 'track', bg: '#a63f2c',
+    props: ['stars', 'towers', 'tiers', 'worldFlags'], banner: ['#1f3a8a', '#ffffff'],
+    crowd: { type: 'athlete', shirts: ['#e04a4a', '#3a6ad0', '#f2c43a', '#2fa36a', '#f2f2f2', '#e86a9a'], pants: '#222a44' }, recorder: 'intl', lowG: false, amb: 'stadium', k: 1.8 },
+  // 8 月面大会：月面・地球・宇宙飛行士
+  { id: 'moon', kind: 'moon', wall: ['#000004', '#080b1a'], wain: '#55555f', wainLine: '#33333c', floor: ['#8d8d96', '#5c5c66'], floorStyle: 'regolith', bg: '#5c5c66',
+    props: ['stars', 'earth', 'hills', 'lander', 'moonFlag'],
+    crowd: { type: 'astro', shirts: ['#f2f2f6', '#f2f2f6', '#ffe9c0', '#f2f2f6'], pants: '#c9c9d4' }, recorder: 'astro', lowG: true, amb: 'moon', k: 0.5 },
+  // 9 宇宙大会：宇宙空間・星雲・宇宙人
+  { id: 'space', kind: 'space', wall: ['#0a0420', '#1d0b45'], wain: '#2a1d6a', wainLine: '#5cf0ff', floor: ['#2a1d6a', '#150f40'], floorStyle: 'grid', bg: '#150f40',
+    props: ['stars', 'nebula', 'planet', 'ufo', 'twinkle'],
+    crowd: { type: 'alien', shirts: ['#8fe07a', '#7ad0e8', '#e89ae0', '#f2d65a', '#b09af0'], pants: '#5a4a9a' }, recorder: 'alien', lowG: false, amb: 'space', k: 0.9 },
+];
+
+VENUES.forEach((v, i) => { v.i = i; });
+
+// エンディングの長さ（秒）。3 つの場面のあとに記録用紙（宇宙記録）が出る。タップでとばせる
+const ENDING_TIMES = { galaxy: 5.2, sheet: 5.2, teacher: 5.6 };
+const endingTotal = () => ENDING_TIMES.galaxy + ENDING_TIMES.sheet + ENDING_TIMES.teacher;
 // ===== ゲームのロジック（画面を使わない）=====
 const clamp = (v, a, b) => Math.max(a, Math.min(b, v));
 function mulberry32(a) {
@@ -931,6 +1040,34 @@ const Tourney = {
   const beaten = rec => CFG.targets.filter(t => rec > t).length;
   check('毎秒6回のボットは、少なくとも最初の大会に勝てる（遊び始めで詰まらない）', beaten(rec6) >= 1, 'rec=' + rec6 + ' 勝てる大会=' + beaten(rec6));
   check('強化なしでは、最後の大会には勝てない（毎秒10回でも宇宙大会には届かない）', beaten(rec9) < N && beaten(b11.rec) < N, 'rec9=' + rec9 + ' 勝てる大会=' + beaten(rec9) + ' ／ 最高速 rec=' + b11.rec);
+
+  // ===== v2 Phase 3：会場・記録係・ライバルの一言・エンディング =====
+  {
+    const NV = CFG.targets.length;
+    const strs = o => { const out = []; (function w(v) { if (typeof v === 'string') out.push(v); else if (Array.isArray(v)) v.forEach(w); else if (v && typeof v === 'object') Object.keys(v).forEach(k => w(v[k])); })(o); return out; };
+    check('会場の表：大会と同じ 9 つ（目標・名前・言葉と同じ数）', VENUES.length === 9 && NV === 9 && STR.tournaments.length === 9 && STR.venues.length === 9);
+    check('会場の表：番号と id が合っている（重なりなし）', VENUES.every((v, i) => v.i === i) && new Set(VENUES.map(v => v.id)).size === 9);
+    check('会場の表：必要な項目（kind・壁・床・小物・観客・記録係・音）が全部ある', VENUES.every(v => VENUE_KINDS.indexOf(v.kind) >= 0 && v.wall.length === 2 && v.floor.length === 2 && typeof v.floorStyle === 'string' && typeof v.bg === 'string'
+      && v.props.length > 0 && v.props.every(n => VENUE_PROPS.indexOf(n) >= 0) && CROWD_TYPES.indexOf(v.crowd.type) >= 0 && v.crowd.shirts.length > 0 && typeof v.crowd.pants === 'string'
+      && REC_TYPES.indexOf(v.recorder) >= 0 && typeof v.amb === 'string' && v.k > 0 && typeof v.lowG === 'boolean'));
+    check('会場の表：最初の 3 つは体育館・月面だけ低重力・記録係の絵は 9 会場ぜんぶ別', VENUES.slice(0, 3).every(v => v.kind === 'gym') && VENUES.filter(v => v.lowG).length === 1 && VENUES[7].lowG && new Set(VENUES.map(v => v.recorder)).size === 9);
+    check('会場の表：会場が上がるほど観客が大きく（クラス＜世界）、月面は静か', VENUES[6].k >= VENUES[0].k * 2 && VENUES[7].k < VENUES[0].k);
+    check('会場の言葉：9 つとも横断幕・待ち・終了・読み上げがある', STR.venues.every(v => v.banner && v.ready && v.fin && v.tag && typeof v.over(12) === 'string' && v.over(12).indexOf('12') >= 0));
+    check('記録係のひとこと：9 会場とも、勢いの段階 0〜10（秘伝書の 7〜10 も）に 1 つずつある', STR.venues.every(v => v.rec.length >= 7 + CFG.bodiesExtra.length && v.rec.every(x => typeof x === 'string' && x.length > 0)), '段階の数 ' + (7 + CFG.bodiesExtra.length));
+    check('記録係のひとこと：1 行に収まる長さ（16 文字まで）', STR.venues.every(v => v.rec.concat([v.ready, v.fin, v.over(99999)]).every(x => x.length <= 16)));
+    check('記録係のひとこと：会場ごとに言葉が違う（同じ文が 2 会場に出ない）', (() => { const all = [].concat(...STR.venues.map(v => v.rec)); return new Set(all).size === all.length; })());
+    check('ライバルの一言：9 人とも、勝ったとき・負けたときの 2 つがある', STR.tournaments.every(t => t.rival.win && t.rival.lose && t.rival.win !== t.rival.lose));
+    check('文節の区切り「|」：空の文節がない（画面の言葉全部）', strs(STR).every(x => x.indexOf('||') < 0 && x[0] !== '|' && x[x.length - 1] !== '|'));
+    check('エンディング：全体の長さは 10〜20 秒（3 場面ぶん）', endingTotal() >= 10 && endingTotal() <= 20 && Object.keys(ENDING_TIMES).length === 3 && Object.values(ENDING_TIMES).every(x => x > 3));
+    check('エンディング：字幕・先生のセリフ・記録用紙の言葉がそろっている', STR.ending.cap.galaxy.length >= 2 && STR.ending.cap.sheet.length >= 2 && STR.ending.teacher.length === 3 && strs(STR.ending.cert).every(x => x.length > 0) && STR.ending.teacher[1]('9,999').indexOf('9,999') >= 0);
+    check('エンディング：宇宙大会に初めて勝った 1 回だけ出る・見たあとは全大会が遊べて、ベストを伸ばせる', (() => {
+      const sv = Tourney.newSave();
+      for (let i = 0; i < NV - 1; i++) Tourney.record(sv, i, CFG.targets[i] + 1);
+      const a = Tourney.record(sv, NV - 1, CFG.targets[NV - 1] + 10), b = Tourney.record(sv, NV - 1, CFG.targets[NV - 1] + 99);
+      return a.ending === true && b.ending === false && b.isBest && sv.best[NV - 1] === CFG.targets[NV - 1] + 99 && sv.won.every(Boolean) && sv.won.every((_, i) => Tourney.playable(sv, i));
+    })());
+    check('保存：Phase 3 では形を変えない（版 2・項目は v・unlocked・won・best・tickets・up）', SAVE_VER === 2 && JSON.stringify(Object.keys(Tourney.newSave()).sort()) === JSON.stringify(['best', 'tickets', 'unlocked', 'up', 'v', 'won']));
+  }
 
   const s = document.createElement('h2');
   s.textContent = fail === 0 ? '全部 OK' : 'NG が ' + fail + ' 件';
