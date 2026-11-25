@@ -1,9 +1,9 @@
 // ===== 大会のくり返し（画面を使わない）=====
 // 保存の形：{ v, unlocked（遊べる一番先の大会 0始まり）, won[大会ごとの勝ち], best[大会ごとのベスト] }
-// Phase 2 で tickets（引換券の残り）と up（品物ごとの強化の段階）を足した。知らない項目は読み書きしても消さない
+// Phase 2 で tickets（引換券の残り）と up（品物ごとの強化の段階）を、Phase 4 で endingSeen（エンディングを最後まで見たか）を足した。知らない項目は読み書きしても消さない
 const SAVE_KEY = 'hanpuku-yokotobi-save';
 const V1_BEST_KEY = 'hanpuku-yokotobi-best';   // v1 のベスト（引き継ぎ用に読むだけ）
-const SAVE_VER = 2;   // 1＝Phase 1（大会だけ）／2＝引換券と強化
+const SAVE_VER = 3;   // 1＝Phase 1（大会だけ）／2＝引換券と強化／3＝endingSeen（エンディングを見たか）
 
 const Tourney = {
   count() { return CFG.targets.length; },
@@ -13,7 +13,7 @@ const Tourney = {
 
   newSave() {
     const n = this.count();
-    return { v: SAVE_VER, unlocked: 0, won: new Array(n).fill(false), best: new Array(n).fill(0), tickets: 0, up: Shop.zeroUp() };
+    return { v: SAVE_VER, unlocked: 0, won: new Array(n).fill(false), best: new Array(n).fill(0), tickets: 0, up: Shop.zeroUp(), endingSeen: false };
   },
 
   // どんな値が来ても、使える形に直す（壊れた保存・古い保存・手で書き換えた保存）
@@ -40,6 +40,8 @@ const Tourney = {
       const l = Math.floor(Number(o.up && o.up[id]));
       out.up[id] = Number.isFinite(l) ? clamp(l, 0, Shop.maxLevel(id)) : 0;
     }
+    // エンディングを見たか（版 2 までの保存にはないので false。全部勝っているのに false なら、次に大会の一覧を開いたとき 1 回だけ出る）
+    out.endingSeen = o.endingSeen === true;
     out.v = SAVE_VER;
     return out;
   },
@@ -52,6 +54,10 @@ const Tourney = {
   playable(save, i) { return i >= 0 && i < this.count() && i <= save.unlocked; },
   focusIndex(save) { return save.unlocked; },
   wonCount(save) { return save.won.filter(Boolean).length; },
+  allWon(save) { return save.won.length > 0 && save.won.every(Boolean); },
+  // エンディングを出すか：9 大会ぜんぶ勝っていて、まだ最後まで見ていない（ページを閉じて見損ねても、次に出る）
+  shouldShowEnding(save) { return this.allWon(save) && !save.endingSeen; },
+  markEndingSeen(save) { save.endingSeen = true; },
 
   // 1回の結果を保存の形に反映する。勝てば次の大会が開く。遊べない大会は何も変えない
   record(save, i, rec) {

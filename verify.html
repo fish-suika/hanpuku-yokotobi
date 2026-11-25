@@ -3,6 +3,7 @@
 <style>body{font:16px sans-serif;padding:16px}.ok{color:#080}.ng{color:#c00;font-weight:bold}pre{background:#f4f4f4;padding:8px}</style>
 </head><body><h1>分身反復横とび 検証</h1><div id="out"></div>
 <script>
+window.__FORCE_LANG = 'ja';   // 検証は日本語で固定（英語は STR_EN を直接調べる）
 // ===== 調整用の数値 =====
 const CFG = {
   h: 1 / 120,            // 検証用の固定刻み
@@ -22,7 +23,7 @@ const CFG = {
   bodies: [1, 2, 4, 8, 16, 32, 48],   // 段階ごとの体の数（本人を含む）。段階1から分身する
 
   // 判定（記録の下限）
-  judge: [[0, 'E'], [40, 'D'], [80, 'C'], [150, 'B'], [400, 'A'], [1000, 'S'], [3000, '測定不能'], [7000, '人類の範囲外']],   // 分身が早く出るようにしたので記録の桁が上がった（元は 130/200/400/1000/3000）
+  judge: [[0, 'E'], [40, 'D'], [80, 'C'], [150, 'B'], [400, 'A'], [1000, 'S'], [3000, 'x'], [7000, 'y']],   // 名前は STR.judge（言語ごと）。ここは下限の数と並びだけ使う。分身が早く出るようにしたので記録の桁が上がった（元は 130/200/400/1000/3000）
 
   // v2 大会：ライバルの記録（これを超えると勝ち）。数字は仮。Phase 2 でボットを使って調整する
   targets: [80, 200, 500, 1200, 3000, 8000, 20000, 45000, 100000],
@@ -46,12 +47,31 @@ const CFG = {
   },
 
   cloneDelay: 0.022,     // 分身1体あたりの遅れ（秒）
-  shareUrl: 'https://fish-suika.github.io/hanpuku-yokotobi/',
 };
-// ===== 画面に出す言葉（ここに集める。Phase 4 で英語を足す）=====
+// ===== 言語（日本語 / 英語）=====
+// ブラウザの言語が ja で始まれば日本語、それ以外は英語（ほかのポータル版と同じ規則）。?lang=ja / ?lang=en で上書きできる（確認用）。
+// PORTAL はビルドで埋め込む（false＝GitHub 版：Xの共有ボタンあり／true＝ポータル版：外部リンク・共有ボタンなし）
+const PORTAL = false;
+function pickLang(nav, query) {
+  if (query === 'ja' || query === 'en') return query;
+  return /^ja/i.test(nav || '') ? 'ja' : 'en';
+}
+const LANG = (function () {
+  let q = '';
+  try { q = new URLSearchParams(location.search).get('lang') || ''; } catch (_) {}
+  try { if (typeof window !== 'undefined' && window.__FORCE_LANG) q = window.__FORCE_LANG; } catch (_) {}
+  let nav = '';
+  try { nav = navigator.language || ''; } catch (_) {}
+  return pickLang(nav, q);
+})();
+const EN = LANG === 'en';
+// ===== 画面に出す言葉（ここに集める。日本語は STR_JA、英語は STR_EN。同じ形で書く）=====
 // 「|」は文節の切れ目。画面では文節ごとに改行しない塊（.nb）になる。ph() で「|」を取れば普通の文字列
-const STR = {
-  title: { name: '分身|反復横とび', catch: '20秒で|何人 分身できる？', tap: 'タップで スタート' },
+const STR_JA = {
+  title: { name: '分身|反復横とび', logo: ['分身', '反復横とび'], tag: '体力測定', catch: '20秒で|何人 分身できる？', tap: 'タップで スタート' },
+
+  // 判定の名前（CFG.judge と同じ並び）。「|」は判子の中で改行できる場所
+  judge: ['E', 'D', 'C', 'B', 'A', 'S', '測定|不能', '人類の|範囲外'],
 
   list: {
     head: '大会の一覧', back: 'タイトルへ',
@@ -59,6 +79,7 @@ const STR = {
     vs: 'VS', unit: '回', best: 'ベスト', noBest: 'ベスト ---',
     tagWon: '勝ち', tagNext: '挑戦！', tagLocked: 'ロック', hidden: '？？？',
     tickets: '引換券', shop: '購買部',
+    sub: (short, n) => 'VS ' + short + '　' + n + '回', bestOf: n => 'ベスト ' + n,
   },
 
   // 購買部。品物は 6 つ。name・desc（何が強くなるか 1 行）・lb（効果の見出し）・v（段階ごとの効果の短い表示。引数は Shop.effect の値）。画面には「lb v → 次の v」
@@ -77,7 +98,7 @@ const STR = {
     },
   },
 
-  intro: { rival: 'ライバル', rec: 'ライバルの記録', unit: '回', best: 'ベスト', start: 'タップで スタート', back: 'もどる' },
+  intro: { rival: 'ライバル', rec: 'ライバルの記録', unit: '回', bestOf: n => 'ベスト ' + n + ' 回', start: 'タップで スタート', back: 'もどる' },
 
   // 大会 9 つ。順番が進む順番（CFG.targets と同じ並び）
   tournaments: [
@@ -178,28 +199,164 @@ const STR = {
     card: { head: '体力測定 記録用紙', kind: '種目', kindVal: '反復横とび', rec: '記録', unit: '回', steps: '本当の回数', maxN: '最高の分身', trips: '転んだ回数', times: ' 回', people: ' 人' },
   },
 };
-const ph = s => s.replace(/\|/g, '');   // 「|」を取った普通の文字列
 
-// ===== 大きな数字の表示（ここ 1 か所。Phase 4 で英語の K / M / B を足すときは units と、読みを変えるところだけ）=====
-// 1 万未満はそのまま（3 桁ごとにカンマ）。1 万以上は 万・億・兆 を付けて、有効数字 4 桁まで（例 12.34万・123.4万・1234万・1.5億）
-STR.num = { units: [[1e4, '万'], [1e8, '億'], [1e12, '兆']], sep: ',', sig: 4 };
-function fmtNum(v) {
+// ===== English（日本語と同じ形で書く。「|」は文節の切れ目で、英語では画面に出るとき空白になる）=====
+// 学校の体力測定のまじめな言い方のまま、記録だけが大げさになる味を残す
+const STR_EN = {
+  title: { name: 'Clone|Side Step', logo: ['CLONE', 'SIDE STEP'], tag: 'FITNESS TEST', catch: 'How many clones|in 20 seconds?', tap: 'Tap to Start' },
+
+  judge: ['E', 'D', 'C', 'B', 'A', 'S', 'Off the|Charts', 'Beyond|Human'],
+
+  list: {
+    head: 'Tournaments', back: 'Title',
+    progress: (n, m) => n + ' / ' + m,
+    vs: 'VS', unit: 'reps', best: 'Best', noBest: 'Best ---',
+    tagWon: 'WON', tagNext: 'NEXT!', tagLocked: 'LOCKED', hidden: '???',
+    tickets: 'Coupons', shop: 'Shop',
+    sub: (short, n) => 'VS ' + short + ' · ' + n + ' reps', bestOf: n => 'Best ' + n,
+  },
+
+  shop: {
+    head: 'School Shop', tickets: 'Coupons', back: 'Tournaments', go: 'Try Again',
+    price: n => n, max: 'MAX', soldOut: 'Maxed', poor: 'Short', lock: 'Locked',
+    gate: name => 'Win|' + name + '|to unlock',
+    arrow: ' → ',
+    items: {
+      shoes: { name: 'Gym Shoes', desc: 'Keeps your|momentum|longer', lb: 'Hold', v: e => '×' + e.mul.toFixed(1) },
+      clothes: { name: 'New Gym Clothes', desc: 'Clones appear|more easily', lb: 'Speed needed', v: e => e.mul < 1 ? '-' + Math.round((1 - e.mul) * 100) + '%' : '±0%' },
+      fall: { name: 'Fall Practice', desc: 'Recover|faster from|tumbles', lb: '', v: e => '-' + e.drop + ' lvl ' + e.secs.toFixed(2) + 's' },
+      recorder: { name: 'More Recorders', desc: 'Bigger|records', lb: 'Record', v: e => '×' + (e.mul % 1 ? e.mul.toFixed(1) : e.mul) },
+      cheer: { name: 'Cheer Squad', desc: 'Start with|high momentum', lb: 'Start', v: e => fmtNum(e.bodies) + (e.bodies === 1 ? ' clone' : ' clones') },
+      book: { name: 'Clone Scroll', desc: 'Raises the|clone cap', lb: 'Max', v: e => fmtNum(e.bodies) + ' clones' },
+    },
+  },
+
+  intro: { rival: 'Rival', rec: 'Rival Record', unit: 'reps', bestOf: n => 'Best ' + n + ' reps', start: 'Tap to Start', back: 'Back' },
+
+  tournaments: [
+    { name: 'Class Fitness Test', rival: { name: 'Tanaka from|the Front Seat', short: 'Tanaka', say: 'Aiming for|the same record|as last year.', win: 'Guess I get|milk again|next year.', lose: 'Won with the|same record|as last year.' } },
+    { name: 'Grade Fitness Test', rival: { name: 'Grade Champ|Suzuki', short: 'Suzuki', say: 'I drink milk|every morning.', win: 'We were short|on milk.', lose: 'Thanks to|the milk.' } },
+    { name: 'School Meet', rival: { name: 'PE Committee|Chair Sato', short: 'Sato', say: 'The whole school|is watching.|I do not mind.', win: 'Lost in front|of the whole|school.', lose: 'The whole school|seems to have|watched.' } },
+    { name: 'City Meet', rival: { name: 'City Rep|Takahashi', short: 'Takahashi', say: 'My excuses|are already|prepared.', win: 'Time to use|my excuse.', lose: 'No excuse|was needed.' } },
+    { name: 'Prefecture Meet', rival: { name: 'Prefecture Champ|Ito', short: 'Ito', say: 'I am waiting|for the prize|rice.', win: 'You can|have the rice.', lose: 'I will take|the rice.' } },
+    { name: 'National Meet', rival: { name: 'Two-Time National|Champ Watanabe', short: 'Watanabe', say: 'I will be on TV,|so I fixed|my hair.', win: 'My hair|got messy.', lose: 'My hair is|not messy.' } },
+    { name: 'World Meet', rival: { name: 'World Champ|Jean', short: 'Jean', say: 'We share no|language, but|records translate.', win: 'The record|translated.|I concede.', lose: 'The record|did not|translate.' } },
+    { name: 'Lunar Meet', rival: { name: 'Astronaut|Yamamoto', short: 'Yamamoto', say: 'Low gravity|helps me|a lot.', win: 'I will blame|the gravity.', lose: 'Gravity was|on my side.' } },
+    { name: 'Space Meet', rival: { name: 'Alien|Popo', short: 'Popo', say: 'My recorder|has six arms.', win: 'Six arms|still cannot|count that.', lose: 'I have|six arms,|you see.' } },
+  ],
+
+  sheet: {
+    head: 'Fitness Test Record Sheet', kind: 'Event', rec: 'Record', unit: 'reps',
+    steps: 'Real hops', maxN: 'Most clones', trips: 'Falls', times: '', people: '',
+    judgeAll: 'The recorders|counted everyone.', judgeClone: 'Clones were|counted too.',
+    bestNew: 'New best!', best: n => 'Best ' + n + ' reps',
+    rival: s => 'Rival ' + s, you: 'You', vs: 'VS', win: 'WIN!', lose: 'LOSE...',
+    noteLose: n => n + ' more reps|to win!',
+    noteUnlock: s => s + '|is now open!',
+    noteReplay: 'Beat the rival|again.',
+    noteEnd: 'All tournaments|cleared!',
+    rivalSay: s => '“' + s + '”',
+    retry: 'Try Again', toList: 'Tournaments', cont: 'Continue', share: 'Share on X',
+    tickets: 'Coupons', ticketGain: n => '+' + n, shop: 'Shop',
+  },
+
+  venues: [
+    { banner: 'FITNESS TEST', sign: '', tag: 'Homeroom Teacher', ready: 'Ready...', fin: 'Time! Recording...', over: n => '...' + n + ' reps.',
+      rec: ['One, two...', 'W-whoa, fast!', 'Huh...? Two, four...', 'There are more of them...', 'The f-floor...!', 'Calculator! Calculator...!', 'Un... unmeasurable...!',
+        '100 people...? Counting!', 'Not enough attendance sheets', 'Teacher is going outside', 'Can teacher go home now?'] },
+    { banner: 'GRADE FITNESS TEST', sign: '', tag: 'Grade Teachers', ready: 'Three of us are watching...', fin: 'Time! Tallying up', over: n => 'Grade record: ' + n + ' reps',
+      rec: ['Class 1 teacher, count!', 'My count does not match', 'Three of us will count!', 'There are two grade heads', 'The gym teacher is crying', 'Pass the calculator around', 'Calling a meeting! Unmeasurable',
+        'Everyone count... but...', 'Send help from the staff room!', 'The vice principal fainted', 'Reporting to the principal'] },
+    { banner: 'SCHOOL MEET', sign: '', tag: 'PE Committee Teacher', ready: 'Whole school, quiet...', fin: 'Time! Announcing to all', over: n => 'School record: ' + n + ' reps!',
+      rec: ['The whole school is watching', 'Quiet! I cannot see!', 'PE committee, line up!', 'Murmuring across the school...', 'Even the principal stood up', 'Broadcast room! Commentary!', 'The school record is broken',
+        'The yard is all clones', 'Neighbors are watching too', 'What about next year...?', 'Please sing the school song'] },
+    { banner: 'CITY MEET', sign: 'CITY GYM', tag: 'Referee', ready: 'Take your marks...', fin: 'Time. Checking the record', over: n => 'Record: ' + n + ' reps. Valid.',
+      rec: ['Take your marks.', 'That motion: valid.', 'Looks like two. Still valid', 'Counting competitors...', 'No precedent in the rules', 'Chief referee, confer!', 'Per the rules: unmeasurable',
+        'Clones are not registered', 'Contacted the mayor', 'After review: continuing', 'Adding more referees'] },
+    { banner: 'PREFECTURE MEET', sign: '', tag: 'Judge', ready: 'Scoring begins...', fin: 'Scoring is closed', over: n => 'Score: ' + n + ' reps',
+      rec: ['Judges, get ready to score!', 'Judge one: 7 points!', 'Judge two is hesitating', 'All three paddles split', 'Cannot keep up with scoring', 'Need a bigger scoreboard!', 'Beyond a perfect score',
+        'The judges cloned too', 'The governor stood up', 'Scoring is left to heaven', 'Rewriting the judging rules'] },
+    { banner: 'NATIONAL MEET', sign: 'LIVE', tag: 'Announcer', ready: 'Going live...', fin: 'And that is it! The result is...', over: n => 'The record is... ' + n + ' reps!',
+      rec: ['And we are underway!', 'Oh! Two of them now?!', 'Analyst Tamura, what is this?', 'More and more of them!', 'Ratings are spiking!', 'Broadcast accident incoming!', 'The camera cannot follow!',
+        'Living rooms nationwide erupt!', 'We are extending the show!', 'Witnessing history!', 'No time for commercials!'] },
+    { banner: 'WORLD MEET', sign: '', tag: 'International Referee', ready: 'Ready...', fin: 'Finish. Judges confer', over: n => n + ' reps. Official record.',
+      rec: ['Umm... ready?', 'Interpreter! Interpreter!', 'Wonderful...? Two?', 'Smells like a world record', 'No words needed', 'Referees of all nations confer', 'No count... no, we count it',
+        'Reporting to the UN', 'Every continent is watching', 'We ran out of rulebook', 'Which country is this now?'] },
+    { banner: 'LUNAR MEET', sign: '', tag: 'Astronaut', ready: 'To Earth. Starting...', fin: 'Finish. Sending the data', over: n => 'To Earth. ' + n + ' reps.',
+      rec: ['To Earth. Measurement start', 'To Earth. I see two', 'This is Moon. Four of them', 'Crrk... they are increasing', 'The dust will not settle', 'Earth, respond! The count...', 'Unmeasurable. Ending comms',
+        '100 confirmed. Over.', '500. Oxygen is running low', '3,000. The Moon is cramped', 'To Earth. I am moving out'] },
+    { banner: 'SPACE MEET', sign: '', tag: 'Alien Popo', ready: 'Pipo. Ready...', fin: 'Pipo. All done', over: n => n + ' reps... maybe',
+      rec: ['Pipo. One... yes?', 'Two. Or 8 millimeters', 'Four... no, ninety thousand', 'More. Stars more', 'I read 16 as 3', 'I forgot how to count', 'Digits exceeded the galaxy',
+        '100. So, blue', '500. Tasty smell', '3,000. My planet population', 'Popo loves counting all'] },
+  ],
+
+  ending: {
+    cap: {
+      galaxy: ['Your clones|lined up and|flew off|into space.', 'They fill|every corner|of the galaxy.'],
+      sheet: ['Recorder Popo|writes it down|with six arms.', 'Cosmic scale,|same format|as always.'],
+      teacher: ['Meanwhile,|at the gym.'],
+    },
+    sheetRow: { kind: 'Event', kindVal: 'Side Step Test', rec: 'Record', unit: 'reps', judge: 'Verdict', judgeVal: 'Cosmic scale' },
+    teacher: ['...Yes.|Recorded.', n => 'Space record:|' + n + ' reps.', 'Nothing unusual|this year.'],
+    pop: 'That Doesn’t Happen',
+    cert: {
+      head: 'Fitness Test Record Sheet', sub: 'Space Record', kind: 'Event', kindVal: 'Side Step Test', tn: 'Meet', tnVal: 'Space Meet', rec: 'Record', unit: 'reps',
+      who: 'Recorder', whoVal: 'Popo (6 arms)', witness: 'Witness', witnessVal: 'Homeroom Teacher', note: 'Notes', noteVal: 'Nothing unusual|this year', stamp: 'COSMIC|SCALE',
+    },
+    skip: 'Skip ▶', list: 'To Tournaments', share: 'Share on X',
+    shareText: (n) => 'I won the Space Meet in Clone Side Step! Space record: ' + n + ' reps. Notes: “Nothing unusual this year.” #CloneSideStep',
+  },
+
+  hud: {
+    rec: 'Record', real: n => 'Real hops: ' + n, left: 'Left', bodies: n => n + ' clones',
+    ready: 'Ready...', vs: 'VS', passed: 'Passed!',
+  },
+  pop: {
+    start: 'GO!', stumble: 'Tangled!', out: 'Out of bounds!', down: 'Momentum down', end: 'Time!', pant: 'huff',
+    rival: 'Passed the rival!',
+    lv: ['', 'Clone!', '4 clones!', '8 clones!!', '16 clones!!', '32 clones!!!', 'Off the charts!!!'],
+    lvN: n => fmtNum(n) + ' clones!!!',
+    crowd: ['Woah!', 'So fast!', 'What is that?!', 'Clones?!', 'No way!', 'There are two!', 'I can’t see!', 'Go go go!'],
+  },
+
+  share: {
+    text: (t, rec, steps, judge, maxN, win) =>
+      'I scored ' + rec + ' reps (' + steps + ' real hops) at the ' + t + ' in Clone Side Step. Verdict: “' + judge + '”!' + (win ? ' Beat the rival!' : '') + ' ' + maxN + ' clones #CloneSideStep',
+    card: { head: 'Fitness Test Record Sheet', kind: 'Event', kindVal: 'Side Step Test', rec: 'Record', unit: 'reps', steps: 'Real hops', maxN: 'Most clones', trips: 'Falls', times: '', people: '' },
+  },
+};
+
+// 言語ごとの数字の書き方。units＝[基準, 記号]、from＝この数からまとめる
+STR_JA.num = { units: [[1e4, '万'], [1e8, '億'], [1e12, '兆']], sep: ',', sig: 4, from: 1e4 };
+STR_EN.num = { units: [[1e3, 'K'], [1e6, 'M'], [1e9, 'B']], sep: ',', sig: 4, from: 1e4 };
+const STRS = { ja: STR_JA, en: STR_EN };
+const STR = STRS[LANG];
+
+// 「|」を、日本語では何もなし・英語では空白にした普通の文字列
+const STRSEP = EN ? ' ' : '';
+const phL = (s, lang) => s.replace(/\|/g, lang === 'en' ? ' ' : '');
+const ph = s => s.replace(/\|/g, STRSEP);
+
+// ===== 大きな数字の表示（ここ 1 か所）=====
+// 日本語：1 万未満はカンマ、1 万以上は 万・億・兆。英語：1 万（10,000）未満はカンマ、以上は K / M / B。
+// どちらも有効数字 4 桁まで・最大 6 文字（例 12.34万・123.4万・1234万・1.5億／12.35K・123.5K・1.235M）。lang を省くと今の言語
+function fmtNum(v, lang) {
   let n = Math.round(Number(v));
   if (!Number.isFinite(n)) return '0';
   const neg = n < 0; if (neg) n = -n;
-  const U = STR.num.units;
+  const N = STRS[lang === 'ja' || lang === 'en' ? lang : LANG].num, U = N.units;   // map(fmtNum) のように添字が渡っても無視
   let out;
-  if (n < U[0][0]) {
-    out = String(n).replace(/\B(?=(\d{3})+(?!\d))/g, STR.num.sep);
+  if (n < N.from) {
+    out = String(n).replace(/\B(?=(\d{3})+(?!\d))/g, N.sep);
   } else {
     let u = 0;
     while (u + 1 < U.length && n >= U[u + 1][0]) u++;
     const body = k => {   // 有効数字 sig 桁に丸めて、余分な 0 を落とす
-      const m = n / U[k][0], d = Math.max(0, STR.num.sig - 1 - Math.floor(Math.log10(m)));
+      const m = n / U[k][0], d = Math.max(0, N.sig - 1 - Math.floor(Math.log10(m)));
       return Number(m.toFixed(d));
     };
     let m = body(u);
-    if (m >= 10000 && u + 1 < U.length) { u++; m = body(u); }   // 9999.6万 → 1億 のような繰り上がり
+    if (u + 1 < U.length && m >= U[u + 1][0] / U[u][0]) { u++; m = body(u); }   // 9999.6万 → 1億、999.96K → 1M のような繰り上がり
     out = String(m) + U[u][1];
   }
   return neg ? '-' + out : out;
@@ -270,6 +427,29 @@ VENUES.forEach((v, i) => { v.i = i; });
 // エンディングの長さ（秒）。3 つの場面のあとに記録用紙（宇宙記録）が出る。タップでとばせる
 const ENDING_TIMES = { galaxy: 5.2, sheet: 5.2, teacher: 5.6 };
 const endingTotal = () => ENDING_TIMES.galaxy + ENDING_TIMES.sheet + ENDING_TIMES.teacher;
+
+// ===== 横画面：レーンと分身の立つ場所（画面を使わない。描くのは 40-render.js）=====
+// レーン＝右左左右の 3 本線のひとまとまり。縦画面は 1 つ、横に広いほど増える（本人はまん中）。LANE_W は床の線 1 間隔を 1 としたレーンの間隔
+const LANE_W = 2.6;
+// wide＝画面の幅（遊ぶ場所の幅 100 を単位に）、step＝床の線 1 間隔（40-render の LS）。レーンの数は 1・3・5・7
+function lanesFor(wide, step) {
+  const m = Math.floor((wide / 2 - 8) / (LANE_W * step));
+  return (m >= 0 ? Math.min(3, m) : 0) * 2 + 1;
+}
+// 本人のレーンが先頭、そのあと左右へ 1 つずつ（0, -1, 1, -2, 2 …）
+function laneOrder(n) { const o = [0]; for (let j = 1; o.length < n; j++) o.push(-j, j); return o.slice(0, n); }
+// 分身 count 人の立つ場所。1 レーンは今までどおり（奥へ 3 人ずつ）。複数レーンは、1 行目が本人の横（本人のレーンはあけておく）・2 行目から全レーンで、ずらして立つ
+function buildSlots(lanes, count) {
+  const out = [], L = laneOrder(lanes);
+  for (let i = 0; out.length < count; i++) {
+    if (lanes === 1) { out.push({ z: 1 + Math.floor(i / 3), lane: 0, wx: (i % 3 - 1) * 0.3 }); continue; }
+    const first = L.length - 1;
+    if (i < first) { out.push({ z: 0, lane: L[i + 1], wx: 0 }); continue; }
+    const j = i - first, z = 1 + Math.floor(j / lanes), idx = j % lanes;
+    out.push({ z, lane: L[idx], wx: ((z + idx) % 3 - 1) * 0.28 });
+  }
+  return out;
+}
 // ===== ゲームのロジック（画面を使わない）=====
 const clamp = (v, a, b) => Math.max(a, Math.min(b, v));
 function mulberry32(a) {
@@ -419,12 +599,14 @@ const Game = {
   },
 };
 
-// 判定（記録から）
-function judgeFor(rec) {
-  let j = CFG.judge[0][1];
-  for (const [min, name] of CFG.judge) if (rec >= min) j = name;
+// 判定（記録から）。名前は STR.judge（言語ごと。「|」は判子の中の改行位置）。judgeFor は「|」を取った名前
+function judgeIdx(rec) {
+  let j = 0;
+  for (let i = 0; i < CFG.judge.length; i++) if (rec >= CFG.judge[i][0]) j = i;
   return j;
 }
+function judgeRaw(rec) { return STR.judge[judgeIdx(rec)]; }
+function judgeFor(rec) { return ph(judgeRaw(rec)); }
 // ===== 購買部と引換券（画面を使わない）=====
 // 強化の段階は保存の up（品物ごと 0〜最大）。測定のはじめに Shop.apply(save) が CFG へ掛け算・足し算で反映する。
 // Shop.apply は「素の値」から計算し直すので、何度呼んでも重ならない。20-logic.js の仕組みは変えない
@@ -520,10 +702,10 @@ const Shop = {
 };
 // ===== 大会のくり返し（画面を使わない）=====
 // 保存の形：{ v, unlocked（遊べる一番先の大会 0始まり）, won[大会ごとの勝ち], best[大会ごとのベスト] }
-// Phase 2 で tickets（引換券の残り）と up（品物ごとの強化の段階）を足した。知らない項目は読み書きしても消さない
+// Phase 2 で tickets（引換券の残り）と up（品物ごとの強化の段階）を、Phase 4 で endingSeen（エンディングを最後まで見たか）を足した。知らない項目は読み書きしても消さない
 const SAVE_KEY = 'hanpuku-yokotobi-save';
 const V1_BEST_KEY = 'hanpuku-yokotobi-best';   // v1 のベスト（引き継ぎ用に読むだけ）
-const SAVE_VER = 2;   // 1＝Phase 1（大会だけ）／2＝引換券と強化
+const SAVE_VER = 3;   // 1＝Phase 1（大会だけ）／2＝引換券と強化／3＝endingSeen（エンディングを見たか）
 
 const Tourney = {
   count() { return CFG.targets.length; },
@@ -533,7 +715,7 @@ const Tourney = {
 
   newSave() {
     const n = this.count();
-    return { v: SAVE_VER, unlocked: 0, won: new Array(n).fill(false), best: new Array(n).fill(0), tickets: 0, up: Shop.zeroUp() };
+    return { v: SAVE_VER, unlocked: 0, won: new Array(n).fill(false), best: new Array(n).fill(0), tickets: 0, up: Shop.zeroUp(), endingSeen: false };
   },
 
   // どんな値が来ても、使える形に直す（壊れた保存・古い保存・手で書き換えた保存）
@@ -560,6 +742,8 @@ const Tourney = {
       const l = Math.floor(Number(o.up && o.up[id]));
       out.up[id] = Number.isFinite(l) ? clamp(l, 0, Shop.maxLevel(id)) : 0;
     }
+    // エンディングを見たか（版 2 までの保存にはないので false。全部勝っているのに false なら、次に大会の一覧を開いたとき 1 回だけ出る）
+    out.endingSeen = o.endingSeen === true;
     out.v = SAVE_VER;
     return out;
   },
@@ -572,6 +756,10 @@ const Tourney = {
   playable(save, i) { return i >= 0 && i < this.count() && i <= save.unlocked; },
   focusIndex(save) { return save.unlocked; },
   wonCount(save) { return save.won.filter(Boolean).length; },
+  allWon(save) { return save.won.length > 0 && save.won.every(Boolean); },
+  // エンディングを出すか：9 大会ぜんぶ勝っていて、まだ最後まで見ていない（ページを閉じて見損ねても、次に出る）
+  shouldShowEnding(save) { return this.allWon(save) && !save.endingSeen; },
+  markEndingSeen(save) { save.endingSeen = true; },
 
   // 1回の結果を保存の形に反映する。勝てば次の大会が開く。遊べない大会は何も変えない
   record(save, i, rec) {
@@ -989,7 +1177,7 @@ const Tourney = {
   const p1save = { v: 1, unlocked: 3, won: [true, true, true, false, false, false, false, false, false], best: [90, 250, 700, 100, 0, 0, 0, 0, 0] };
   const stP1 = fake({ [SAVE_KEY]: JSON.stringify(p1save) });
   const mig2 = Tourney.load(stP1);
-  check('Phase 1 の保存を読むと、進み具合とベストはそのまま、引換券は 0・強化は全部 0', mig2.unlocked === 3 && mig2.won.slice(0, 3).every(Boolean) && mig2.best[1] === 250 && mig2.tickets === 0 && Shop.ids.every(id => mig2.up[id] === 0) && mig2.v === 2 && SAVE_VER === 2);
+  check('Phase 1 の保存を読むと、進み具合とベストはそのまま、引換券は 0・強化は全部 0', mig2.unlocked === 3 && mig2.won.slice(0, 3).every(Boolean) && mig2.best[1] === 250 && mig2.tickets === 0 && Shop.ids.every(id => mig2.up[id] === 0) && mig2.v === SAVE_VER && SAVE_VER === 3 && mig2.endingSeen === false);
   sv = Tourney.newSave(); Tourney.record(sv, 0, 5000); sv.up.shoes = 2; sv.up.cheer = 1;
   const stP2 = fake({}); Tourney.persist(stP2, sv);
   const back2 = Tourney.load(stP2);
@@ -997,7 +1185,7 @@ const Tourney = {
   const weird = Tourney.sanitize({ tickets: -50, up: { shoes: 99, clothes: -3, fall: 'x', recorder: 2.9, cheer: null, book: 1 } });
   check('おかしい保存は直して読む（引換券は 0 以上・強化は 0〜最大）', weird.tickets === 0 && weird.up.shoes === Shop.maxLevel('shoes') && weird.up.clothes === 0 && weird.up.fall === 0 && weird.up.recorder === 2 && weird.up.cheer === 0 && weird.up.book === 1);
   check('引換券が小数・文字でも整数の枚数に直す', Tourney.sanitize({ tickets: 12.8 }).tickets === 12 && Tourney.sanitize({ tickets: 'abc' }).tickets === 0 && Tourney.sanitize({ up: 5 }).up.shoes === 0);
-  check('v1 のベストの引き継ぎは、これまでどおり新しい保存の形で書かれる', JSON.parse(st2.d[SAVE_KEY]).v === 2 && JSON.parse(st2.d[SAVE_KEY]).tickets === 0);
+  check('v1 のベストの引き継ぎは、これまでどおり新しい保存の形で書かれる', JSON.parse(st2.d[SAVE_KEY]).v === SAVE_VER && JSON.parse(st2.d[SAVE_KEY]).tickets === 0);
   Shop.reset();
 
   // ===== ボットでペースを確認：毎秒 4 / 6 / 8 回のボットが、次に勝っていない大会を遊び続け、いちばん安い強化を買いながら宇宙大会まで =====
@@ -1066,7 +1254,122 @@ const Tourney = {
       const a = Tourney.record(sv, NV - 1, CFG.targets[NV - 1] + 10), b = Tourney.record(sv, NV - 1, CFG.targets[NV - 1] + 99);
       return a.ending === true && b.ending === false && b.isBest && sv.best[NV - 1] === CFG.targets[NV - 1] + 99 && sv.won.every(Boolean) && sv.won.every((_, i) => Tourney.playable(sv, i));
     })());
-    check('保存：Phase 3 では形を変えない（版 2・項目は v・unlocked・won・best・tickets・up）', SAVE_VER === 2 && JSON.stringify(Object.keys(Tourney.newSave()).sort()) === JSON.stringify(['best', 'tickets', 'unlocked', 'up', 'v', 'won']));
+    check('保存：Phase 4 で endingSeen を足した形（版 3・項目は v・unlocked・won・best・tickets・up・endingSeen）', SAVE_VER === 3 && JSON.stringify(Object.keys(Tourney.newSave()).sort()) === JSON.stringify(['best', 'endingSeen', 'tickets', 'unlocked', 'up', 'v', 'won']));
+  }
+
+
+  // ===== v2 Phase 4：日本語／英語・数字の書式・保存の版 3・エンディングは 1 回だけ =====
+  {
+    const NV = CFG.targets.length;
+    // --- 言語の選び方 ---
+    check('言語：ブラウザが ja で始まれば日本語、それ以外は英語', pickLang('ja', '') === 'ja' && pickLang('ja-JP', '') === 'ja' && pickLang('JA', '') === 'ja'
+      && pickLang('en-US', '') === 'en' && pickLang('fr-FR', '') === 'en' && pickLang('zh-CN', '') === 'en' && pickLang('', '') === 'en' && pickLang(undefined, undefined) === 'en');
+    check('言語：?lang=ja / en は、ブラウザの言語より優先（それ以外の値は無視）', pickLang('en-US', 'ja') === 'ja' && pickLang('ja-JP', 'en') === 'en' && pickLang('en-US', 'xx') === 'en' && pickLang('ja-JP', 'xx') === 'ja');
+    check('言語：検証ページは日本語で固定されている（LANG・STR は日本語）', LANG === 'ja' && STR === STR_JA && STRS.en === STR_EN && STR_EN !== STR_JA);
+
+    // --- 英語の数字 ---
+    const E = v => fmtNum(v, 'en'), J = v => fmtNum(v, 'ja');
+    check('英語の数字：1 万未満はカンマ（1,234）', E(0) === '0' && E(999) === '999' && E(1000) === '1,000' && E(1234) === '1,234' && E(9999) === '9,999', [0, 999, 1234, 9999].map(E).join(' '));
+    check('英語の数字：1 万以上は K / M / B（有効数字 4 桁まで）', E(10000) === '10K' && E(12345) === '12.35K' && E(123456) === '123.5K' && E(1234567) === '1.235M' && E(12345678) === '12.35M' && E(123456789) === '123.5M' && E(1234567890) === '1.235B' && E(100000) === '100K',
+      [10000, 12345, 123456, 1234567, 12345678, 123456789, 1234567890].map(E).join(' '));
+    check('英語の数字：繰り上がり（999.96K → 1M）と余分な 0 を落とす', E(999999) === '1M' && E(999960) === '1M' && E(999900) === '999.9K' && E(1000000) === '1M' && E(2500000) === '2.5M' && E(20000) === '20K' && E(1e9) === '1B' && E(999999999) === '1B');
+    check('英語の数字：壊れた値でも文字列・負の値・小数', E(NaN) === '0' && E(undefined) === '0' && E(-5) === '-5' && E(-12345) === '-12.35K' && E(2.4) === '2' && E('1234') === '1,234');
+    check('英語の数字：想定する最大でも 6 文字以内（ゲームの最大は数千万。9999 億まで余裕）', [9999, 10000, 99999, 123456, 999999, 1234567, 9999999, 99999999, 123456789, 999999999, 1.234e10, 1.234e11, 9.99e11].every(v => E(v).length <= 6),
+      [1.234e11, 9.99e11].map(E).join(' '));
+    check('日本語の数字は今までどおり（lang を渡しても同じ）', J(1234) === '1,234' && J(12346) === '1.235万' && J(123456789) === '1.235億' && fmtNum(12346) === J(12346) && [1, 12346].map(fmtNum).join() === '1,1.235万');
+
+    // --- どの言葉も、日本語と英語の両方がある（形が同じ） ---
+    const shape = (a, b, path, bad) => {
+      if (typeof a !== typeof b) { bad.push(path + ' 型 ' + typeof a + '/' + typeof b); return; }
+      if (Array.isArray(a)) {
+        if (!Array.isArray(b) || a.length !== b.length) { bad.push(path + ' 長さ ' + a.length + '/' + (b && b.length)); return; }
+        a.forEach((x, i) => shape(x, b[i], path + '[' + i + ']', bad));
+      } else if (a && typeof a === 'object') {
+        for (const k of Object.keys(a)) { if (!(k in b)) bad.push(path + '.' + k + ' が英語にない'); else shape(a[k], b[k], path + '.' + k, bad); }
+        for (const k of Object.keys(b)) if (!(k in a)) bad.push(path + '.' + k + ' が日本語にない');
+      }
+    };
+    const bad = []; shape(STR_JA, STR_EN, 'STR', bad);
+    check('言葉の表：日本語と英語で、全部の項目がそろっている（キー・配列の長さ・関数）', bad.length === 0, bad.slice(0, 5).join(' / '));
+    // 関数も同じように呼べて文字列を返す
+    const calls = [];
+    const callAll = (o, path) => { for (const k of Object.keys(o)) { const v = o[k]; if (typeof v === 'function') calls.push([path + '.' + k, v]); else if (v && typeof v === 'object') callAll(v, path + '.' + k); } };
+    callAll(STR_EN, 'STR_EN');
+    const fe = [];
+    for (const [name, f] of calls) {
+      try {
+        let r;
+        if (/shop\.items\.\w+\.v$/.test(name)) { const id = name.split('.')[3]; r = f(Shop.effect(id, 2)); }
+        else if (/share\.text$/.test(name)) r = f('City Meet', '1,234', 99, 'A', '48', true);
+        else if (/(shop|list)\.(price|progress)$/.test(name)) r = f(3, 9);
+        else if (/list\.sub$/.test(name)) r = f('Tanaka', '80');
+        else r = f('1,234', 'x');
+        if (typeof r !== 'string' && typeof r !== 'number') fe.push(name);
+      } catch (err) { fe.push(name + ' ' + err.message); }
+    }
+    check('言葉の表（英語）：関数はどれも文字列を返す', fe.length === 0 && calls.length >= 20, 'calls=' + calls.length + ' ' + fe.slice(0, 3).join(' / '));
+    const strsOf = o => { const out = []; (function w(v) { if (typeof v === 'string') out.push(v); else if (Array.isArray(v)) v.forEach(w); else if (v && typeof v === 'object') Object.keys(v).forEach(k => w(v[k])); })(o); return out; };
+    const en = strsOf(STR_EN);
+    check('英語：空の文節がない（「|」の前後に言葉がある）', en.every(x => x.indexOf('||') < 0 && x[0] !== '|' && x[x.length - 1] !== '|'));
+    check('英語：日本語の文字（ひらがな・カタカナ・漢字）が混ざっていない', en.every(x => !/[\u3040-\u30ff\u4e00-\u9fff]/.test(x)), en.filter(x => /[\u3040-\u30ff\u4e00-\u9fff]/.test(x)).slice(0, 3).join(' / '));
+    check('英語：9 つの大会・9 つの会場・ライバルの言葉がある（勝ち・負けが違う）', STR_EN.tournaments.length === NV && STR_EN.venues.length === NV && STR_EN.tournaments.every(t => t.name && t.rival.name && t.rival.short && t.rival.say && t.rival.win && t.rival.lose && t.rival.win !== t.rival.lose));
+    check('英語：記録係のひとこと 9 会場 × 11 段階が全部あって、1 行に収まる長さ（34 文字まで）', STR_EN.venues.every(v => v.rec.length >= 7 + CFG.bodiesExtra.length && v.rec.concat([v.ready, v.fin, v.over('1,234')]).every(x => x.length > 0 && x.length <= 34)),
+      'max=' + Math.max.apply(null, [].concat(...STR_EN.venues.map(v => v.rec.concat([v.ready, v.fin, v.over('1,234')]).map(x => x.length)))));
+    check('英語：記録係のひとこと・横断幕は、会場ごとに別（同じ文が 2 つない）', (() => { const all = [].concat(...STR_EN.venues.map(v => v.rec)); return new Set(all).size === all.length && new Set(STR_EN.venues.map(v => v.banner)).size === NV; })());
+    check('英語：判定の名前が 8 つ（CFG.judge と同じ数）・長い名前は判子の中で 2 行に分けられる', STR_EN.judge.length === CFG.judge.length && STR_JA.judge.length === CFG.judge.length && STR_EN.judge.slice(6).every(x => x.indexOf('|') > 0) && STR_EN.judge.slice(6).every(x => x.split('|').every(w => w.length <= 7)));
+    check('英語：大会の名前・ライバルの名前が長すぎない（画面の枠に入る目安）', STR_EN.tournaments.every(t => t.name.length <= 20 && t.rival.short.length <= 10 && t.rival.name.split('|').every(w => w.length <= 20)));
+    check('ph()：英語では文節の切れ目が空白になる（phL）', phL('Tap|to Start', 'en') === 'Tap to Start' && phL('去年と|同じ', 'ja') === '去年と同じ' && ph('去年と|同じ') === '去年と同じ');
+    check('英語の判定名（ph したもの）：Off the Charts / Beyond Human', phL(STR_EN.judge[6], 'en') === 'Off the Charts' && phL(STR_EN.judge[7], 'en') === 'Beyond Human');
+    check('英語のタイトル：Clone Side Step', phL(STR_EN.title.name, 'en') === 'Clone Side Step' && STR_EN.title.logo.join(' ') === 'CLONE SIDE STEP');
+
+    // --- 保存 v3 と、エンディングは 1 回だけ ---
+    const st = (init) => { const d = Object.assign({}, init); return { d, getItem: k => (k in d ? d[k] : null), setItem: (k, v) => { d[k] = String(v); } }; };
+    const v2 = { v: 2, unlocked: 5, won: [true, true, true, true, true, false, false, false, false], best: [90, 250, 700, 1500, 3500, 0, 0, 0, 0], tickets: 777, up: { shoes: 2, clothes: 1, fall: 0, recorder: 3, cheer: 0, book: 0 } };
+    const m3 = Tourney.load(st({ [SAVE_KEY]: JSON.stringify(v2) }));
+    check('保存：版 2 の保存を読むと、進み具合・引換券・強化はそのまま、endingSeen は false、版は 3', m3.v === 3 && m3.unlocked === 5 && m3.tickets === 777 && m3.up.shoes === 2 && m3.up.recorder === 3 && m3.best[4] === 3500 && m3.endingSeen === false);
+    const sv3 = Tourney.newSave();
+    check('保存：新しい保存は版 3・endingSeen は false・書いて読み直しても同じ', sv3.v === 3 && sv3.endingSeen === false && (() => { const s0 = st({}); Tourney.persist(s0, sv3); return JSON.stringify(Tourney.load(s0)) === JSON.stringify(sv3); })());
+    check('保存：endingSeen が true なら読み直しても true・true 以外（文字・数・null）は false', Tourney.sanitize({ endingSeen: true }).endingSeen === true && Tourney.sanitize({ endingSeen: 'true' }).endingSeen === false && Tourney.sanitize({ endingSeen: 1 }).endingSeen === false && Tourney.sanitize({ endingSeen: null }).endingSeen === false && Tourney.sanitize(null).endingSeen === false);
+    const all = Tourney.newSave(); for (let i = 0; i < NV; i++) Tourney.record(all, i, CFG.targets[i] + 1);
+    const part = Tourney.newSave(); for (let i = 0; i < NV - 1; i++) Tourney.record(part, i, CFG.targets[i] + 1);
+    check('エンディング：9 大会ぜんぶ勝って、まだ見ていなければ出す。8 つまでなら出さない', Tourney.allWon(all) && Tourney.shouldShowEnding(all) === true && !Tourney.allWon(part) && Tourney.shouldShowEnding(part) === false && Tourney.shouldShowEnding(Tourney.newSave()) === false);
+    check('エンディング：見たと記録すると、もう出ない（保存して読み直しても）', (() => {
+      const a = JSON.parse(JSON.stringify(all)); Tourney.markEndingSeen(a);
+      const s0 = st({}); Tourney.persist(s0, a); const b = Tourney.load(s0);
+      return Tourney.shouldShowEnding(a) === false && Tourney.shouldShowEnding(b) === false && b.endingSeen === true;
+    })());
+    check('エンディング：見る前にページを閉じても（勝った保存だけ残る）、読み直すとまた出る', (() => {
+      const a = Tourney.newSave(); for (let i = 0; i < NV - 1; i++) Tourney.record(a, i, CFG.targets[i] + 1);
+      const r = Tourney.record(a, NV - 1, CFG.targets[NV - 1] + 1);   // 最後の大会に初めて勝った
+      const s0 = st({}); Tourney.persist(s0, a);   // ここでページが閉じた
+      const b = Tourney.load(s0);
+      return r.ending === true && Tourney.shouldShowEnding(b) === true;
+    })());
+    check('エンディング：版 2 で 9 つ全部勝っていた保存は、読み込み後に 1 回だけ出る', (() => {
+      const w = JSON.parse(JSON.stringify(all)); delete w.endingSeen; w.v = 2;
+      const b = Tourney.load(st({ [SAVE_KEY]: JSON.stringify(w) }));
+      const first = Tourney.shouldShowEnding(b); Tourney.markEndingSeen(b);
+      return first === true && Tourney.shouldShowEnding(b) === false;
+    })());
+    check('エンディング：見たあとにベストを伸ばしても、勝ち直しても、もう出ない', (() => {
+      const a = JSON.parse(JSON.stringify(all)); Tourney.markEndingSeen(a);
+      const r = Tourney.record(a, NV - 1, CFG.targets[NV - 1] + 5000);
+      return r.ending === false && Tourney.shouldShowEnding(a) === false && a.endingSeen === true;
+    })());
+
+    // --- 横画面のレーン・分身の並び（描画の関数は 40-render にあるので、ここでは決まりごとだけ）---
+    // --- 横画面：レーンと分身の並び ---
+    const aspect = r => 177.78 * r;   // 画面の幅（遊ぶ場所の幅 100 の単位）。縦 177.78 に合わせたときの横
+    check('横画面：レーンの数は縦画面 1・パソコンの横画面（16:9）5・1000x560 でも 5・4:3 は 3', lanesFor(100, 26) === 1 && lanesFor(aspect(390 / 844), 26) === 1 && lanesFor(aspect(16 / 9), 26) === 5 && lanesFor(aspect(1000 / 560), 26) === 5 && lanesFor(aspect(4 / 3), 26) === 3 && lanesFor(aspect(21 / 9), 26) === 5,
+      [100, aspect(16 / 9), aspect(4 / 3)].map(w => lanesFor(w, 26)).join());
+    check('横画面：レーンはいつも奇数で、広いほど増える（最大 7）・変な値でも壊れない', [50, 100, 150, 200, 250, 300, 400, 500, 1000, NaN, -5].every(w => { const n = lanesFor(w, 26); return n % 2 === 1 && n >= 1 && n <= 7; }) && lanesFor(1000, 26) === 7 && lanesFor(300, 26) >= lanesFor(200, 26));
+    check('横画面：レーンの並びは本人のレーンが先頭（0, -1, 1, -2, 2）', laneOrder(5).join() === '0,-1,1,-2,2' && laneOrder(1).join() === '0' && laneOrder(3).join() === '0,-1,1');
+    const s1 = buildSlots(1, 47), s5 = buildSlots(5, 47), s3 = buildSlots(3, 47);
+    check('分身の立つ場所：縦画面（1 レーン）は今までどおり、奥へ 3 人ずつ（1 行目は z=1）', s1.length === 47 && s1[0].z === 1 && s1[2].z === 1 && s1[3].z === 2 && s1.every(p => p.lane === 0) && s1[0].wx === -0.3 && s1[1].wx === 0 && s1[2].wx === 0.3 && s1[46].z === 16);
+    check('分身の立つ場所：5 レーンは 47 人ぶんあって、同じ場所に 2 人立たない・本人のレーンの z=0 は空いている', s5.length === 47 && new Set(s5.map(p => p.z + ':' + p.lane + ':' + p.wx)).size === 47 && !s5.some(p => p.z === 0 && p.lane === 0) && s5.filter(p => p.z === 0).length === 4);
+    check('分身の立つ場所：5 レーンは 1 人目から横に出る・奥行きは縦画面の半分ほど（47 人で z が 10 まで）', s5[0].z === 0 && s5[0].lane === -1 && s5[1].lane === 1 && s5[46].z <= 10 && s5[46].z < s1[46].z && s3[46].z <= 16 && s3[46].z > s5[46].z);
+    check('分身の立つ場所：横に出たあとも、近い順（z の小さい順）に並ぶ', s5.every((p, i) => i === 0 || p.z >= s5[i - 1].z) && s3.every((p, i) => i === 0 || p.z >= s3[i - 1].z));
+    check('保存：知らない項目は読み書きしても消えない（版 3 でも）', Tourney.sanitize({ foo: 'bar', endingSeen: true }).foo === 'bar');
   }
 
   const s = document.createElement('h2');

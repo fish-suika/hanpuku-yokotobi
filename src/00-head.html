@@ -15,49 +15,52 @@ body{display:flex;align-items:center;justify-content:center}
 
 /* 絵は画面いっぱい（縦長の端末も横長の画面も、体育館が左右・上下に広がる）。遊ぶ場所は縦9:16で中央 */
 #cv{position:fixed;inset:0;width:100%;height:100%;display:block;touch-action:none}
-/* 遊ぶ場所の枠。単位は cqw（枠の幅の1%）。文字の置き場所に使うだけで、触れるのは下の絵 */
-#stage{position:relative;container-type:size;
+/* 遊ぶ場所の枠。単位は --q（縦画面＝枠の幅の1%＝1cqw、横画面＝16:9 の枠の幅の 1/220）。文字の置き場所に使うだけで、触れるのは下の絵 */
+#stage{position:relative;container-type:size;--q:1cqw;
   width:min(100vw,calc(100dvh*9/16));aspect-ratio:9/16;pointer-events:none}
 
-/* タイトル */
-#title{position:absolute;left:5cqw;right:5cqw;top:53cqw;z-index:20;text-align:center;
-  display:flex;flex-direction:column;align-items:center;gap:2.4cqw}
+/* タイトル：ロゴ（分身＋反復横とび）・キャッチ・スタートの案内ひとつ。絵は体育館に並ぶ分身の列（canvas） */
+#title{position:absolute;inset:0;z-index:20;text-align:center}
 #title.hide{display:none}
-#title .t1{font-size:4.6cqw;font-weight:bold;color:#fff;background:#d2382f;border-radius:5cqw;padding:.8cqw 4.5cqw;letter-spacing:.6cqw;box-shadow:0 .8cqw 0 #8f221c}
-#title .t2{font-size:11.5cqw;font-weight:900;line-height:1.1;color:#fff;
-  -webkit-text-stroke:1.4cqw #213a86;paint-order:stroke fill;text-shadow:0 1.4cqw 0 #213a86,0 2.2cqw 3cqw #0004}
-#title .t3{font-size:5.2cqw;font-weight:bold;color:#213a86;background:#fffd;border-radius:3cqw;padding:1cqw 4cqw}
-#title .t4{margin-top:3cqw;font-size:6cqw;font-weight:bold;color:#fff;background:#e0356f;border-radius:6cqw;
-  padding:2cqw 8cqw;box-shadow:0 1.2cqw 0 #a82350;animation:blink 1.1s ease-in-out infinite}
+#title .head{position:absolute;left:calc(4 * var(--q));right:calc(4 * var(--q));top:calc(11 * var(--q));display:flex;flex-direction:column;align-items:center;gap:calc(2.2 * var(--q))}
+#title .tag{font-size:calc(4.4 * var(--q));font-weight:bold;color:#fff;background:#d2382f;border-radius:calc(5 * var(--q));padding:calc(.7 * var(--q)) calc(4.6 * var(--q));letter-spacing:calc(.9 * var(--q));box-shadow:0 calc(.8 * var(--q)) 0 #8f221c}
+#title .logo{display:flex;flex-direction:column;align-items:center;line-height:1;font-weight:900;color:#fff;
+  -webkit-text-stroke:calc(1.5 * var(--q)) #213a86;paint-order:stroke fill;text-shadow:0 calc(1.5 * var(--q)) 0 #213a86,0 calc(2.6 * var(--q)) calc(3.4 * var(--q)) #0006}
+#title .logo span{display:block;white-space:nowrap}
+#title .logo .l1{font-size:calc(25 * var(--q));color:#ffd23c;letter-spacing:calc(1 * var(--q))}
+#title .logo .l2{font-size:calc(15.5 * var(--q));margin-top:calc(1 * var(--q));-webkit-text-stroke-width:calc(1.05 * var(--q))}   /* 細い字は、縁を細くして白い中身を残す */
+#title .catch{font-size:calc(5.2 * var(--q));font-weight:bold;color:#213a86;background:#fffe;border-radius:calc(3 * var(--q));padding:calc(1 * var(--q)) calc(4 * var(--q));margin-top:calc(1.4 * var(--q))}
+#title .t4{position:absolute;left:0;right:0;top:calc(150 * var(--q));margin:0 auto;width:max-content;font-size:calc(6 * var(--q));font-weight:bold;color:#fff;background:#e0356f;border-radius:calc(6 * var(--q));
+  padding:calc(2 * var(--q)) calc(8 * var(--q));box-shadow:0 calc(1.2 * var(--q)) 0 #a82350;animation:blink 1.1s ease-in-out infinite}
 @keyframes blink{50%{transform:scale(1.07)}}
 
 /* 大会の一覧・測定前（ライバルの紹介）・エンディング */
 .scr{position:absolute;inset:0;z-index:25;display:none;flex-direction:column;pointer-events:auto;
-  background:#f1e6c2;box-shadow:0 0 0 100vmax #f1e6c2;padding:5cqw 5cqw 4.5cqw;gap:2cqw}
+  background:#f1e6c2;box-shadow:0 0 0 100vmax #f1e6c2;padding:calc(5 * var(--q)) calc(5 * var(--q)) calc(4.5 * var(--q));gap:calc(2 * var(--q))}
 .scr.on{display:flex;animation:fade .22s ease-out}
 @keyframes fade{from{opacity:0}to{opacity:1}}
-#list .hd,#shop .hd{display:flex;justify-content:space-between;align-items:baseline;font-size:6.2cqw;font-weight:900;color:#2c4aa0;
-  border-bottom:.6cqw solid #2c4aa0;padding-bottom:1.4cqw;letter-spacing:.5cqw;white-space:nowrap}
-#list .hd small,#shop .hd small{font-size:3.8cqw;color:#55608a;letter-spacing:0;font-weight:bold}
-#listBody,#shopBody{flex:1;min-height:0;display:flex;flex-direction:column;gap:1.7cqw;overflow-y:auto;touch-action:pan-y;padding:1cqw 1.4cqw 1.4cqw}
-.bar{display:flex;justify-content:space-between;align-items:center;gap:3cqw}
-.bar .tk{font-size:4.2cqw;font-weight:bold;color:#55608a;white-space:nowrap}
-.bar .tk b{font-size:5.6cqw;color:#d2382f;font-variant-numeric:tabular-nums;margin-left:1cqw}
-.sm{height:9cqw;padding:0 5.5cqw;font-size:4.2cqw;white-space:nowrap;pointer-events:auto;border-radius:3cqw}
+#list .hd,#shop .hd{display:flex;justify-content:space-between;align-items:baseline;font-size:calc(6.2 * var(--q));font-weight:900;color:#2c4aa0;
+  border-bottom:calc(.6 * var(--q)) solid #2c4aa0;padding-bottom:calc(1.4 * var(--q));letter-spacing:calc(.5 * var(--q));white-space:nowrap}
+#list .hd small,#shop .hd small{font-size:calc(3.8 * var(--q));color:#55608a;letter-spacing:0;font-weight:bold}
+#listBody,#shopBody{flex:1;min-height:0;display:flex;flex-direction:column;gap:calc(1.7 * var(--q));overflow-y:auto;touch-action:pan-y;padding:calc(1 * var(--q)) calc(1.4 * var(--q)) calc(1.4 * var(--q))}
+.bar{display:flex;justify-content:space-between;align-items:center;gap:calc(3 * var(--q))}
+.bar .tk{font-size:calc(4.2 * var(--q));font-weight:bold;color:#55608a;white-space:nowrap}
+.bar .tk b{font-size:calc(5.6 * var(--q));color:#d2382f;font-variant-numeric:tabular-nums;margin-left:calc(1 * var(--q))}
+.sm{height:calc(9 * var(--q));padding:0 calc(5.5 * var(--q));font-size:calc(4.2 * var(--q));white-space:nowrap;pointer-events:auto;border-radius:calc(3 * var(--q))}
 .hot{animation:blink 1.1s ease-in-out infinite}
-.tn{flex:1 1 0;min-height:11.6cqw;max-height:17cqw;display:grid;grid-template-columns:8.4cqw minmax(0,1fr) auto;align-items:center;column-gap:2.6cqw;
-  border:.5cqw solid #2c4aa0;border-radius:2cqw;background:#fffdf2;padding:0 2.8cqw 0 2.4cqw;font:inherit;color:#2b2b3a;text-align:left;
-  cursor:pointer;box-shadow:0 .8cqw 0 #1c3170;touch-action:manipulation}
-.tn:active:not(:disabled){transform:translateY(.6cqw);box-shadow:0 .2cqw 0 #1c3170}
-.tn .no{width:8.4cqw;height:8.4cqw;border-radius:50%;background:#2c4aa0;color:#fff;font-weight:900;font-size:4.6cqw;display:flex;align-items:center;justify-content:center}
-.tn .mid{display:flex;flex-direction:column;gap:.5cqw;min-width:0}
-.tn .nm{font-size:4.7cqw;font-weight:bold;white-space:nowrap}
-.tn .sb{font-size:3.3cqw;color:#55608a;white-space:nowrap}
-.tn .rt{display:flex;flex-direction:column;align-items:flex-end;gap:.7cqw}
-.tn .tag{font-size:3.3cqw;font-weight:900;border:.45cqw solid;border-radius:1.4cqw;padding:0 1.6cqw;white-space:nowrap;line-height:1.5}
-.tn .bs{font-size:3.2cqw;color:#55608a;white-space:nowrap}
+.tn{flex:1 1 0;min-height:calc(11.6 * var(--q));max-height:calc(17 * var(--q));display:grid;grid-template-columns:calc(8.4 * var(--q)) minmax(0,1fr) auto;align-items:center;column-gap:calc(2.6 * var(--q));
+  border:calc(.5 * var(--q)) solid #2c4aa0;border-radius:calc(2 * var(--q));background:#fffdf2;padding:0 calc(2.8 * var(--q)) 0 calc(2.4 * var(--q));font:inherit;color:#2b2b3a;text-align:left;
+  cursor:pointer;box-shadow:0 calc(.8 * var(--q)) 0 #1c3170;touch-action:manipulation}
+.tn:active:not(:disabled){transform:translateY(calc(.6 * var(--q)));box-shadow:0 calc(.2 * var(--q)) 0 #1c3170}
+.tn .no{width:calc(8.4 * var(--q));height:calc(8.4 * var(--q));border-radius:50%;background:#2c4aa0;color:#fff;font-weight:900;font-size:calc(4.6 * var(--q));display:flex;align-items:center;justify-content:center}
+.tn .mid{display:flex;flex-direction:column;gap:calc(.5 * var(--q));min-width:0}
+.tn .nm{font-size:calc(4.7 * var(--q));font-weight:bold;white-space:nowrap}
+.tn .sb{font-size:calc(3.3 * var(--q));color:#55608a;white-space:nowrap}
+.tn .rt{display:flex;flex-direction:column;align-items:flex-end;gap:calc(.7 * var(--q))}
+.tn .tag{font-size:calc(3.3 * var(--q));font-weight:900;border:calc(.45 * var(--q)) solid;border-radius:calc(1.4 * var(--q));padding:0 calc(1.6 * var(--q));white-space:nowrap;line-height:1.5}
+.tn .bs{font-size:calc(3.2 * var(--q));color:#55608a;white-space:nowrap}
 .tn.won .tag{color:#d2382f;border-color:#d2382f;transform:rotate(-5deg)}
-.tn.next{border-color:#e0356f;box-shadow:0 .8cqw 0 #a82350;animation:nextp 1.2s ease-in-out infinite}
+.tn.next{border-color:#e0356f;box-shadow:0 calc(.8 * var(--q)) 0 #a82350;animation:nextp 1.2s ease-in-out infinite}
 .tn.next .tag{background:#e0356f;border-color:#e0356f;color:#fff}
 .tn.next .no{background:#e0356f}
 @keyframes nextp{50%{transform:scale(1.025)}}
@@ -65,144 +68,352 @@ body{display:flex;align-items:center;justify-content:center}
 .tn.locked .no{background:#a6a18a}
 .tn.locked .sb,.tn.locked .bs{color:#9b9680}
 .tn.locked .tag{color:#9b9680;border-color:#b3ae98}
-#list .back,#intro .back,#shop .back{align-self:center;height:9cqw;padding:0 7cqw;font-size:3.8cqw;background:transparent;color:#2c4aa0;
-  border:.5cqw solid #2c4aa0;border-radius:3cqw;box-shadow:0 .6cqw 0 #2c4aa066;white-space:nowrap;pointer-events:auto}
+#list .back,#intro .back,#shop .back{align-self:center;height:calc(9 * var(--q));padding:0 calc(7 * var(--q));font-size:calc(3.8 * var(--q));background:transparent;color:#2c4aa0;
+  border:calc(.5 * var(--q)) solid #2c4aa0;border-radius:calc(3 * var(--q));box-shadow:0 calc(.6 * var(--q)) 0 #2c4aa066;white-space:nowrap;pointer-events:auto}
 
 #intro .back{background:#fffdf2e8}
 
 /* 購買部 */
-.it{flex:1 1 0;min-height:15cqw;max-height:21cqw;display:grid;grid-template-columns:minmax(0,1fr) 22cqw;align-items:center;column-gap:2.4cqw;
-  border:.5cqw solid #2c4aa0;border-radius:2cqw;background:#fffdf2;padding:0 2.4cqw 0 3cqw;box-shadow:0 .8cqw 0 #1c3170}
-.it .mid{display:flex;flex-direction:column;gap:.5cqw;min-width:0}
-.it .l1{display:flex;align-items:baseline;gap:2cqw;white-space:nowrap}
-.it .nm{font-size:4.5cqw;font-weight:bold}
-.it .pips{font-size:3cqw;letter-spacing:.2cqw;color:#e0356f}
+.it{flex:1 1 0;min-height:calc(15 * var(--q));max-height:calc(21 * var(--q));display:grid;grid-template-columns:minmax(0,1fr) calc(22 * var(--q));align-items:center;column-gap:calc(2.4 * var(--q));
+  border:calc(.5 * var(--q)) solid #2c4aa0;border-radius:calc(2 * var(--q));background:#fffdf2;padding:0 calc(2.4 * var(--q)) 0 calc(3 * var(--q));box-shadow:0 calc(.8 * var(--q)) 0 #1c3170}
+.it .mid{display:flex;flex-direction:column;gap:calc(.5 * var(--q));min-width:0}
+.it .l1{display:flex;align-items:baseline;gap:calc(2 * var(--q));white-space:nowrap}
+.it .nm{font-size:calc(4.5 * var(--q));font-weight:bold}
+.it .pips{font-size:calc(3 * var(--q));letter-spacing:calc(.2 * var(--q));color:#e0356f}
 .it .pips i{font-style:normal;color:#c9cde0}
 .it .pips i.on{color:#e0356f}
-.it .ds{font-size:3.4cqw;color:#2b2b3a;white-space:nowrap}
-.it .fx{font-size:3.3cqw;color:#2c4aa0;font-weight:bold;white-space:nowrap}
-.it .buy{height:11.5cqw;border:0;border-radius:3cqw;font:inherit;font-size:4.8cqw;font-weight:900;color:#fff;cursor:pointer;touch-action:manipulation;
-  background:linear-gradient(#ff6b9a,#e0356f);box-shadow:0 1cqw 0 #a82350;white-space:nowrap;font-variant-numeric:tabular-nums;pointer-events:auto}
-.it .buy:active{transform:translateY(.7cqw);box-shadow:0 .3cqw 0 #a82350}
-.it.poor .buy{background:#e6dfc6;color:#8b8672;box-shadow:0 1cqw 0 #bdb69c}
+.it .ds{font-size:calc(3.4 * var(--q));color:#2b2b3a;white-space:nowrap}
+.it .fx{font-size:calc(3.3 * var(--q));color:#2c4aa0;font-weight:bold;white-space:nowrap}
+.it .buy{height:calc(11.5 * var(--q));border:0;border-radius:calc(3 * var(--q));font:inherit;font-size:calc(4.8 * var(--q));font-weight:900;color:#fff;cursor:pointer;touch-action:manipulation;
+  background:linear-gradient(#ff6b9a,#e0356f);box-shadow:0 calc(1 * var(--q)) 0 #a82350;white-space:nowrap;font-variant-numeric:tabular-nums;pointer-events:auto}
+.it .buy:active{transform:translateY(calc(.7 * var(--q)));box-shadow:0 calc(.3 * var(--q)) 0 #a82350}
+.it.poor .buy{background:#e6dfc6;color:#8b8672;box-shadow:0 calc(1 * var(--q)) 0 #bdb69c}
 .it.locked{background:#e6dfc6;border-color:#a6a18a;box-shadow:none}
-.it.locked .buy{background:#cfc9b0;color:#8b8672;box-shadow:none;font-size:3.8cqw}
+.it.locked .buy{background:#cfc9b0;color:#8b8672;box-shadow:none;font-size:calc(3.8 * var(--q))}
 .it.locked .fx{color:#8b8672}
 .it.max{background:#eef3ff}
-.it.max .buy{background:#2c4aa0;color:#fff;box-shadow:none;font-size:4cqw;cursor:default}
+.it.max .buy{background:#2c4aa0;color:#fff;box-shadow:none;font-size:calc(4 * var(--q));cursor:default}
 .it.got{animation:got .35s ease-out}
 .it.no{animation:shake .25s}
 @keyframes got{0%{transform:scale(1.04);background:#fff6b0}100%{transform:none}}
-@keyframes shake{25%{transform:translateX(-1.2cqw)}75%{transform:translateX(1.2cqw)}}
+@keyframes shake{25%{transform:translateX(calc(-1.2 * var(--q)))}75%{transform:translateX(calc(1.2 * var(--q)))}}
 #shop .row{margin-top:0}
-#shop .hd small b{color:#d2382f;margin-left:1cqw;font-size:5.4cqw;font-variant-numeric:tabular-nums}
-#shopBack{flex:1;height:10cqw;font-size:3.9cqw;background:transparent;color:#2c4aa0;white-space:nowrap;border:.5cqw solid #2c4aa0;border-radius:3cqw;box-shadow:0 .6cqw 0 #2c4aa066}
-#shopGo{flex:1.2;height:12cqw;font-size:5.2cqw;white-space:nowrap}
-#intro{position:absolute;left:6cqw;right:6cqw;top:51cqw;z-index:25;display:none;flex-direction:column;align-items:center;gap:3cqw;text-align:center}
+#shop .hd small b{color:#d2382f;margin-left:calc(1 * var(--q));font-size:calc(5.4 * var(--q));font-variant-numeric:tabular-nums}
+#shopBack{flex:1;height:calc(10 * var(--q));font-size:calc(3.9 * var(--q));background:transparent;color:#2c4aa0;white-space:nowrap;border:calc(.5 * var(--q)) solid #2c4aa0;border-radius:calc(3 * var(--q));box-shadow:0 calc(.6 * var(--q)) 0 #2c4aa066}
+#shopGo{flex:1.2;height:calc(12 * var(--q));font-size:calc(5.2 * var(--q));white-space:nowrap}
+#intro{position:absolute;left:calc(6 * var(--q));right:calc(6 * var(--q));top:calc(51 * var(--q));z-index:25;display:none;flex-direction:column;align-items:center;gap:calc(3 * var(--q));text-align:center}
 #intro.on{display:flex;animation:pop .3s cubic-bezier(.3,1.5,.5,1)}
-#inName{font-size:5cqw;font-weight:bold;color:#fff;background:#d2382f;border-radius:5cqw;padding:.8cqw 5cqw;letter-spacing:.5cqw;box-shadow:0 .8cqw 0 #8f221c;white-space:nowrap}
-#inCard{width:100%;background:#fffdf2;border:.7cqw solid #2c4aa0;border-radius:1.6cqw;box-shadow:0 2cqw 0 #1c3170,0 3cqw 6cqw #0006;
-  padding:4cqw 4cqw 4.4cqw;display:flex;flex-direction:column;align-items:center;gap:1.4cqw}
-#inCard .lb{font-size:3.6cqw;color:#55608a;font-weight:bold;letter-spacing:.4cqw}
-#inRival{font-size:8cqw;font-weight:900;color:#2b2b3a;line-height:1.15}
-#inSay{font-size:4.2cqw;color:#2b2b3a;line-height:1.5;margin-bottom:1cqw}
-#inCard .rule{width:100%;border-top:.3cqw dashed #9aa7d0;margin:.6cqw 0 .2cqw}
-#inRec{font-size:15cqw;font-weight:900;line-height:1;color:#d2382f;font-variant-numeric:tabular-nums;white-space:nowrap}
-#inRec small{font-size:5cqw;color:#55608a;font-weight:bold;margin-left:.8cqw}
-#inBest{font-size:3.6cqw;color:#55608a;min-height:4.6cqw}
-#intro .go{font-size:6cqw;font-weight:bold;color:#fff;background:#e0356f;border-radius:6cqw;padding:2cqw 8cqw;box-shadow:0 1.2cqw 0 #a82350;
+#inName{font-size:calc(5 * var(--q));font-weight:bold;color:#fff;background:#d2382f;border-radius:calc(5 * var(--q));padding:calc(.8 * var(--q)) calc(5 * var(--q));letter-spacing:calc(.5 * var(--q));box-shadow:0 calc(.8 * var(--q)) 0 #8f221c;white-space:nowrap}
+#inCard{width:100%;background:#fffdf2;border:calc(.7 * var(--q)) solid #2c4aa0;border-radius:calc(1.6 * var(--q));box-shadow:0 calc(2 * var(--q)) 0 #1c3170,0 calc(3 * var(--q)) calc(6 * var(--q)) #0006;
+  padding:calc(4 * var(--q)) calc(4 * var(--q)) calc(4.4 * var(--q));display:flex;flex-direction:column;align-items:center;gap:calc(1.4 * var(--q))}
+#inCard .lb{font-size:calc(3.6 * var(--q));color:#55608a;font-weight:bold;letter-spacing:calc(.4 * var(--q))}
+#inRival{font-size:calc(8 * var(--q));font-weight:900;color:#2b2b3a;line-height:1.15}
+#inSay{font-size:calc(4.2 * var(--q));color:#2b2b3a;line-height:1.5;margin-bottom:calc(1 * var(--q))}
+#inCard .rule{width:100%;border-top:calc(.3 * var(--q)) dashed #9aa7d0;margin:calc(.6 * var(--q)) 0 calc(.2 * var(--q))}
+#inRec{font-size:calc(15 * var(--q));font-weight:900;line-height:1;color:#d2382f;font-variant-numeric:tabular-nums;white-space:nowrap}
+#inRec small{font-size:calc(5 * var(--q));color:#55608a;font-weight:bold;margin-left:calc(.8 * var(--q))}
+#inBest{font-size:calc(3.6 * var(--q));color:#55608a;min-height:calc(4.6 * var(--q))}
+#intro .go{font-size:calc(6 * var(--q));font-weight:bold;color:#fff;background:#e0356f;border-radius:calc(6 * var(--q));padding:calc(2 * var(--q)) calc(8 * var(--q));box-shadow:0 calc(1.2 * var(--q)) 0 #a82350;
   white-space:nowrap;animation:blink 1.1s ease-in-out infinite}
 
 /* エンディング：最初の 3 場面は canvas に描く（この画面は透明でタップを受けるだけ）。そのあと宇宙記録の記録用紙が出る */
-#ending{align-items:center;justify-content:center;text-align:center;background:transparent;box-shadow:none;cursor:pointer;padding:5cqw}
-#endSkip{position:absolute;right:5cqw;bottom:3.4cqw;font-size:3.6cqw;font-weight:bold;color:#cfd6ff;opacity:.7;white-space:nowrap;letter-spacing:.3cqw}
+#ending{align-items:center;justify-content:center;text-align:center;background:transparent;box-shadow:none;cursor:pointer;padding:calc(5 * var(--q))}
+#endSkip{position:absolute;right:calc(5 * var(--q));bottom:calc(3.4 * var(--q));font-size:calc(3.6 * var(--q));font-weight:bold;color:#cfd6ff;opacity:.7;white-space:nowrap;letter-spacing:calc(.3 * var(--q))}
 #ending.cert #endSkip{display:none}
-#cert{display:none;width:100%;margin-top:6cqw;padding:4cqw 5.5cqw 4.4cqw;background:#fffdf2;border:.7cqw solid #2c4aa0;border-radius:1.6cqw;
-  box-shadow:0 2cqw 0 #1c3170,0 3cqw 6cqw #0006;color:#2b2b3a;flex-direction:column;align-items:stretch;gap:1.7cqw;text-align:center;cursor:default}
+#cert{display:none;width:100%;margin-top:calc(6 * var(--q));padding:calc(4 * var(--q)) calc(5.5 * var(--q)) calc(4.4 * var(--q));background:#fffdf2;border:calc(.7 * var(--q)) solid #2c4aa0;border-radius:calc(1.6 * var(--q));
+  box-shadow:0 calc(2 * var(--q)) 0 #1c3170,0 calc(3 * var(--q)) calc(6 * var(--q)) #0006;color:#2b2b3a;flex-direction:column;align-items:stretch;gap:calc(1.7 * var(--q));text-align:center;cursor:default}
 #ending.cert #cert{display:flex;animation:pop .35s cubic-bezier(.3,1.5,.5,1)}
-#cert .sub{align-self:center;font-size:4.4cqw;font-weight:900;color:#5a3d00;background:linear-gradient(#f9d878,#e0a828);border-radius:5cqw;padding:.7cqw 6cqw;letter-spacing:1cqw;margin-top:-8.4cqw;box-shadow:0 .7cqw 0 #a87810;white-space:nowrap}
-#cert .hd{font-size:5.4cqw;font-weight:bold;color:#2c4aa0;border-bottom:.5cqw solid #2c4aa0;padding-bottom:1.2cqw;letter-spacing:.5cqw;white-space:nowrap}
-#cert .ln{display:flex;justify-content:space-between;align-items:baseline;font-size:4.2cqw;border-bottom:.3cqw dashed #9aa7d0;padding-bottom:.8cqw;white-space:nowrap}
+#cert .sub{align-self:center;font-size:calc(4.4 * var(--q));font-weight:900;color:#5a3d00;background:linear-gradient(#f9d878,#e0a828);border-radius:calc(5 * var(--q));padding:calc(.7 * var(--q)) calc(6 * var(--q));letter-spacing:calc(1 * var(--q));margin-top:calc(-8.4 * var(--q));box-shadow:0 calc(.7 * var(--q)) 0 #a87810;white-space:nowrap}
+#cert .hd{font-size:calc(5.4 * var(--q));font-weight:bold;color:#2c4aa0;border-bottom:calc(.5 * var(--q)) solid #2c4aa0;padding-bottom:calc(1.2 * var(--q));letter-spacing:calc(.5 * var(--q));white-space:nowrap}
+#cert .ln{display:flex;justify-content:space-between;align-items:baseline;font-size:calc(4.2 * var(--q));border-bottom:calc(.3 * var(--q)) dashed #9aa7d0;padding-bottom:calc(.8 * var(--q));white-space:nowrap}
 #cert .ln span:first-child{color:#55608a}
-#cert .ln b{font-size:4.6cqw}
-#cert .big{position:relative;display:flex;justify-content:space-between;align-items:center;margin:.8cqw 0 2.2cqw}
-#cert .big .lb{font-size:4.8cqw;color:#55608a;font-weight:bold}
-#cert .big .num{font-size:12cqw;font-weight:900;line-height:1;color:#d2382f;font-variant-numeric:tabular-nums}
-#cert .big .num small{font-size:5cqw;color:#55608a;font-weight:bold;margin-left:.8cqw}
-#cStamp{position:absolute;left:15cqw;top:-2.4cqw;width:19cqw;height:19cqw;border:.9cqw solid #d2382f;border-radius:50%;color:#d2382f;font-weight:900;
-  display:flex;align-items:center;justify-content:center;text-align:center;line-height:1.15;transform:rotate(-14deg) scale(2.4);opacity:0;background:#fffdf277;font-size:4.8cqw}
+#cert .ln b{font-size:calc(4.6 * var(--q))}
+#cert .big{position:relative;display:flex;justify-content:space-between;align-items:center;margin:calc(.8 * var(--q)) 0 calc(2.2 * var(--q))}
+#cert .big .lb{font-size:calc(4.8 * var(--q));color:#55608a;font-weight:bold}
+#cert .big .num{font-size:calc(12 * var(--q));font-weight:900;line-height:1;color:#d2382f;font-variant-numeric:tabular-nums}
+#cert .big .num small{font-size:calc(5 * var(--q));color:#55608a;font-weight:bold;margin-left:calc(.8 * var(--q))}
+#cStamp{position:absolute;left:calc(15 * var(--q));top:calc(-2.4 * var(--q));width:calc(19 * var(--q));height:calc(19 * var(--q));border:calc(.9 * var(--q)) solid #d2382f;border-radius:50%;color:#d2382f;font-weight:900;
+  display:flex;align-items:center;justify-content:center;text-align:center;line-height:1.15;transform:rotate(-14deg) scale(2.4);opacity:0;background:#fffdf277;font-size:calc(4.8 * var(--q))}
 #cStamp.on{animation:stamp .28s cubic-bezier(.4,1.6,.6,1) forwards}
-#cert .note{font-size:4cqw;font-weight:bold;color:#2c4aa0;line-height:1.5}
-#endBtn{flex:1.2;height:12.5cqw;font-size:4.8cqw;white-space:nowrap}
-#endShare{flex:1;height:10cqw;font-size:3.5cqw;background:transparent;color:#2c4aa0;white-space:nowrap;padding:0 1.5cqw;border:.6cqw solid #2c4aa0;border-radius:3cqw;box-shadow:0 .6cqw 0 #2c4aa066}
-#endShare:active{transform:translateY(.5cqw)}
+#cert .note{font-size:calc(4 * var(--q));font-weight:bold;color:#2c4aa0;line-height:1.5}
+#endBtn{flex:1.2;height:calc(12.5 * var(--q));font-size:calc(4.8 * var(--q));white-space:nowrap}
+#endShare{flex:1;height:calc(10 * var(--q));font-size:calc(3.5 * var(--q));background:transparent;color:#2c4aa0;white-space:nowrap;padding:0 calc(1.5 * var(--q));border:calc(.6 * var(--q)) solid #2c4aa0;border-radius:calc(3 * var(--q));box-shadow:0 calc(.6 * var(--q)) 0 #2c4aa066}
+#endShare:active{transform:translateY(calc(.5 * var(--q)))}
 
 /* 結果：体力測定の記録用紙 */
-#result{position:absolute;left:6cqw;right:6cqw;top:21cqw;z-index:30;padding:4cqw 5.5cqw 4.2cqw;
-  background:#fffdf2;border:.7cqw solid #2c4aa0;border-radius:1.6cqw;
-  box-shadow:0 2cqw 0 #1c3170,0 3cqw 6cqw #0006;
-  color:#2b2b3a;display:none;flex-direction:column;align-items:stretch;gap:1.6cqw;text-align:center;pointer-events:auto}
+#result{position:absolute;left:calc(6 * var(--q));right:calc(6 * var(--q));top:calc(21 * var(--q));z-index:30;padding:calc(4 * var(--q)) calc(5.5 * var(--q)) calc(4.2 * var(--q));
+  background:#fffdf2;border:calc(.7 * var(--q)) solid #2c4aa0;border-radius:calc(1.6 * var(--q));
+  box-shadow:0 calc(2 * var(--q)) 0 #1c3170,0 calc(3 * var(--q)) calc(6 * var(--q)) #0006;
+  color:#2b2b3a;display:none;flex-direction:column;align-items:stretch;gap:calc(1.6 * var(--q));text-align:center;pointer-events:auto}
 #result.show{display:flex;animation:pop .3s cubic-bezier(.3,1.5,.5,1)}
 #result.wait{pointer-events:none}
 @keyframes pop{from{transform:scale(.7) rotate(-2deg);opacity:0}to{transform:none;opacity:1}}
-#result .hd{font-size:5.2cqw;font-weight:bold;color:#2c4aa0;border-bottom:.5cqw solid #2c4aa0;padding-bottom:1.2cqw;letter-spacing:.5cqw;white-space:nowrap}
-#result .ln{display:flex;justify-content:space-between;align-items:baseline;font-size:4.2cqw;
-  border-bottom:.3cqw dashed #9aa7d0;padding-bottom:.8cqw;white-space:nowrap}
+#result .hd{font-size:calc(5.2 * var(--q));font-weight:bold;color:#2c4aa0;border-bottom:calc(.5 * var(--q)) solid #2c4aa0;padding-bottom:calc(1.2 * var(--q));letter-spacing:calc(.5 * var(--q));white-space:nowrap}
+#result .ln{display:flex;justify-content:space-between;align-items:baseline;font-size:calc(4.2 * var(--q));
+  border-bottom:calc(.3 * var(--q)) dashed #9aa7d0;padding-bottom:calc(.8 * var(--q));white-space:nowrap}
 #result .ln span:first-child{color:#55608a}
-#result .ln b{font-size:4.6cqw}
-#result .big{position:relative;display:flex;justify-content:space-between;align-items:center;margin:.6cqw 0 1.6cqw}
-#result .big .lb{font-size:4.8cqw;color:#55608a;font-weight:bold}
-#result .big .num{font-size:12cqw;font-weight:900;line-height:1;color:#d2382f;font-variant-numeric:tabular-nums}
-#result .big .num small{font-size:5cqw;color:#55608a;font-weight:bold;margin-left:.8cqw}
-#stamp{position:absolute;left:11.5cqw;top:-2.5cqw;width:19cqw;height:19cqw;border:.9cqw solid #d2382f;border-radius:50%;
+#result .ln b{font-size:calc(4.6 * var(--q))}
+#result .big{position:relative;display:flex;justify-content:space-between;align-items:center;margin:calc(.6 * var(--q)) 0 calc(1.6 * var(--q))}
+#result .big .lb{font-size:calc(4.8 * var(--q));color:#55608a;font-weight:bold}
+#result .big .num{font-size:calc(12 * var(--q));font-weight:900;line-height:1;color:#d2382f;font-variant-numeric:tabular-nums}
+#result .big .num small{font-size:calc(5 * var(--q));color:#55608a;font-weight:bold;margin-left:calc(.8 * var(--q))}
+#stamp{position:absolute;left:calc(11.5 * var(--q));top:calc(-2.5 * var(--q));width:calc(19 * var(--q));height:calc(19 * var(--q));border:calc(.9 * var(--q)) solid #d2382f;border-radius:50%;
   color:#d2382f;font-weight:900;display:flex;align-items:center;justify-content:center;text-align:center;line-height:1.1;
-  transform:rotate(-14deg) scale(2.4);opacity:0;background:#fffdf277;font-size:10cqw}
-#stamp.long{font-size:4.2cqw}
+  transform:rotate(-14deg) scale(2.4);opacity:0;background:#fffdf277;font-size:calc(10 * var(--q))}
+#stamp.long{font-size:calc(4.2 * var(--q))}
 #stamp.on{animation:stamp .28s cubic-bezier(.4,1.6,.6,1) forwards}
 @keyframes stamp{to{transform:rotate(-14deg) scale(1);opacity:1}}
-#rJudge{font-size:3.8cqw;color:#55608a;min-height:4.8cqw}
-#rBest{font-size:3.6cqw;color:#55608a;min-height:4.6cqw}
+#rJudge{font-size:calc(3.8 * var(--q));color:#55608a;min-height:calc(4.8 * var(--q))}
+#rBest{font-size:calc(3.6 * var(--q));color:#55608a;min-height:calc(4.6 * var(--q))}
 
 /* ライバルとの比べ。勝ち負けの判子が真ん中に押される */
-#vs{display:grid;grid-template-columns:minmax(0,1fr) 19cqw minmax(0,1fr);align-items:center;background:#f1f4fc;border:.4cqw solid #9aa7d0;border-radius:1.6cqw;padding:2cqw 1.6cqw}
-#vs .col{display:flex;flex-direction:column;gap:.4cqw;min-width:0}
-#vs .col span{font-size:3.4cqw;color:#55608a;font-weight:bold;white-space:nowrap}
-#vs .col b{font-size:7cqw;font-weight:900;line-height:1.1;white-space:nowrap;font-variant-numeric:tabular-nums}
-#vs .col b.l2{font-size:5.2cqw}
-#vs .col b.l3{font-size:4.2cqw}
+#vs{display:grid;grid-template-columns:minmax(0,1fr) calc(19 * var(--q)) minmax(0,1fr);align-items:center;background:#f1f4fc;border:calc(.4 * var(--q)) solid #9aa7d0;border-radius:calc(1.6 * var(--q));padding:calc(2 * var(--q)) calc(1.6 * var(--q))}
+#vs .col{display:flex;flex-direction:column;gap:calc(.4 * var(--q));min-width:0}
+#vs .col span{font-size:calc(3.4 * var(--q));color:#55608a;font-weight:bold;white-space:nowrap}
+#vs .col b{font-size:calc(7 * var(--q));font-weight:900;line-height:1.1;white-space:nowrap;font-variant-numeric:tabular-nums}
+#vs .col b.l2{font-size:calc(5.2 * var(--q))}
+#vs .col b.l3{font-size:calc(4.2 * var(--q))}
 #vs .col.you b{color:#d2382f}
-#vs .mid{position:relative;height:15cqw;display:flex;align-items:center;justify-content:center}
-#vs .mid .v{font-size:4cqw;font-weight:900;color:#9aa7d0}
-#vsStamp{position:absolute;left:50%;top:50%;margin:-7.5cqw 0 0 -8.5cqw;width:17cqw;height:15cqw;border:.8cqw solid #d2382f;border-radius:2cqw;
+#vs .mid{position:relative;height:calc(15 * var(--q));display:flex;align-items:center;justify-content:center}
+#vs .mid .v{font-size:calc(4 * var(--q));font-weight:900;color:#9aa7d0}
+#vsStamp{position:absolute;left:50%;top:50%;margin:calc(-7.5 * var(--q)) 0 0 calc(-8.5 * var(--q));width:calc(17 * var(--q));height:calc(15 * var(--q));border:calc(.8 * var(--q)) solid #d2382f;border-radius:calc(2 * var(--q));
   color:#d2382f;font-weight:900;display:flex;align-items:center;justify-content:center;text-align:center;line-height:1.05;white-space:nowrap;
-  transform:rotate(-10deg) scale(2.4);opacity:0;background:#fffdf2d0;font-size:5cqw}
+  transform:rotate(-10deg) scale(2.4);opacity:0;background:#fffdf2d0;font-size:calc(5 * var(--q))}
 #vs.lose #vsStamp{color:#4a5a9a;border-color:#4a5a9a}
 #vsStamp.on{animation:vstamp .26s cubic-bezier(.4,1.6,.6,1) forwards}
 @keyframes vstamp{to{transform:rotate(-10deg) scale(1);opacity:1}}
-#vsSay{grid-column:1/-1;margin-top:1.4cqw;padding-top:1.3cqw;border-top:.3cqw dashed #9aa7d0;font-size:3.6cqw;color:#2b2b3a;text-align:center;line-height:1.35;min-height:4.8cqw}
-#vsSay .who{font-weight:900;color:#55608a;margin-right:1.2cqw}
-#vsNote{font-size:3.9cqw;font-weight:bold;color:#2c4aa0;min-height:5cqw}
+#vsSay{grid-column:1/-1;margin-top:calc(1.4 * var(--q));padding-top:calc(1.3 * var(--q));border-top:calc(.3 * var(--q)) dashed #9aa7d0;font-size:calc(3.6 * var(--q));color:#2b2b3a;text-align:center;line-height:1.35;min-height:calc(4.8 * var(--q))}
+#vsSay .who{font-weight:900;color:#55608a;margin-right:calc(1.2 * var(--q))}
+#vsNote{font-size:calc(3.9 * var(--q));font-weight:bold;color:#2c4aa0;min-height:calc(5 * var(--q))}
 
-.row{display:flex;gap:3cqw;align-items:center;width:100%;margin-top:.6cqw}
-.btn{border:0;border-radius:3.6cqw;font:inherit;font-weight:bold;color:#fff;cursor:pointer;
-  background:linear-gradient(#ff6b9a,#e0356f);box-shadow:0 1.2cqw 0 #a82350;touch-action:manipulation}
-.btn:active{transform:translateY(.8cqw);box-shadow:0 .4cqw 0 #a82350}
-#retry{flex:1;height:13cqw;font-size:5.8cqw;white-space:nowrap}
-#toList,#rShop,#share{height:10cqw;font-size:3.5cqw;background:transparent;color:#2c4aa0;white-space:nowrap;padding:0 1.5cqw;
-  border:.6cqw solid #2c4aa0;border-radius:3cqw;box-shadow:0 .6cqw 0 #2c4aa066}
+.row{display:flex;gap:calc(3 * var(--q));align-items:center;width:100%;margin-top:calc(.6 * var(--q))}
+.btn{border:0;border-radius:calc(3.6 * var(--q));font:inherit;font-weight:bold;color:#fff;cursor:pointer;
+  background:linear-gradient(#ff6b9a,#e0356f);box-shadow:0 calc(1.2 * var(--q)) 0 #a82350;touch-action:manipulation}
+.btn:active{transform:translateY(calc(.8 * var(--q)));box-shadow:0 calc(.4 * var(--q)) 0 #a82350}
+#retry{flex:1;height:calc(13 * var(--q));font-size:calc(5.8 * var(--q));white-space:nowrap}
+#toList,#rShop,#share{height:calc(10 * var(--q));font-size:calc(3.5 * var(--q));background:transparent;color:#2c4aa0;white-space:nowrap;padding:0 calc(1.5 * var(--q));
+  border:calc(.6 * var(--q)) solid #2c4aa0;border-radius:calc(3 * var(--q));box-shadow:0 calc(.6 * var(--q)) 0 #2c4aa066}
 #toList{flex:1.15}
 #rShop{flex:1}
-#share{width:23cqw}
+#share{width:calc(23 * var(--q))}
 #rShop.hot{background:#fff0f5;border-color:#e0356f;color:#c4235c}
-#toList:active,#rShop:active,#share:active{transform:translateY(.5cqw)}
+#toList:active,#rShop:active,#share:active{transform:translateY(calc(.5 * var(--q)))}
+
+/* キーボードで選んでいるボタンの目印（Tab・矢印・Enter／Space で遊べる） */
+button:focus{outline:none}
+button:focus-visible{outline:calc(.7 * var(--q)) solid #ffcf2a;outline-offset:calc(.5 * var(--q));box-shadow:0 0 0 calc(1.1 * var(--q)) #2c4aa0}
+.tn:focus-visible,.it .buy:focus-visible{z-index:2}
+
+/* ===== English：言葉が長いので、文字を少し小さく・字間をつめる ===== */
+html[lang=en] body{font-family:"Arial Rounded MT Bold","Trebuchet MS","Segoe UI","Hiragino Maru Gothic ProN","Yu Gothic UI",sans-serif;word-break:normal;line-break:auto}
+html[lang=en] #title .tag{font-size:calc(4 * var(--q));letter-spacing:calc(.5 * var(--q))}
+html[lang=en] #title .logo .l1{font-size:calc(21 * var(--q));letter-spacing:calc(.4 * var(--q))}
+html[lang=en] #title .logo .l2{font-size:calc(14 * var(--q))}
+html[lang=en] #title .catch{font-size:calc(4.8 * var(--q))}
+html[lang=en] #list .hd,html[lang=en] #shop .hd{letter-spacing:0}
+html[lang=en] .tn .nm{font-size:calc(4.2 * var(--q))}
+html[lang=en] .tn .sb{font-size:calc(3 * var(--q))}
+html[lang=en] .tn .tag{font-size:calc(3 * var(--q))}
+html[lang=en] .tn .bs{font-size:calc(3 * var(--q))}
+html[lang=en] .bar .tk{font-size:calc(3.8 * var(--q))}
+html[lang=en] .it .nm{font-size:calc(4.2 * var(--q))}
+html[lang=en] .it .ds{font-size:calc(3.2 * var(--q))}
+html[lang=en] .it .fx{font-size:calc(3.1 * var(--q))}
+html[lang=en] .it .buy{font-size:calc(4.4 * var(--q))}
+html[lang=en] .it.locked .buy{font-size:calc(3.4 * var(--q))}
+html[lang=en] #inName{letter-spacing:0;font-size:calc(4.4 * var(--q))}
+html[lang=en] #inRival{font-size:calc(6.4 * var(--q))}
+html[lang=en] #inSay{font-size:calc(4 * var(--q))}
+html[lang=en] #result .hd,html[lang=en] #cert .hd{font-size:calc(4.3 * var(--q));letter-spacing:0}
+html[lang=en] #result .ln,html[lang=en] #cert .ln{font-size:calc(3.9 * var(--q))}
+html[lang=en] #result .ln b,html[lang=en] #cert .ln b{font-size:calc(4.2 * var(--q))}
+html[lang=en] #result .big .lb,html[lang=en] #cert .big .lb{font-size:calc(4.2 * var(--q))}
+html[lang=en] #stamp.long{font-size:calc(3.6 * var(--q))}
+html[lang=en] #cStamp{font-size:calc(3.5 * var(--q))}
+html[lang=en] #vsStamp{font-size:calc(4.4 * var(--q))}
+html[lang=en] #vs .col span{font-size:calc(3.1 * var(--q))}
+html[lang=en] #vsSay{font-size:calc(3.3 * var(--q))}
+html[lang=en] #cert .sub{letter-spacing:calc(.4 * var(--q));font-size:calc(4 * var(--q))}
+html[lang=en] #cert .note{font-size:calc(3.6 * var(--q))}
+html[lang=en] #retry{font-size:calc(5.4 * var(--q))}
+html[lang=en] #toList,html[lang=en] #rShop,html[lang=en] #share{font-size:calc(3.2 * var(--q))}
+html[lang=en] #endBtn{font-size:calc(4.2 * var(--q))}
+html[lang=en] #endShare{font-size:calc(3.2 * var(--q))}
+html[lang=en] #listBack,html[lang=en] #inBack,html[lang=en] #shopBack{font-size:calc(3.5 * var(--q))}
+html[lang=en] #shopGo{font-size:calc(4.6 * var(--q))}
+html[lang=en] .t4,html[lang=en] #intro .go{letter-spacing:calc(.3 * var(--q))}
+
+/* English・縦画面：判子が左の見出し（Record）にかからないよう、少し右へ */
+@media (max-aspect-ratio:124/100){
+  html[lang=en] #stamp{left:calc(14.5 * var(--q));width:calc(17 * var(--q));height:calc(17 * var(--q))}
+  html[lang=en] #cStamp{left:calc(17 * var(--q));width:calc(17 * var(--q));height:calc(17 * var(--q))}
+}
+
+/* ===== 横画面（パソコン・横向きのスマホ）：16:9 の枠いっぱいに、横に並べた画面にする。単位 --q は枠の幅の 1/220 ===== */
+@media (min-aspect-ratio:5/4){
+  #stage{width:min(100vw,calc(100dvh*16/9));aspect-ratio:16/9;--q:.4545cqw}
+  /* タイトル：ロゴは 1 行（分身＋反復横とび）、案内は下 */
+  #title .head{top:calc(8 * var(--q));gap:calc(2 * var(--q))}
+  #title .logo{flex-direction:row;align-items:baseline;gap:calc(2.4 * var(--q))}
+  #title .logo .l1{font-size:calc(31 * var(--q))}
+  #title .logo .l2{font-size:calc(21 * var(--q));margin-top:0}
+  html[lang=en] #title .logo .l1{font-size:calc(25 * var(--q))}
+  html[lang=en] #title .logo .l2{font-size:calc(19 * var(--q))}
+  #title .tag{font-size:calc(4.6 * var(--q))}
+  #title .catch{font-size:calc(5.4 * var(--q));margin-top:calc(.6 * var(--q))}
+  #title .t4{top:calc(108 * var(--q));font-size:calc(6.4 * var(--q))}
+
+  .scr{padding:calc(6 * var(--q)) calc(9 * var(--q)) calc(5 * var(--q));gap:calc(3 * var(--q))}
+  /* 大会の一覧：上に見出しと券、まん中に 3×3 のカード、下にもどる */
+  #list.on{display:grid;grid-template-columns:1fr auto;grid-template-rows:auto minmax(0,1fr) auto;align-items:end}
+  #list .hd{grid-column:1;font-size:calc(6.4 * var(--q))}
+  #list .bar{grid-column:2;gap:calc(5 * var(--q));align-self:center}
+  #list .bar .tk{font-size:calc(4 * var(--q))}
+  #list .bar .tk b{font-size:calc(5.2 * var(--q))}
+  #list .sm{height:calc(8 * var(--q));padding:0 calc(5 * var(--q));font-size:calc(3.8 * var(--q));border-radius:calc(2.6 * var(--q))}
+  #listBody{grid-column:1/-1;display:grid;grid-template-columns:repeat(3,minmax(0,1fr));grid-auto-rows:minmax(0,1fr);gap:calc(3.6 * var(--q));padding:calc(1 * var(--q)) calc(1.4 * var(--q)) calc(1.6 * var(--q));align-self:stretch}
+  #listBody .tn{max-height:none;min-height:0;grid-template-columns:calc(9 * var(--q)) minmax(0,1fr);grid-template-rows:minmax(0,1fr) auto;grid-template-areas:"no mid" "rt rt";row-gap:calc(1 * var(--q));padding:calc(2 * var(--q)) calc(3 * var(--q)) calc(2 * var(--q)) calc(2.6 * var(--q))}
+  #listBody .tn .no{grid-area:no;width:calc(9 * var(--q));height:calc(9 * var(--q));font-size:calc(5 * var(--q));align-self:center}
+  #listBody .tn .mid{grid-area:mid;align-self:center;gap:calc(.8 * var(--q))}
+  #listBody .tn .rt{grid-area:rt;flex-direction:row;justify-content:space-between;align-items:center;border-top:calc(.3 * var(--q)) dashed #c3cadf;padding-top:calc(1.2 * var(--q))}
+  #listBody .tn .nm{font-size:calc(4.6 * var(--q))}
+  #listBody .tn .sb{font-size:calc(3.3 * var(--q))}
+  #listBody .tn .tag{font-size:calc(3.2 * var(--q))}
+  #listBody .tn .bs{font-size:calc(3.2 * var(--q))}
+  html[lang=en] #listBody .tn .nm{font-size:calc(4.1 * var(--q))}
+  html[lang=en] #listBody .tn .sb,html[lang=en] #listBody .tn .tag,html[lang=en] #listBody .tn .bs{font-size:calc(3 * var(--q))}
+  #list .back,#intro .back{height:calc(8 * var(--q));padding:0 calc(7 * var(--q));font-size:calc(3.6 * var(--q));border-radius:calc(2.6 * var(--q))}
+  #list .back{grid-column:1/-1;justify-self:center}
+
+  /* 購買部：2 列 × 3 行 */
+  #shop.on{display:grid;grid-template-columns:1fr;grid-template-rows:auto minmax(0,1fr) auto}
+  #shop .hd{font-size:calc(6.4 * var(--q))}
+  #shop .hd small{font-size:calc(4 * var(--q))}
+  #shop .hd small b{font-size:calc(5.2 * var(--q))}
+  #shopBody{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));grid-auto-rows:minmax(0,1fr);gap:calc(3.4 * var(--q));align-self:stretch}
+  #shopBody .it{max-height:none;min-height:0;grid-template-columns:minmax(0,1fr) calc(30 * var(--q));column-gap:calc(3 * var(--q));padding:0 calc(3 * var(--q)) 0 calc(4 * var(--q))}
+  #shopBody .it .nm{font-size:calc(4.6 * var(--q))}
+  #shopBody .it .pips{font-size:calc(3.2 * var(--q))}
+  #shopBody .it .ds{font-size:calc(3.5 * var(--q))}
+  #shopBody .it .fx{font-size:calc(3.5 * var(--q))}
+  #shopBody .it .buy{height:calc(12 * var(--q));font-size:calc(5.2 * var(--q));border-radius:calc(3 * var(--q))}
+  html[lang=en] #shopBody .it .nm{font-size:calc(4.3 * var(--q))}
+  html[lang=en] #shopBody .it .ds{font-size:calc(3.3 * var(--q))}
+  html[lang=en] #shopBody .it .fx{font-size:calc(3.2 * var(--q))}
+  html[lang=en] #shopBody .it .buy{font-size:calc(4.6 * var(--q))}
+  #shop .row{width:calc(110 * var(--q));margin:0 auto;gap:calc(5 * var(--q))}
+  #shopBack{height:calc(9 * var(--q));font-size:calc(4 * var(--q))}
+  #shopGo{height:calc(10.5 * var(--q));font-size:calc(5.4 * var(--q))}
+  html[lang=en] #shopBack{font-size:calc(3.8 * var(--q))}
+  html[lang=en] #shopGo{font-size:calc(4.8 * var(--q))}
+
+  /* 測定前（ライバルの紹介）：カードは左にライバル・右に記録の 2 列 */
+  #intro{left:calc(34 * var(--q));right:calc(34 * var(--q));top:calc(37 * var(--q));gap:calc(2.6 * var(--q))}
+  #inName{font-size:calc(4.8 * var(--q))}
+  #inCard{display:grid;grid-template-columns:minmax(0,1fr) minmax(0,.85fr);column-gap:calc(5 * var(--q));row-gap:calc(1.2 * var(--q));padding:calc(3.4 * var(--q)) calc(5 * var(--q)) calc(3.8 * var(--q));align-items:center;justify-items:center}
+  #inCard > :nth-child(1){grid-column:1;grid-row:1}
+  #inCard > :nth-child(2){grid-column:1;grid-row:2}
+  #inCard > :nth-child(3){grid-column:1;grid-row:3;margin:0}
+  #inCard > :nth-child(4){display:none}
+  #inCard > :nth-child(5){grid-column:2;grid-row:1}
+  #inCard > :nth-child(6){grid-column:2;grid-row:2}
+  #inCard > :nth-child(7){grid-column:2;grid-row:3}
+  #inCard .lb{font-size:calc(3.3 * var(--q))}
+  #inRival{font-size:calc(7.2 * var(--q))}
+  #inSay{font-size:calc(3.9 * var(--q))}
+  #inRec{font-size:calc(17 * var(--q))}
+  #inRec small{font-size:calc(4.8 * var(--q))}
+  #inBest{font-size:calc(3.4 * var(--q))}
+  #intro .go{font-size:calc(5.6 * var(--q));padding:calc(1.8 * var(--q)) calc(8 * var(--q))}
+  html[lang=en] #inRival{font-size:calc(5.8 * var(--q))}
+  html[lang=en] #inSay{font-size:calc(3.6 * var(--q))}
+
+  /* 記録用紙：左に記録・右にライバルとの比べ。ボタンは下に横ならび */
+  #result{left:calc(31 * var(--q));right:calc(31 * var(--q));top:calc(8 * var(--q));padding:calc(3.4 * var(--q)) calc(6 * var(--q)) calc(3.6 * var(--q));gap:calc(1.8 * var(--q)) calc(7 * var(--q))}
+  #result.show{display:grid;grid-template-columns:minmax(0,1fr) minmax(0,1fr);
+    grid-template-areas:"hd hd" "kind vs" "big vs" "judge vnote" "tk steps" "max trips" "best best" "retry retry" "btns btns";align-items:center}
+  #result .r-hd{grid-area:hd;font-size:calc(4.8 * var(--q))}
+  #result .r-kind{grid-area:kind}
+  #result .r-big{grid-area:big;margin:calc(1 * var(--q)) 0;display:grid;grid-template-columns:auto 1fr;grid-template-rows:auto auto;row-gap:calc(.4 * var(--q))}
+  #result .r-big .lb{grid-column:1/-1;grid-row:1;text-align:left}
+  #result .r-big .num{grid-column:2;grid-row:2;justify-self:end}
+  #rJudge{grid-area:judge}
+  #vs{grid-area:vs;align-self:stretch}
+  #vsNote{grid-area:vnote}
+  #result .r-tk{grid-area:tk}
+  #result .r-steps{grid-area:steps}
+  #result .r-max{grid-area:max}
+  #result .r-trips{grid-area:trips}
+  #rBest{grid-area:best}
+  #result .r-retry{grid-area:retry;justify-content:center}
+  #result .r-btns{grid-area:btns;justify-content:center}
+  #result .ln{font-size:calc(3.8 * var(--q))}
+  #result .ln b{font-size:calc(4.2 * var(--q))}
+  #result .big .lb{font-size:calc(4.2 * var(--q))}
+  #result .big .num{font-size:calc(11.5 * var(--q))}
+  #result .big .num small{font-size:calc(4.6 * var(--q))}
+  #stamp{left:calc(.5 * var(--q));top:calc(3.4 * var(--q));width:calc(15.5 * var(--q));height:calc(15.5 * var(--q));font-size:calc(8.4 * var(--q))}
+  #stamp.long{font-size:calc(3.6 * var(--q))}
+  html[lang=en] #stamp.long{font-size:calc(3.1 * var(--q))}
+  #vs{grid-template-columns:minmax(0,1fr) calc(17 * var(--q)) minmax(0,1fr);padding:calc(2.4 * var(--q)) calc(2 * var(--q))}
+  #vs .col span{font-size:calc(3.2 * var(--q))}
+  #vs .col b{font-size:calc(6.6 * var(--q))}
+  #vs .col b.l2{font-size:calc(5 * var(--q))}
+  #vs .col b.l3{font-size:calc(4 * var(--q))}
+  #vsStamp{width:calc(15.5 * var(--q));height:calc(13.5 * var(--q));margin:calc(-6.75 * var(--q)) 0 0 calc(-7.75 * var(--q));font-size:calc(4.6 * var(--q))}
+  #vsSay{font-size:calc(3.4 * var(--q))}
+  #vsNote{font-size:calc(3.8 * var(--q))}
+  #rJudge{font-size:calc(3.5 * var(--q))}
+  #rBest{font-size:calc(3.4 * var(--q))}
+  #retry{flex:none;width:calc(70 * var(--q));height:calc(11 * var(--q));font-size:calc(5.4 * var(--q));border-radius:calc(3.2 * var(--q))}
+  #toList,#rShop,#share{height:calc(8.6 * var(--q));font-size:calc(3.5 * var(--q));padding:0 calc(5 * var(--q))}
+  #toList,#rShop{flex:none}
+  #share{width:auto}
+  html[lang=en] #retry{font-size:calc(5 * var(--q))}
+  html[lang=en] #toList,html[lang=en] #rShop,html[lang=en] #share{font-size:calc(3.3 * var(--q))}
+  html[lang=en] #vsStamp{font-size:calc(4 * var(--q))}
+
+  /* エンディングの記録用紙（宇宙記録）*/
+  #ending{padding:calc(4 * var(--q))}
+  #endSkip{right:calc(8 * var(--q));bottom:calc(5 * var(--q));font-size:calc(3.6 * var(--q))}
+  #cert{width:calc(150 * var(--q));margin-top:calc(5 * var(--q));padding:calc(3.4 * var(--q)) calc(6 * var(--q)) calc(3.6 * var(--q));
+    display:none;grid-template-columns:minmax(0,1fr) minmax(0,1fr);gap:calc(1.8 * var(--q)) calc(7 * var(--q));
+    grid-template-areas:"sub sub" "hd hd" "kind big" "tn big" "who note" "wit note" "row row";align-items:center}
+  #ending.cert #cert{display:grid}
+  #cert .sub{grid-area:sub;justify-self:center;margin-top:calc(-7.4 * var(--q));font-size:calc(4 * var(--q))}
+  #cert .hd{grid-area:hd;font-size:calc(4.8 * var(--q))}
+  #cert .c-kind{grid-area:kind}
+  #cert .c-tn{grid-area:tn}
+  #cert .c-big{grid-area:big;margin:0;display:grid;grid-template-columns:auto 1fr;grid-template-rows:auto auto;row-gap:calc(.4 * var(--q))}
+  #cert .c-big .lb{grid-column:1/-1;grid-row:1;text-align:left}
+  #cert .c-big .num{grid-column:2;grid-row:2;justify-self:end}
+  #cert .c-who{grid-area:who}
+  #cert .c-wit{grid-area:wit}
+  #cert .c-note{grid-area:note;flex-direction:column;align-items:flex-start;gap:calc(1 * var(--q));text-align:left;border-bottom:0}
+  #cert .c-row{grid-area:row;justify-content:center;margin-top:calc(1 * var(--q))}
+  #cert .ln{font-size:calc(3.8 * var(--q))}
+  #cert .ln b{font-size:calc(4.2 * var(--q))}
+  #cert .note{font-size:calc(3.8 * var(--q))}
+  #cert .big .lb{font-size:calc(4.2 * var(--q))}
+  #cert .big .num{font-size:calc(10 * var(--q))}
+  #cert .big .num small{font-size:calc(4.4 * var(--q))}
+  #cStamp{left:calc(.5 * var(--q));top:calc(3 * var(--q));width:calc(13.5 * var(--q));height:calc(13.5 * var(--q));font-size:calc(3.4 * var(--q))}
+  html[lang=en] #cStamp{font-size:calc(2.7 * var(--q))}
+  #endBtn{flex:none;width:calc(62 * var(--q));height:calc(10 * var(--q));font-size:calc(4.6 * var(--q))}
+  #endShare{flex:none;width:auto;height:calc(8.6 * var(--q));padding:0 calc(5 * var(--q));font-size:calc(3.5 * var(--q))}
+  html[lang=en] #endBtn{font-size:calc(4.2 * var(--q))}
+}
 </style>
 </head>
 <body>
 <canvas id="cv"></canvas>
 <div id="stage">
   <div id="title">
-    <div class="t2" data-p="title.name"></div>
-    <div class="t3" data-p="title.catch"></div>
+    <div class="head">
+      <div class="tag" data-s="title.tag"></div>
+      <div class="logo"><span class="l1" id="logo1"></span><span class="l2" id="logo2"></span></div>
+      <div class="catch" data-p="title.catch"></div>
+    </div>
     <div class="t4" data-s="title.tap"></div>
   </div>
   <div id="list" class="scr">
@@ -231,9 +442,9 @@ body{display:flex;align-items:center;justify-content:center}
     <button id="inBack" class="btn back" data-s="intro.back"></button>
   </div>
   <div id="result">
-    <div class="hd" data-s="sheet.head"></div>
-    <div class="ln"><span data-s="sheet.kind"></span><b id="rName"></b></div>
-    <div class="big">
+    <div class="hd r-hd" data-s="sheet.head"></div>
+    <div class="ln r-kind"><span data-s="sheet.kind"></span><b id="rName"></b></div>
+    <div class="big r-big">
       <span class="lb" data-s="sheet.rec"></span>
       <span class="num"><span id="rRec">0</span><small data-s="sheet.unit"></small></span>
       <div id="stamp"></div>
@@ -246,15 +457,15 @@ body{display:flex;align-items:center;justify-content:center}
       <div id="vsSay"></div>
     </div>
     <div id="vsNote"></div>
-    <div class="ln"><span data-s="sheet.tickets"></span><b id="rTk"></b></div>
-    <div class="ln"><span data-s="sheet.steps"></span><b><span id="rSteps">0</span><span data-s="sheet.times"></span></b></div>
-    <div class="ln"><span data-s="sheet.maxN"></span><b><span id="rMaxN">0</span><span data-s="sheet.people"></span></b></div>
-    <div class="ln"><span data-s="sheet.trips"></span><b><span id="rTrips">0</span><span data-s="sheet.times"></span></b></div>
+    <div class="ln r-tk"><span data-s="sheet.tickets"></span><b id="rTk"></b></div>
+    <div class="ln r-steps"><span data-s="sheet.steps"></span><b><span id="rSteps">0</span><span data-s="sheet.times"></span></b></div>
+    <div class="ln r-max"><span data-s="sheet.maxN"></span><b><span id="rMaxN">0</span><span data-s="sheet.people"></span></b></div>
+    <div class="ln r-trips"><span data-s="sheet.trips"></span><b><span id="rTrips">0</span><span data-s="sheet.times"></span></b></div>
     <div id="rBest"></div>
-    <div class="row">
+    <div class="row r-retry">
       <button id="retry" class="btn" data-s="sheet.retry"></button>
     </div>
-    <div class="row">
+    <div class="row r-btns">
       <button id="toList" class="btn"></button>
       <button id="rShop" class="btn" data-s="sheet.shop"></button>
       <button id="share" class="btn" data-s="sheet.share"></button>
@@ -265,17 +476,17 @@ body{display:flex;align-items:center;justify-content:center}
     <div id="cert">
       <div class="sub" data-s="ending.cert.sub"></div>
       <div class="hd" data-s="ending.cert.head"></div>
-      <div class="ln"><span data-s="ending.cert.kind"></span><b data-s="ending.cert.kindVal"></b></div>
-      <div class="ln"><span data-s="ending.cert.tn"></span><b data-s="ending.cert.tnVal"></b></div>
-      <div class="big">
+      <div class="ln c-kind"><span data-s="ending.cert.kind"></span><b data-s="ending.cert.kindVal"></b></div>
+      <div class="ln c-tn"><span data-s="ending.cert.tn"></span><b data-s="ending.cert.tnVal"></b></div>
+      <div class="big c-big">
         <span class="lb" data-s="ending.cert.rec"></span>
         <span class="num"><span id="cRec">0</span><small data-s="ending.cert.unit"></small></span>
-        <div id="cStamp" data-p="ending.cert.stamp"></div>
+        <div id="cStamp"><span data-p="ending.cert.stamp"></span></div>
       </div>
-      <div class="ln"><span data-s="ending.cert.who"></span><b data-s="ending.cert.whoVal"></b></div>
-      <div class="ln"><span data-s="ending.cert.witness"></span><b data-s="ending.cert.witnessVal"></b></div>
-      <div class="ln"><span data-s="ending.cert.note"></span><b class="note" data-p="ending.cert.noteVal"></b></div>
-      <div class="row"><button id="endBtn" class="btn" data-s="ending.list"></button><button id="endShare" class="btn" data-s="ending.share"></button></div>
+      <div class="ln c-who"><span data-s="ending.cert.who"></span><b data-s="ending.cert.whoVal"></b></div>
+      <div class="ln c-wit"><span data-s="ending.cert.witness"></span><b data-s="ending.cert.witnessVal"></b></div>
+      <div class="ln c-note"><span data-s="ending.cert.note"></span><b class="note" data-p="ending.cert.noteVal"></b></div>
+      <div class="row c-row"><button id="endBtn" class="btn" data-s="ending.list"></button><button id="endShare" class="btn" data-s="ending.share"></button></div>
     </div>
   </div>
 </div>

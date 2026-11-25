@@ -1,7 +1,10 @@
-// ===== 画面に出す言葉（ここに集める。Phase 4 で英語を足す）=====
+// ===== 画面に出す言葉（ここに集める。日本語は STR_JA、英語は STR_EN。同じ形で書く）=====
 // 「|」は文節の切れ目。画面では文節ごとに改行しない塊（.nb）になる。ph() で「|」を取れば普通の文字列
-const STR = {
-  title: { name: '分身|反復横とび', catch: '20秒で|何人 分身できる？', tap: 'タップで スタート' },
+const STR_JA = {
+  title: { name: '分身|反復横とび', logo: ['分身', '反復横とび'], tag: '体力測定', catch: '20秒で|何人 分身できる？', tap: 'タップで スタート' },
+
+  // 判定の名前（CFG.judge と同じ並び）。「|」は判子の中で改行できる場所
+  judge: ['E', 'D', 'C', 'B', 'A', 'S', '測定|不能', '人類の|範囲外'],
 
   list: {
     head: '大会の一覧', back: 'タイトルへ',
@@ -9,6 +12,7 @@ const STR = {
     vs: 'VS', unit: '回', best: 'ベスト', noBest: 'ベスト ---',
     tagWon: '勝ち', tagNext: '挑戦！', tagLocked: 'ロック', hidden: '？？？',
     tickets: '引換券', shop: '購買部',
+    sub: (short, n) => 'VS ' + short + '　' + n + '回', bestOf: n => 'ベスト ' + n,
   },
 
   // 購買部。品物は 6 つ。name・desc（何が強くなるか 1 行）・lb（効果の見出し）・v（段階ごとの効果の短い表示。引数は Shop.effect の値）。画面には「lb v → 次の v」
@@ -27,7 +31,7 @@ const STR = {
     },
   },
 
-  intro: { rival: 'ライバル', rec: 'ライバルの記録', unit: '回', best: 'ベスト', start: 'タップで スタート', back: 'もどる' },
+  intro: { rival: 'ライバル', rec: 'ライバルの記録', unit: '回', bestOf: n => 'ベスト ' + n + ' 回', start: 'タップで スタート', back: 'もどる' },
 
   // 大会 9 つ。順番が進む順番（CFG.targets と同じ並び）
   tournaments: [
@@ -128,28 +132,164 @@ const STR = {
     card: { head: '体力測定 記録用紙', kind: '種目', kindVal: '反復横とび', rec: '記録', unit: '回', steps: '本当の回数', maxN: '最高の分身', trips: '転んだ回数', times: ' 回', people: ' 人' },
   },
 };
-const ph = s => s.replace(/\|/g, '');   // 「|」を取った普通の文字列
 
-// ===== 大きな数字の表示（ここ 1 か所。Phase 4 で英語の K / M / B を足すときは units と、読みを変えるところだけ）=====
-// 1 万未満はそのまま（3 桁ごとにカンマ）。1 万以上は 万・億・兆 を付けて、有効数字 4 桁まで（例 12.34万・123.4万・1234万・1.5億）
-STR.num = { units: [[1e4, '万'], [1e8, '億'], [1e12, '兆']], sep: ',', sig: 4 };
-function fmtNum(v) {
+// ===== English（日本語と同じ形で書く。「|」は文節の切れ目で、英語では画面に出るとき空白になる）=====
+// 学校の体力測定のまじめな言い方のまま、記録だけが大げさになる味を残す
+const STR_EN = {
+  title: { name: 'Clone|Side Step', logo: ['CLONE', 'SIDE STEP'], tag: 'FITNESS TEST', catch: 'How many clones|in 20 seconds?', tap: 'Tap to Start' },
+
+  judge: ['E', 'D', 'C', 'B', 'A', 'S', 'Off the|Charts', 'Beyond|Human'],
+
+  list: {
+    head: 'Tournaments', back: 'Title',
+    progress: (n, m) => n + ' / ' + m,
+    vs: 'VS', unit: 'reps', best: 'Best', noBest: 'Best ---',
+    tagWon: 'WON', tagNext: 'NEXT!', tagLocked: 'LOCKED', hidden: '???',
+    tickets: 'Coupons', shop: 'Shop',
+    sub: (short, n) => 'VS ' + short + ' · ' + n + ' reps', bestOf: n => 'Best ' + n,
+  },
+
+  shop: {
+    head: 'School Shop', tickets: 'Coupons', back: 'Tournaments', go: 'Try Again',
+    price: n => n, max: 'MAX', soldOut: 'Maxed', poor: 'Short', lock: 'Locked',
+    gate: name => 'Win|' + name + '|to unlock',
+    arrow: ' → ',
+    items: {
+      shoes: { name: 'Gym Shoes', desc: 'Keeps your|momentum|longer', lb: 'Hold', v: e => '×' + e.mul.toFixed(1) },
+      clothes: { name: 'New Gym Clothes', desc: 'Clones appear|more easily', lb: 'Speed needed', v: e => e.mul < 1 ? '-' + Math.round((1 - e.mul) * 100) + '%' : '±0%' },
+      fall: { name: 'Fall Practice', desc: 'Recover|faster from|tumbles', lb: '', v: e => '-' + e.drop + ' lvl ' + e.secs.toFixed(2) + 's' },
+      recorder: { name: 'More Recorders', desc: 'Bigger|records', lb: 'Record', v: e => '×' + (e.mul % 1 ? e.mul.toFixed(1) : e.mul) },
+      cheer: { name: 'Cheer Squad', desc: 'Start with|high momentum', lb: 'Start', v: e => fmtNum(e.bodies) + (e.bodies === 1 ? ' clone' : ' clones') },
+      book: { name: 'Clone Scroll', desc: 'Raises the|clone cap', lb: 'Max', v: e => fmtNum(e.bodies) + ' clones' },
+    },
+  },
+
+  intro: { rival: 'Rival', rec: 'Rival Record', unit: 'reps', bestOf: n => 'Best ' + n + ' reps', start: 'Tap to Start', back: 'Back' },
+
+  tournaments: [
+    { name: 'Class Fitness Test', rival: { name: 'Tanaka from|the Front Seat', short: 'Tanaka', say: 'Aiming for|the same record|as last year.', win: 'Guess I get|milk again|next year.', lose: 'Won with the|same record|as last year.' } },
+    { name: 'Grade Fitness Test', rival: { name: 'Grade Champ|Suzuki', short: 'Suzuki', say: 'I drink milk|every morning.', win: 'We were short|on milk.', lose: 'Thanks to|the milk.' } },
+    { name: 'School Meet', rival: { name: 'PE Committee|Chair Sato', short: 'Sato', say: 'The whole school|is watching.|I do not mind.', win: 'Lost in front|of the whole|school.', lose: 'The whole school|seems to have|watched.' } },
+    { name: 'City Meet', rival: { name: 'City Rep|Takahashi', short: 'Takahashi', say: 'My excuses|are already|prepared.', win: 'Time to use|my excuse.', lose: 'No excuse|was needed.' } },
+    { name: 'Prefecture Meet', rival: { name: 'Prefecture Champ|Ito', short: 'Ito', say: 'I am waiting|for the prize|rice.', win: 'You can|have the rice.', lose: 'I will take|the rice.' } },
+    { name: 'National Meet', rival: { name: 'Two-Time National|Champ Watanabe', short: 'Watanabe', say: 'I will be on TV,|so I fixed|my hair.', win: 'My hair|got messy.', lose: 'My hair is|not messy.' } },
+    { name: 'World Meet', rival: { name: 'World Champ|Jean', short: 'Jean', say: 'We share no|language, but|records translate.', win: 'The record|translated.|I concede.', lose: 'The record|did not|translate.' } },
+    { name: 'Lunar Meet', rival: { name: 'Astronaut|Yamamoto', short: 'Yamamoto', say: 'Low gravity|helps me|a lot.', win: 'I will blame|the gravity.', lose: 'Gravity was|on my side.' } },
+    { name: 'Space Meet', rival: { name: 'Alien|Popo', short: 'Popo', say: 'My recorder|has six arms.', win: 'Six arms|still cannot|count that.', lose: 'I have|six arms,|you see.' } },
+  ],
+
+  sheet: {
+    head: 'Fitness Test Record Sheet', kind: 'Event', rec: 'Record', unit: 'reps',
+    steps: 'Real hops', maxN: 'Most clones', trips: 'Falls', times: '', people: '',
+    judgeAll: 'The recorders|counted everyone.', judgeClone: 'Clones were|counted too.',
+    bestNew: 'New best!', best: n => 'Best ' + n + ' reps',
+    rival: s => 'Rival ' + s, you: 'You', vs: 'VS', win: 'WIN!', lose: 'LOSE...',
+    noteLose: n => n + ' more reps|to win!',
+    noteUnlock: s => s + '|is now open!',
+    noteReplay: 'Beat the rival|again.',
+    noteEnd: 'All tournaments|cleared!',
+    rivalSay: s => '“' + s + '”',
+    retry: 'Try Again', toList: 'Tournaments', cont: 'Continue', share: 'Share on X',
+    tickets: 'Coupons', ticketGain: n => '+' + n, shop: 'Shop',
+  },
+
+  venues: [
+    { banner: 'FITNESS TEST', sign: '', tag: 'Homeroom Teacher', ready: 'Ready...', fin: 'Time! Recording...', over: n => '...' + n + ' reps.',
+      rec: ['One, two...', 'W-whoa, fast!', 'Huh...? Two, four...', 'There are more of them...', 'The f-floor...!', 'Calculator! Calculator...!', 'Un... unmeasurable...!',
+        '100 people...? Counting!', 'Not enough attendance sheets', 'Teacher is going outside', 'Can teacher go home now?'] },
+    { banner: 'GRADE FITNESS TEST', sign: '', tag: 'Grade Teachers', ready: 'Three of us are watching...', fin: 'Time! Tallying up', over: n => 'Grade record: ' + n + ' reps',
+      rec: ['Class 1 teacher, count!', 'My count does not match', 'Three of us will count!', 'There are two grade heads', 'The gym teacher is crying', 'Pass the calculator around', 'Calling a meeting! Unmeasurable',
+        'Everyone count... but...', 'Send help from the staff room!', 'The vice principal fainted', 'Reporting to the principal'] },
+    { banner: 'SCHOOL MEET', sign: '', tag: 'PE Committee Teacher', ready: 'Whole school, quiet...', fin: 'Time! Announcing to all', over: n => 'School record: ' + n + ' reps!',
+      rec: ['The whole school is watching', 'Quiet! I cannot see!', 'PE committee, line up!', 'Murmuring across the school...', 'Even the principal stood up', 'Broadcast room! Commentary!', 'The school record is broken',
+        'The yard is all clones', 'Neighbors are watching too', 'What about next year...?', 'Please sing the school song'] },
+    { banner: 'CITY MEET', sign: 'CITY GYM', tag: 'Referee', ready: 'Take your marks...', fin: 'Time. Checking the record', over: n => 'Record: ' + n + ' reps. Valid.',
+      rec: ['Take your marks.', 'That motion: valid.', 'Looks like two. Still valid', 'Counting competitors...', 'No precedent in the rules', 'Chief referee, confer!', 'Per the rules: unmeasurable',
+        'Clones are not registered', 'Contacted the mayor', 'After review: continuing', 'Adding more referees'] },
+    { banner: 'PREFECTURE MEET', sign: '', tag: 'Judge', ready: 'Scoring begins...', fin: 'Scoring is closed', over: n => 'Score: ' + n + ' reps',
+      rec: ['Judges, get ready to score!', 'Judge one: 7 points!', 'Judge two is hesitating', 'All three paddles split', 'Cannot keep up with scoring', 'Need a bigger scoreboard!', 'Beyond a perfect score',
+        'The judges cloned too', 'The governor stood up', 'Scoring is left to heaven', 'Rewriting the judging rules'] },
+    { banner: 'NATIONAL MEET', sign: 'LIVE', tag: 'Announcer', ready: 'Going live...', fin: 'And that is it! The result is...', over: n => 'The record is... ' + n + ' reps!',
+      rec: ['And we are underway!', 'Oh! Two of them now?!', 'Analyst Tamura, what is this?', 'More and more of them!', 'Ratings are spiking!', 'Broadcast accident incoming!', 'The camera cannot follow!',
+        'Living rooms nationwide erupt!', 'We are extending the show!', 'Witnessing history!', 'No time for commercials!'] },
+    { banner: 'WORLD MEET', sign: '', tag: 'International Referee', ready: 'Ready...', fin: 'Finish. Judges confer', over: n => n + ' reps. Official record.',
+      rec: ['Umm... ready?', 'Interpreter! Interpreter!', 'Wonderful...? Two?', 'Smells like a world record', 'No words needed', 'Referees of all nations confer', 'No count... no, we count it',
+        'Reporting to the UN', 'Every continent is watching', 'We ran out of rulebook', 'Which country is this now?'] },
+    { banner: 'LUNAR MEET', sign: '', tag: 'Astronaut', ready: 'To Earth. Starting...', fin: 'Finish. Sending the data', over: n => 'To Earth. ' + n + ' reps.',
+      rec: ['To Earth. Measurement start', 'To Earth. I see two', 'This is Moon. Four of them', 'Crrk... they are increasing', 'The dust will not settle', 'Earth, respond! The count...', 'Unmeasurable. Ending comms',
+        '100 confirmed. Over.', '500. Oxygen is running low', '3,000. The Moon is cramped', 'To Earth. I am moving out'] },
+    { banner: 'SPACE MEET', sign: '', tag: 'Alien Popo', ready: 'Pipo. Ready...', fin: 'Pipo. All done', over: n => n + ' reps... maybe',
+      rec: ['Pipo. One... yes?', 'Two. Or 8 millimeters', 'Four... no, ninety thousand', 'More. Stars more', 'I read 16 as 3', 'I forgot how to count', 'Digits exceeded the galaxy',
+        '100. So, blue', '500. Tasty smell', '3,000. My planet population', 'Popo loves counting all'] },
+  ],
+
+  ending: {
+    cap: {
+      galaxy: ['Your clones|lined up and|flew off|into space.', 'They fill|every corner|of the galaxy.'],
+      sheet: ['Recorder Popo|writes it down|with six arms.', 'Cosmic scale,|same format|as always.'],
+      teacher: ['Meanwhile,|at the gym.'],
+    },
+    sheetRow: { kind: 'Event', kindVal: 'Side Step Test', rec: 'Record', unit: 'reps', judge: 'Verdict', judgeVal: 'Cosmic scale' },
+    teacher: ['...Yes.|Recorded.', n => 'Space record:|' + n + ' reps.', 'Nothing unusual|this year.'],
+    pop: 'That Doesn’t Happen',
+    cert: {
+      head: 'Fitness Test Record Sheet', sub: 'Space Record', kind: 'Event', kindVal: 'Side Step Test', tn: 'Meet', tnVal: 'Space Meet', rec: 'Record', unit: 'reps',
+      who: 'Recorder', whoVal: 'Popo (6 arms)', witness: 'Witness', witnessVal: 'Homeroom Teacher', note: 'Notes', noteVal: 'Nothing unusual|this year', stamp: 'COSMIC|SCALE',
+    },
+    skip: 'Skip ▶', list: 'To Tournaments', share: 'Share on X',
+    shareText: (n) => 'I won the Space Meet in Clone Side Step! Space record: ' + n + ' reps. Notes: “Nothing unusual this year.” #CloneSideStep',
+  },
+
+  hud: {
+    rec: 'Record', real: n => 'Real hops: ' + n, left: 'Left', bodies: n => n + ' clones',
+    ready: 'Ready...', vs: 'VS', passed: 'Passed!',
+  },
+  pop: {
+    start: 'GO!', stumble: 'Tangled!', out: 'Out of bounds!', down: 'Momentum down', end: 'Time!', pant: 'huff',
+    rival: 'Passed the rival!',
+    lv: ['', 'Clone!', '4 clones!', '8 clones!!', '16 clones!!', '32 clones!!!', 'Off the charts!!!'],
+    lvN: n => fmtNum(n) + ' clones!!!',
+    crowd: ['Woah!', 'So fast!', 'What is that?!', 'Clones?!', 'No way!', 'There are two!', 'I can’t see!', 'Go go go!'],
+  },
+
+  share: {
+    text: (t, rec, steps, judge, maxN, win) =>
+      'I scored ' + rec + ' reps (' + steps + ' real hops) at the ' + t + ' in Clone Side Step. Verdict: “' + judge + '”!' + (win ? ' Beat the rival!' : '') + ' ' + maxN + ' clones #CloneSideStep',
+    card: { head: 'Fitness Test Record Sheet', kind: 'Event', kindVal: 'Side Step Test', rec: 'Record', unit: 'reps', steps: 'Real hops', maxN: 'Most clones', trips: 'Falls', times: '', people: '' },
+  },
+};
+
+// 言語ごとの数字の書き方。units＝[基準, 記号]、from＝この数からまとめる
+STR_JA.num = { units: [[1e4, '万'], [1e8, '億'], [1e12, '兆']], sep: ',', sig: 4, from: 1e4 };
+STR_EN.num = { units: [[1e3, 'K'], [1e6, 'M'], [1e9, 'B']], sep: ',', sig: 4, from: 1e4 };
+const STRS = { ja: STR_JA, en: STR_EN };
+const STR = STRS[LANG];
+
+// 「|」を、日本語では何もなし・英語では空白にした普通の文字列
+const STRSEP = EN ? ' ' : '';
+const phL = (s, lang) => s.replace(/\|/g, lang === 'en' ? ' ' : '');
+const ph = s => s.replace(/\|/g, STRSEP);
+
+// ===== 大きな数字の表示（ここ 1 か所）=====
+// 日本語：1 万未満はカンマ、1 万以上は 万・億・兆。英語：1 万（10,000）未満はカンマ、以上は K / M / B。
+// どちらも有効数字 4 桁まで・最大 6 文字（例 12.34万・123.4万・1234万・1.5億／12.35K・123.5K・1.235M）。lang を省くと今の言語
+function fmtNum(v, lang) {
   let n = Math.round(Number(v));
   if (!Number.isFinite(n)) return '0';
   const neg = n < 0; if (neg) n = -n;
-  const U = STR.num.units;
+  const N = STRS[lang === 'ja' || lang === 'en' ? lang : LANG].num, U = N.units;   // map(fmtNum) のように添字が渡っても無視
   let out;
-  if (n < U[0][0]) {
-    out = String(n).replace(/\B(?=(\d{3})+(?!\d))/g, STR.num.sep);
+  if (n < N.from) {
+    out = String(n).replace(/\B(?=(\d{3})+(?!\d))/g, N.sep);
   } else {
     let u = 0;
     while (u + 1 < U.length && n >= U[u + 1][0]) u++;
     const body = k => {   // 有効数字 sig 桁に丸めて、余分な 0 を落とす
-      const m = n / U[k][0], d = Math.max(0, STR.num.sig - 1 - Math.floor(Math.log10(m)));
+      const m = n / U[k][0], d = Math.max(0, N.sig - 1 - Math.floor(Math.log10(m)));
       return Number(m.toFixed(d));
     };
     let m = body(u);
-    if (m >= 10000 && u + 1 < U.length) { u++; m = body(u); }   // 9999.6万 → 1億 のような繰り上がり
+    if (u + 1 < U.length && m >= U[u + 1][0] / U[u][0]) { u++; m = body(u); }   // 9999.6万 → 1億、999.96K → 1M のような繰り上がり
     out = String(m) + U[u][1];
   }
   return neg ? '-' + out : out;

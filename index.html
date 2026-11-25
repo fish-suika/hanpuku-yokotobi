@@ -15,49 +15,52 @@ body{display:flex;align-items:center;justify-content:center}
 
 /* 絵は画面いっぱい（縦長の端末も横長の画面も、体育館が左右・上下に広がる）。遊ぶ場所は縦9:16で中央 */
 #cv{position:fixed;inset:0;width:100%;height:100%;display:block;touch-action:none}
-/* 遊ぶ場所の枠。単位は cqw（枠の幅の1%）。文字の置き場所に使うだけで、触れるのは下の絵 */
-#stage{position:relative;container-type:size;
+/* 遊ぶ場所の枠。単位は --q（縦画面＝枠の幅の1%＝1cqw、横画面＝16:9 の枠の幅の 1/220）。文字の置き場所に使うだけで、触れるのは下の絵 */
+#stage{position:relative;container-type:size;--q:1cqw;
   width:min(100vw,calc(100dvh*9/16));aspect-ratio:9/16;pointer-events:none}
 
-/* タイトル */
-#title{position:absolute;left:5cqw;right:5cqw;top:53cqw;z-index:20;text-align:center;
-  display:flex;flex-direction:column;align-items:center;gap:2.4cqw}
+/* タイトル：ロゴ（分身＋反復横とび）・キャッチ・スタートの案内ひとつ。絵は体育館に並ぶ分身の列（canvas） */
+#title{position:absolute;inset:0;z-index:20;text-align:center}
 #title.hide{display:none}
-#title .t1{font-size:4.6cqw;font-weight:bold;color:#fff;background:#d2382f;border-radius:5cqw;padding:.8cqw 4.5cqw;letter-spacing:.6cqw;box-shadow:0 .8cqw 0 #8f221c}
-#title .t2{font-size:11.5cqw;font-weight:900;line-height:1.1;color:#fff;
-  -webkit-text-stroke:1.4cqw #213a86;paint-order:stroke fill;text-shadow:0 1.4cqw 0 #213a86,0 2.2cqw 3cqw #0004}
-#title .t3{font-size:5.2cqw;font-weight:bold;color:#213a86;background:#fffd;border-radius:3cqw;padding:1cqw 4cqw}
-#title .t4{margin-top:3cqw;font-size:6cqw;font-weight:bold;color:#fff;background:#e0356f;border-radius:6cqw;
-  padding:2cqw 8cqw;box-shadow:0 1.2cqw 0 #a82350;animation:blink 1.1s ease-in-out infinite}
+#title .head{position:absolute;left:calc(4 * var(--q));right:calc(4 * var(--q));top:calc(11 * var(--q));display:flex;flex-direction:column;align-items:center;gap:calc(2.2 * var(--q))}
+#title .tag{font-size:calc(4.4 * var(--q));font-weight:bold;color:#fff;background:#d2382f;border-radius:calc(5 * var(--q));padding:calc(.7 * var(--q)) calc(4.6 * var(--q));letter-spacing:calc(.9 * var(--q));box-shadow:0 calc(.8 * var(--q)) 0 #8f221c}
+#title .logo{display:flex;flex-direction:column;align-items:center;line-height:1;font-weight:900;color:#fff;
+  -webkit-text-stroke:calc(1.5 * var(--q)) #213a86;paint-order:stroke fill;text-shadow:0 calc(1.5 * var(--q)) 0 #213a86,0 calc(2.6 * var(--q)) calc(3.4 * var(--q)) #0006}
+#title .logo span{display:block;white-space:nowrap}
+#title .logo .l1{font-size:calc(25 * var(--q));color:#ffd23c;letter-spacing:calc(1 * var(--q))}
+#title .logo .l2{font-size:calc(15.5 * var(--q));margin-top:calc(1 * var(--q));-webkit-text-stroke-width:calc(1.05 * var(--q))}   /* 細い字は、縁を細くして白い中身を残す */
+#title .catch{font-size:calc(5.2 * var(--q));font-weight:bold;color:#213a86;background:#fffe;border-radius:calc(3 * var(--q));padding:calc(1 * var(--q)) calc(4 * var(--q));margin-top:calc(1.4 * var(--q))}
+#title .t4{position:absolute;left:0;right:0;top:calc(150 * var(--q));margin:0 auto;width:max-content;font-size:calc(6 * var(--q));font-weight:bold;color:#fff;background:#e0356f;border-radius:calc(6 * var(--q));
+  padding:calc(2 * var(--q)) calc(8 * var(--q));box-shadow:0 calc(1.2 * var(--q)) 0 #a82350;animation:blink 1.1s ease-in-out infinite}
 @keyframes blink{50%{transform:scale(1.07)}}
 
 /* 大会の一覧・測定前（ライバルの紹介）・エンディング */
 .scr{position:absolute;inset:0;z-index:25;display:none;flex-direction:column;pointer-events:auto;
-  background:#f1e6c2;box-shadow:0 0 0 100vmax #f1e6c2;padding:5cqw 5cqw 4.5cqw;gap:2cqw}
+  background:#f1e6c2;box-shadow:0 0 0 100vmax #f1e6c2;padding:calc(5 * var(--q)) calc(5 * var(--q)) calc(4.5 * var(--q));gap:calc(2 * var(--q))}
 .scr.on{display:flex;animation:fade .22s ease-out}
 @keyframes fade{from{opacity:0}to{opacity:1}}
-#list .hd,#shop .hd{display:flex;justify-content:space-between;align-items:baseline;font-size:6.2cqw;font-weight:900;color:#2c4aa0;
-  border-bottom:.6cqw solid #2c4aa0;padding-bottom:1.4cqw;letter-spacing:.5cqw;white-space:nowrap}
-#list .hd small,#shop .hd small{font-size:3.8cqw;color:#55608a;letter-spacing:0;font-weight:bold}
-#listBody,#shopBody{flex:1;min-height:0;display:flex;flex-direction:column;gap:1.7cqw;overflow-y:auto;touch-action:pan-y;padding:1cqw 1.4cqw 1.4cqw}
-.bar{display:flex;justify-content:space-between;align-items:center;gap:3cqw}
-.bar .tk{font-size:4.2cqw;font-weight:bold;color:#55608a;white-space:nowrap}
-.bar .tk b{font-size:5.6cqw;color:#d2382f;font-variant-numeric:tabular-nums;margin-left:1cqw}
-.sm{height:9cqw;padding:0 5.5cqw;font-size:4.2cqw;white-space:nowrap;pointer-events:auto;border-radius:3cqw}
+#list .hd,#shop .hd{display:flex;justify-content:space-between;align-items:baseline;font-size:calc(6.2 * var(--q));font-weight:900;color:#2c4aa0;
+  border-bottom:calc(.6 * var(--q)) solid #2c4aa0;padding-bottom:calc(1.4 * var(--q));letter-spacing:calc(.5 * var(--q));white-space:nowrap}
+#list .hd small,#shop .hd small{font-size:calc(3.8 * var(--q));color:#55608a;letter-spacing:0;font-weight:bold}
+#listBody,#shopBody{flex:1;min-height:0;display:flex;flex-direction:column;gap:calc(1.7 * var(--q));overflow-y:auto;touch-action:pan-y;padding:calc(1 * var(--q)) calc(1.4 * var(--q)) calc(1.4 * var(--q))}
+.bar{display:flex;justify-content:space-between;align-items:center;gap:calc(3 * var(--q))}
+.bar .tk{font-size:calc(4.2 * var(--q));font-weight:bold;color:#55608a;white-space:nowrap}
+.bar .tk b{font-size:calc(5.6 * var(--q));color:#d2382f;font-variant-numeric:tabular-nums;margin-left:calc(1 * var(--q))}
+.sm{height:calc(9 * var(--q));padding:0 calc(5.5 * var(--q));font-size:calc(4.2 * var(--q));white-space:nowrap;pointer-events:auto;border-radius:calc(3 * var(--q))}
 .hot{animation:blink 1.1s ease-in-out infinite}
-.tn{flex:1 1 0;min-height:11.6cqw;max-height:17cqw;display:grid;grid-template-columns:8.4cqw minmax(0,1fr) auto;align-items:center;column-gap:2.6cqw;
-  border:.5cqw solid #2c4aa0;border-radius:2cqw;background:#fffdf2;padding:0 2.8cqw 0 2.4cqw;font:inherit;color:#2b2b3a;text-align:left;
-  cursor:pointer;box-shadow:0 .8cqw 0 #1c3170;touch-action:manipulation}
-.tn:active:not(:disabled){transform:translateY(.6cqw);box-shadow:0 .2cqw 0 #1c3170}
-.tn .no{width:8.4cqw;height:8.4cqw;border-radius:50%;background:#2c4aa0;color:#fff;font-weight:900;font-size:4.6cqw;display:flex;align-items:center;justify-content:center}
-.tn .mid{display:flex;flex-direction:column;gap:.5cqw;min-width:0}
-.tn .nm{font-size:4.7cqw;font-weight:bold;white-space:nowrap}
-.tn .sb{font-size:3.3cqw;color:#55608a;white-space:nowrap}
-.tn .rt{display:flex;flex-direction:column;align-items:flex-end;gap:.7cqw}
-.tn .tag{font-size:3.3cqw;font-weight:900;border:.45cqw solid;border-radius:1.4cqw;padding:0 1.6cqw;white-space:nowrap;line-height:1.5}
-.tn .bs{font-size:3.2cqw;color:#55608a;white-space:nowrap}
+.tn{flex:1 1 0;min-height:calc(11.6 * var(--q));max-height:calc(17 * var(--q));display:grid;grid-template-columns:calc(8.4 * var(--q)) minmax(0,1fr) auto;align-items:center;column-gap:calc(2.6 * var(--q));
+  border:calc(.5 * var(--q)) solid #2c4aa0;border-radius:calc(2 * var(--q));background:#fffdf2;padding:0 calc(2.8 * var(--q)) 0 calc(2.4 * var(--q));font:inherit;color:#2b2b3a;text-align:left;
+  cursor:pointer;box-shadow:0 calc(.8 * var(--q)) 0 #1c3170;touch-action:manipulation}
+.tn:active:not(:disabled){transform:translateY(calc(.6 * var(--q)));box-shadow:0 calc(.2 * var(--q)) 0 #1c3170}
+.tn .no{width:calc(8.4 * var(--q));height:calc(8.4 * var(--q));border-radius:50%;background:#2c4aa0;color:#fff;font-weight:900;font-size:calc(4.6 * var(--q));display:flex;align-items:center;justify-content:center}
+.tn .mid{display:flex;flex-direction:column;gap:calc(.5 * var(--q));min-width:0}
+.tn .nm{font-size:calc(4.7 * var(--q));font-weight:bold;white-space:nowrap}
+.tn .sb{font-size:calc(3.3 * var(--q));color:#55608a;white-space:nowrap}
+.tn .rt{display:flex;flex-direction:column;align-items:flex-end;gap:calc(.7 * var(--q))}
+.tn .tag{font-size:calc(3.3 * var(--q));font-weight:900;border:calc(.45 * var(--q)) solid;border-radius:calc(1.4 * var(--q));padding:0 calc(1.6 * var(--q));white-space:nowrap;line-height:1.5}
+.tn .bs{font-size:calc(3.2 * var(--q));color:#55608a;white-space:nowrap}
 .tn.won .tag{color:#d2382f;border-color:#d2382f;transform:rotate(-5deg)}
-.tn.next{border-color:#e0356f;box-shadow:0 .8cqw 0 #a82350;animation:nextp 1.2s ease-in-out infinite}
+.tn.next{border-color:#e0356f;box-shadow:0 calc(.8 * var(--q)) 0 #a82350;animation:nextp 1.2s ease-in-out infinite}
 .tn.next .tag{background:#e0356f;border-color:#e0356f;color:#fff}
 .tn.next .no{background:#e0356f}
 @keyframes nextp{50%{transform:scale(1.025)}}
@@ -65,144 +68,352 @@ body{display:flex;align-items:center;justify-content:center}
 .tn.locked .no{background:#a6a18a}
 .tn.locked .sb,.tn.locked .bs{color:#9b9680}
 .tn.locked .tag{color:#9b9680;border-color:#b3ae98}
-#list .back,#intro .back,#shop .back{align-self:center;height:9cqw;padding:0 7cqw;font-size:3.8cqw;background:transparent;color:#2c4aa0;
-  border:.5cqw solid #2c4aa0;border-radius:3cqw;box-shadow:0 .6cqw 0 #2c4aa066;white-space:nowrap;pointer-events:auto}
+#list .back,#intro .back,#shop .back{align-self:center;height:calc(9 * var(--q));padding:0 calc(7 * var(--q));font-size:calc(3.8 * var(--q));background:transparent;color:#2c4aa0;
+  border:calc(.5 * var(--q)) solid #2c4aa0;border-radius:calc(3 * var(--q));box-shadow:0 calc(.6 * var(--q)) 0 #2c4aa066;white-space:nowrap;pointer-events:auto}
 
 #intro .back{background:#fffdf2e8}
 
 /* 購買部 */
-.it{flex:1 1 0;min-height:15cqw;max-height:21cqw;display:grid;grid-template-columns:minmax(0,1fr) 22cqw;align-items:center;column-gap:2.4cqw;
-  border:.5cqw solid #2c4aa0;border-radius:2cqw;background:#fffdf2;padding:0 2.4cqw 0 3cqw;box-shadow:0 .8cqw 0 #1c3170}
-.it .mid{display:flex;flex-direction:column;gap:.5cqw;min-width:0}
-.it .l1{display:flex;align-items:baseline;gap:2cqw;white-space:nowrap}
-.it .nm{font-size:4.5cqw;font-weight:bold}
-.it .pips{font-size:3cqw;letter-spacing:.2cqw;color:#e0356f}
+.it{flex:1 1 0;min-height:calc(15 * var(--q));max-height:calc(21 * var(--q));display:grid;grid-template-columns:minmax(0,1fr) calc(22 * var(--q));align-items:center;column-gap:calc(2.4 * var(--q));
+  border:calc(.5 * var(--q)) solid #2c4aa0;border-radius:calc(2 * var(--q));background:#fffdf2;padding:0 calc(2.4 * var(--q)) 0 calc(3 * var(--q));box-shadow:0 calc(.8 * var(--q)) 0 #1c3170}
+.it .mid{display:flex;flex-direction:column;gap:calc(.5 * var(--q));min-width:0}
+.it .l1{display:flex;align-items:baseline;gap:calc(2 * var(--q));white-space:nowrap}
+.it .nm{font-size:calc(4.5 * var(--q));font-weight:bold}
+.it .pips{font-size:calc(3 * var(--q));letter-spacing:calc(.2 * var(--q));color:#e0356f}
 .it .pips i{font-style:normal;color:#c9cde0}
 .it .pips i.on{color:#e0356f}
-.it .ds{font-size:3.4cqw;color:#2b2b3a;white-space:nowrap}
-.it .fx{font-size:3.3cqw;color:#2c4aa0;font-weight:bold;white-space:nowrap}
-.it .buy{height:11.5cqw;border:0;border-radius:3cqw;font:inherit;font-size:4.8cqw;font-weight:900;color:#fff;cursor:pointer;touch-action:manipulation;
-  background:linear-gradient(#ff6b9a,#e0356f);box-shadow:0 1cqw 0 #a82350;white-space:nowrap;font-variant-numeric:tabular-nums;pointer-events:auto}
-.it .buy:active{transform:translateY(.7cqw);box-shadow:0 .3cqw 0 #a82350}
-.it.poor .buy{background:#e6dfc6;color:#8b8672;box-shadow:0 1cqw 0 #bdb69c}
+.it .ds{font-size:calc(3.4 * var(--q));color:#2b2b3a;white-space:nowrap}
+.it .fx{font-size:calc(3.3 * var(--q));color:#2c4aa0;font-weight:bold;white-space:nowrap}
+.it .buy{height:calc(11.5 * var(--q));border:0;border-radius:calc(3 * var(--q));font:inherit;font-size:calc(4.8 * var(--q));font-weight:900;color:#fff;cursor:pointer;touch-action:manipulation;
+  background:linear-gradient(#ff6b9a,#e0356f);box-shadow:0 calc(1 * var(--q)) 0 #a82350;white-space:nowrap;font-variant-numeric:tabular-nums;pointer-events:auto}
+.it .buy:active{transform:translateY(calc(.7 * var(--q)));box-shadow:0 calc(.3 * var(--q)) 0 #a82350}
+.it.poor .buy{background:#e6dfc6;color:#8b8672;box-shadow:0 calc(1 * var(--q)) 0 #bdb69c}
 .it.locked{background:#e6dfc6;border-color:#a6a18a;box-shadow:none}
-.it.locked .buy{background:#cfc9b0;color:#8b8672;box-shadow:none;font-size:3.8cqw}
+.it.locked .buy{background:#cfc9b0;color:#8b8672;box-shadow:none;font-size:calc(3.8 * var(--q))}
 .it.locked .fx{color:#8b8672}
 .it.max{background:#eef3ff}
-.it.max .buy{background:#2c4aa0;color:#fff;box-shadow:none;font-size:4cqw;cursor:default}
+.it.max .buy{background:#2c4aa0;color:#fff;box-shadow:none;font-size:calc(4 * var(--q));cursor:default}
 .it.got{animation:got .35s ease-out}
 .it.no{animation:shake .25s}
 @keyframes got{0%{transform:scale(1.04);background:#fff6b0}100%{transform:none}}
-@keyframes shake{25%{transform:translateX(-1.2cqw)}75%{transform:translateX(1.2cqw)}}
+@keyframes shake{25%{transform:translateX(calc(-1.2 * var(--q)))}75%{transform:translateX(calc(1.2 * var(--q)))}}
 #shop .row{margin-top:0}
-#shop .hd small b{color:#d2382f;margin-left:1cqw;font-size:5.4cqw;font-variant-numeric:tabular-nums}
-#shopBack{flex:1;height:10cqw;font-size:3.9cqw;background:transparent;color:#2c4aa0;white-space:nowrap;border:.5cqw solid #2c4aa0;border-radius:3cqw;box-shadow:0 .6cqw 0 #2c4aa066}
-#shopGo{flex:1.2;height:12cqw;font-size:5.2cqw;white-space:nowrap}
-#intro{position:absolute;left:6cqw;right:6cqw;top:51cqw;z-index:25;display:none;flex-direction:column;align-items:center;gap:3cqw;text-align:center}
+#shop .hd small b{color:#d2382f;margin-left:calc(1 * var(--q));font-size:calc(5.4 * var(--q));font-variant-numeric:tabular-nums}
+#shopBack{flex:1;height:calc(10 * var(--q));font-size:calc(3.9 * var(--q));background:transparent;color:#2c4aa0;white-space:nowrap;border:calc(.5 * var(--q)) solid #2c4aa0;border-radius:calc(3 * var(--q));box-shadow:0 calc(.6 * var(--q)) 0 #2c4aa066}
+#shopGo{flex:1.2;height:calc(12 * var(--q));font-size:calc(5.2 * var(--q));white-space:nowrap}
+#intro{position:absolute;left:calc(6 * var(--q));right:calc(6 * var(--q));top:calc(51 * var(--q));z-index:25;display:none;flex-direction:column;align-items:center;gap:calc(3 * var(--q));text-align:center}
 #intro.on{display:flex;animation:pop .3s cubic-bezier(.3,1.5,.5,1)}
-#inName{font-size:5cqw;font-weight:bold;color:#fff;background:#d2382f;border-radius:5cqw;padding:.8cqw 5cqw;letter-spacing:.5cqw;box-shadow:0 .8cqw 0 #8f221c;white-space:nowrap}
-#inCard{width:100%;background:#fffdf2;border:.7cqw solid #2c4aa0;border-radius:1.6cqw;box-shadow:0 2cqw 0 #1c3170,0 3cqw 6cqw #0006;
-  padding:4cqw 4cqw 4.4cqw;display:flex;flex-direction:column;align-items:center;gap:1.4cqw}
-#inCard .lb{font-size:3.6cqw;color:#55608a;font-weight:bold;letter-spacing:.4cqw}
-#inRival{font-size:8cqw;font-weight:900;color:#2b2b3a;line-height:1.15}
-#inSay{font-size:4.2cqw;color:#2b2b3a;line-height:1.5;margin-bottom:1cqw}
-#inCard .rule{width:100%;border-top:.3cqw dashed #9aa7d0;margin:.6cqw 0 .2cqw}
-#inRec{font-size:15cqw;font-weight:900;line-height:1;color:#d2382f;font-variant-numeric:tabular-nums;white-space:nowrap}
-#inRec small{font-size:5cqw;color:#55608a;font-weight:bold;margin-left:.8cqw}
-#inBest{font-size:3.6cqw;color:#55608a;min-height:4.6cqw}
-#intro .go{font-size:6cqw;font-weight:bold;color:#fff;background:#e0356f;border-radius:6cqw;padding:2cqw 8cqw;box-shadow:0 1.2cqw 0 #a82350;
+#inName{font-size:calc(5 * var(--q));font-weight:bold;color:#fff;background:#d2382f;border-radius:calc(5 * var(--q));padding:calc(.8 * var(--q)) calc(5 * var(--q));letter-spacing:calc(.5 * var(--q));box-shadow:0 calc(.8 * var(--q)) 0 #8f221c;white-space:nowrap}
+#inCard{width:100%;background:#fffdf2;border:calc(.7 * var(--q)) solid #2c4aa0;border-radius:calc(1.6 * var(--q));box-shadow:0 calc(2 * var(--q)) 0 #1c3170,0 calc(3 * var(--q)) calc(6 * var(--q)) #0006;
+  padding:calc(4 * var(--q)) calc(4 * var(--q)) calc(4.4 * var(--q));display:flex;flex-direction:column;align-items:center;gap:calc(1.4 * var(--q))}
+#inCard .lb{font-size:calc(3.6 * var(--q));color:#55608a;font-weight:bold;letter-spacing:calc(.4 * var(--q))}
+#inRival{font-size:calc(8 * var(--q));font-weight:900;color:#2b2b3a;line-height:1.15}
+#inSay{font-size:calc(4.2 * var(--q));color:#2b2b3a;line-height:1.5;margin-bottom:calc(1 * var(--q))}
+#inCard .rule{width:100%;border-top:calc(.3 * var(--q)) dashed #9aa7d0;margin:calc(.6 * var(--q)) 0 calc(.2 * var(--q))}
+#inRec{font-size:calc(15 * var(--q));font-weight:900;line-height:1;color:#d2382f;font-variant-numeric:tabular-nums;white-space:nowrap}
+#inRec small{font-size:calc(5 * var(--q));color:#55608a;font-weight:bold;margin-left:calc(.8 * var(--q))}
+#inBest{font-size:calc(3.6 * var(--q));color:#55608a;min-height:calc(4.6 * var(--q))}
+#intro .go{font-size:calc(6 * var(--q));font-weight:bold;color:#fff;background:#e0356f;border-radius:calc(6 * var(--q));padding:calc(2 * var(--q)) calc(8 * var(--q));box-shadow:0 calc(1.2 * var(--q)) 0 #a82350;
   white-space:nowrap;animation:blink 1.1s ease-in-out infinite}
 
 /* エンディング：最初の 3 場面は canvas に描く（この画面は透明でタップを受けるだけ）。そのあと宇宙記録の記録用紙が出る */
-#ending{align-items:center;justify-content:center;text-align:center;background:transparent;box-shadow:none;cursor:pointer;padding:5cqw}
-#endSkip{position:absolute;right:5cqw;bottom:3.4cqw;font-size:3.6cqw;font-weight:bold;color:#cfd6ff;opacity:.7;white-space:nowrap;letter-spacing:.3cqw}
+#ending{align-items:center;justify-content:center;text-align:center;background:transparent;box-shadow:none;cursor:pointer;padding:calc(5 * var(--q))}
+#endSkip{position:absolute;right:calc(5 * var(--q));bottom:calc(3.4 * var(--q));font-size:calc(3.6 * var(--q));font-weight:bold;color:#cfd6ff;opacity:.7;white-space:nowrap;letter-spacing:calc(.3 * var(--q))}
 #ending.cert #endSkip{display:none}
-#cert{display:none;width:100%;margin-top:6cqw;padding:4cqw 5.5cqw 4.4cqw;background:#fffdf2;border:.7cqw solid #2c4aa0;border-radius:1.6cqw;
-  box-shadow:0 2cqw 0 #1c3170,0 3cqw 6cqw #0006;color:#2b2b3a;flex-direction:column;align-items:stretch;gap:1.7cqw;text-align:center;cursor:default}
+#cert{display:none;width:100%;margin-top:calc(6 * var(--q));padding:calc(4 * var(--q)) calc(5.5 * var(--q)) calc(4.4 * var(--q));background:#fffdf2;border:calc(.7 * var(--q)) solid #2c4aa0;border-radius:calc(1.6 * var(--q));
+  box-shadow:0 calc(2 * var(--q)) 0 #1c3170,0 calc(3 * var(--q)) calc(6 * var(--q)) #0006;color:#2b2b3a;flex-direction:column;align-items:stretch;gap:calc(1.7 * var(--q));text-align:center;cursor:default}
 #ending.cert #cert{display:flex;animation:pop .35s cubic-bezier(.3,1.5,.5,1)}
-#cert .sub{align-self:center;font-size:4.4cqw;font-weight:900;color:#5a3d00;background:linear-gradient(#f9d878,#e0a828);border-radius:5cqw;padding:.7cqw 6cqw;letter-spacing:1cqw;margin-top:-8.4cqw;box-shadow:0 .7cqw 0 #a87810;white-space:nowrap}
-#cert .hd{font-size:5.4cqw;font-weight:bold;color:#2c4aa0;border-bottom:.5cqw solid #2c4aa0;padding-bottom:1.2cqw;letter-spacing:.5cqw;white-space:nowrap}
-#cert .ln{display:flex;justify-content:space-between;align-items:baseline;font-size:4.2cqw;border-bottom:.3cqw dashed #9aa7d0;padding-bottom:.8cqw;white-space:nowrap}
+#cert .sub{align-self:center;font-size:calc(4.4 * var(--q));font-weight:900;color:#5a3d00;background:linear-gradient(#f9d878,#e0a828);border-radius:calc(5 * var(--q));padding:calc(.7 * var(--q)) calc(6 * var(--q));letter-spacing:calc(1 * var(--q));margin-top:calc(-8.4 * var(--q));box-shadow:0 calc(.7 * var(--q)) 0 #a87810;white-space:nowrap}
+#cert .hd{font-size:calc(5.4 * var(--q));font-weight:bold;color:#2c4aa0;border-bottom:calc(.5 * var(--q)) solid #2c4aa0;padding-bottom:calc(1.2 * var(--q));letter-spacing:calc(.5 * var(--q));white-space:nowrap}
+#cert .ln{display:flex;justify-content:space-between;align-items:baseline;font-size:calc(4.2 * var(--q));border-bottom:calc(.3 * var(--q)) dashed #9aa7d0;padding-bottom:calc(.8 * var(--q));white-space:nowrap}
 #cert .ln span:first-child{color:#55608a}
-#cert .ln b{font-size:4.6cqw}
-#cert .big{position:relative;display:flex;justify-content:space-between;align-items:center;margin:.8cqw 0 2.2cqw}
-#cert .big .lb{font-size:4.8cqw;color:#55608a;font-weight:bold}
-#cert .big .num{font-size:12cqw;font-weight:900;line-height:1;color:#d2382f;font-variant-numeric:tabular-nums}
-#cert .big .num small{font-size:5cqw;color:#55608a;font-weight:bold;margin-left:.8cqw}
-#cStamp{position:absolute;left:15cqw;top:-2.4cqw;width:19cqw;height:19cqw;border:.9cqw solid #d2382f;border-radius:50%;color:#d2382f;font-weight:900;
-  display:flex;align-items:center;justify-content:center;text-align:center;line-height:1.15;transform:rotate(-14deg) scale(2.4);opacity:0;background:#fffdf277;font-size:4.8cqw}
+#cert .ln b{font-size:calc(4.6 * var(--q))}
+#cert .big{position:relative;display:flex;justify-content:space-between;align-items:center;margin:calc(.8 * var(--q)) 0 calc(2.2 * var(--q))}
+#cert .big .lb{font-size:calc(4.8 * var(--q));color:#55608a;font-weight:bold}
+#cert .big .num{font-size:calc(12 * var(--q));font-weight:900;line-height:1;color:#d2382f;font-variant-numeric:tabular-nums}
+#cert .big .num small{font-size:calc(5 * var(--q));color:#55608a;font-weight:bold;margin-left:calc(.8 * var(--q))}
+#cStamp{position:absolute;left:calc(15 * var(--q));top:calc(-2.4 * var(--q));width:calc(19 * var(--q));height:calc(19 * var(--q));border:calc(.9 * var(--q)) solid #d2382f;border-radius:50%;color:#d2382f;font-weight:900;
+  display:flex;align-items:center;justify-content:center;text-align:center;line-height:1.15;transform:rotate(-14deg) scale(2.4);opacity:0;background:#fffdf277;font-size:calc(4.8 * var(--q))}
 #cStamp.on{animation:stamp .28s cubic-bezier(.4,1.6,.6,1) forwards}
-#cert .note{font-size:4cqw;font-weight:bold;color:#2c4aa0;line-height:1.5}
-#endBtn{flex:1.2;height:12.5cqw;font-size:4.8cqw;white-space:nowrap}
-#endShare{flex:1;height:10cqw;font-size:3.5cqw;background:transparent;color:#2c4aa0;white-space:nowrap;padding:0 1.5cqw;border:.6cqw solid #2c4aa0;border-radius:3cqw;box-shadow:0 .6cqw 0 #2c4aa066}
-#endShare:active{transform:translateY(.5cqw)}
+#cert .note{font-size:calc(4 * var(--q));font-weight:bold;color:#2c4aa0;line-height:1.5}
+#endBtn{flex:1.2;height:calc(12.5 * var(--q));font-size:calc(4.8 * var(--q));white-space:nowrap}
+#endShare{flex:1;height:calc(10 * var(--q));font-size:calc(3.5 * var(--q));background:transparent;color:#2c4aa0;white-space:nowrap;padding:0 calc(1.5 * var(--q));border:calc(.6 * var(--q)) solid #2c4aa0;border-radius:calc(3 * var(--q));box-shadow:0 calc(.6 * var(--q)) 0 #2c4aa066}
+#endShare:active{transform:translateY(calc(.5 * var(--q)))}
 
 /* 結果：体力測定の記録用紙 */
-#result{position:absolute;left:6cqw;right:6cqw;top:21cqw;z-index:30;padding:4cqw 5.5cqw 4.2cqw;
-  background:#fffdf2;border:.7cqw solid #2c4aa0;border-radius:1.6cqw;
-  box-shadow:0 2cqw 0 #1c3170,0 3cqw 6cqw #0006;
-  color:#2b2b3a;display:none;flex-direction:column;align-items:stretch;gap:1.6cqw;text-align:center;pointer-events:auto}
+#result{position:absolute;left:calc(6 * var(--q));right:calc(6 * var(--q));top:calc(21 * var(--q));z-index:30;padding:calc(4 * var(--q)) calc(5.5 * var(--q)) calc(4.2 * var(--q));
+  background:#fffdf2;border:calc(.7 * var(--q)) solid #2c4aa0;border-radius:calc(1.6 * var(--q));
+  box-shadow:0 calc(2 * var(--q)) 0 #1c3170,0 calc(3 * var(--q)) calc(6 * var(--q)) #0006;
+  color:#2b2b3a;display:none;flex-direction:column;align-items:stretch;gap:calc(1.6 * var(--q));text-align:center;pointer-events:auto}
 #result.show{display:flex;animation:pop .3s cubic-bezier(.3,1.5,.5,1)}
 #result.wait{pointer-events:none}
 @keyframes pop{from{transform:scale(.7) rotate(-2deg);opacity:0}to{transform:none;opacity:1}}
-#result .hd{font-size:5.2cqw;font-weight:bold;color:#2c4aa0;border-bottom:.5cqw solid #2c4aa0;padding-bottom:1.2cqw;letter-spacing:.5cqw;white-space:nowrap}
-#result .ln{display:flex;justify-content:space-between;align-items:baseline;font-size:4.2cqw;
-  border-bottom:.3cqw dashed #9aa7d0;padding-bottom:.8cqw;white-space:nowrap}
+#result .hd{font-size:calc(5.2 * var(--q));font-weight:bold;color:#2c4aa0;border-bottom:calc(.5 * var(--q)) solid #2c4aa0;padding-bottom:calc(1.2 * var(--q));letter-spacing:calc(.5 * var(--q));white-space:nowrap}
+#result .ln{display:flex;justify-content:space-between;align-items:baseline;font-size:calc(4.2 * var(--q));
+  border-bottom:calc(.3 * var(--q)) dashed #9aa7d0;padding-bottom:calc(.8 * var(--q));white-space:nowrap}
 #result .ln span:first-child{color:#55608a}
-#result .ln b{font-size:4.6cqw}
-#result .big{position:relative;display:flex;justify-content:space-between;align-items:center;margin:.6cqw 0 1.6cqw}
-#result .big .lb{font-size:4.8cqw;color:#55608a;font-weight:bold}
-#result .big .num{font-size:12cqw;font-weight:900;line-height:1;color:#d2382f;font-variant-numeric:tabular-nums}
-#result .big .num small{font-size:5cqw;color:#55608a;font-weight:bold;margin-left:.8cqw}
-#stamp{position:absolute;left:11.5cqw;top:-2.5cqw;width:19cqw;height:19cqw;border:.9cqw solid #d2382f;border-radius:50%;
+#result .ln b{font-size:calc(4.6 * var(--q))}
+#result .big{position:relative;display:flex;justify-content:space-between;align-items:center;margin:calc(.6 * var(--q)) 0 calc(1.6 * var(--q))}
+#result .big .lb{font-size:calc(4.8 * var(--q));color:#55608a;font-weight:bold}
+#result .big .num{font-size:calc(12 * var(--q));font-weight:900;line-height:1;color:#d2382f;font-variant-numeric:tabular-nums}
+#result .big .num small{font-size:calc(5 * var(--q));color:#55608a;font-weight:bold;margin-left:calc(.8 * var(--q))}
+#stamp{position:absolute;left:calc(11.5 * var(--q));top:calc(-2.5 * var(--q));width:calc(19 * var(--q));height:calc(19 * var(--q));border:calc(.9 * var(--q)) solid #d2382f;border-radius:50%;
   color:#d2382f;font-weight:900;display:flex;align-items:center;justify-content:center;text-align:center;line-height:1.1;
-  transform:rotate(-14deg) scale(2.4);opacity:0;background:#fffdf277;font-size:10cqw}
-#stamp.long{font-size:4.2cqw}
+  transform:rotate(-14deg) scale(2.4);opacity:0;background:#fffdf277;font-size:calc(10 * var(--q))}
+#stamp.long{font-size:calc(4.2 * var(--q))}
 #stamp.on{animation:stamp .28s cubic-bezier(.4,1.6,.6,1) forwards}
 @keyframes stamp{to{transform:rotate(-14deg) scale(1);opacity:1}}
-#rJudge{font-size:3.8cqw;color:#55608a;min-height:4.8cqw}
-#rBest{font-size:3.6cqw;color:#55608a;min-height:4.6cqw}
+#rJudge{font-size:calc(3.8 * var(--q));color:#55608a;min-height:calc(4.8 * var(--q))}
+#rBest{font-size:calc(3.6 * var(--q));color:#55608a;min-height:calc(4.6 * var(--q))}
 
 /* ライバルとの比べ。勝ち負けの判子が真ん中に押される */
-#vs{display:grid;grid-template-columns:minmax(0,1fr) 19cqw minmax(0,1fr);align-items:center;background:#f1f4fc;border:.4cqw solid #9aa7d0;border-radius:1.6cqw;padding:2cqw 1.6cqw}
-#vs .col{display:flex;flex-direction:column;gap:.4cqw;min-width:0}
-#vs .col span{font-size:3.4cqw;color:#55608a;font-weight:bold;white-space:nowrap}
-#vs .col b{font-size:7cqw;font-weight:900;line-height:1.1;white-space:nowrap;font-variant-numeric:tabular-nums}
-#vs .col b.l2{font-size:5.2cqw}
-#vs .col b.l3{font-size:4.2cqw}
+#vs{display:grid;grid-template-columns:minmax(0,1fr) calc(19 * var(--q)) minmax(0,1fr);align-items:center;background:#f1f4fc;border:calc(.4 * var(--q)) solid #9aa7d0;border-radius:calc(1.6 * var(--q));padding:calc(2 * var(--q)) calc(1.6 * var(--q))}
+#vs .col{display:flex;flex-direction:column;gap:calc(.4 * var(--q));min-width:0}
+#vs .col span{font-size:calc(3.4 * var(--q));color:#55608a;font-weight:bold;white-space:nowrap}
+#vs .col b{font-size:calc(7 * var(--q));font-weight:900;line-height:1.1;white-space:nowrap;font-variant-numeric:tabular-nums}
+#vs .col b.l2{font-size:calc(5.2 * var(--q))}
+#vs .col b.l3{font-size:calc(4.2 * var(--q))}
 #vs .col.you b{color:#d2382f}
-#vs .mid{position:relative;height:15cqw;display:flex;align-items:center;justify-content:center}
-#vs .mid .v{font-size:4cqw;font-weight:900;color:#9aa7d0}
-#vsStamp{position:absolute;left:50%;top:50%;margin:-7.5cqw 0 0 -8.5cqw;width:17cqw;height:15cqw;border:.8cqw solid #d2382f;border-radius:2cqw;
+#vs .mid{position:relative;height:calc(15 * var(--q));display:flex;align-items:center;justify-content:center}
+#vs .mid .v{font-size:calc(4 * var(--q));font-weight:900;color:#9aa7d0}
+#vsStamp{position:absolute;left:50%;top:50%;margin:calc(-7.5 * var(--q)) 0 0 calc(-8.5 * var(--q));width:calc(17 * var(--q));height:calc(15 * var(--q));border:calc(.8 * var(--q)) solid #d2382f;border-radius:calc(2 * var(--q));
   color:#d2382f;font-weight:900;display:flex;align-items:center;justify-content:center;text-align:center;line-height:1.05;white-space:nowrap;
-  transform:rotate(-10deg) scale(2.4);opacity:0;background:#fffdf2d0;font-size:5cqw}
+  transform:rotate(-10deg) scale(2.4);opacity:0;background:#fffdf2d0;font-size:calc(5 * var(--q))}
 #vs.lose #vsStamp{color:#4a5a9a;border-color:#4a5a9a}
 #vsStamp.on{animation:vstamp .26s cubic-bezier(.4,1.6,.6,1) forwards}
 @keyframes vstamp{to{transform:rotate(-10deg) scale(1);opacity:1}}
-#vsSay{grid-column:1/-1;margin-top:1.4cqw;padding-top:1.3cqw;border-top:.3cqw dashed #9aa7d0;font-size:3.6cqw;color:#2b2b3a;text-align:center;line-height:1.35;min-height:4.8cqw}
-#vsSay .who{font-weight:900;color:#55608a;margin-right:1.2cqw}
-#vsNote{font-size:3.9cqw;font-weight:bold;color:#2c4aa0;min-height:5cqw}
+#vsSay{grid-column:1/-1;margin-top:calc(1.4 * var(--q));padding-top:calc(1.3 * var(--q));border-top:calc(.3 * var(--q)) dashed #9aa7d0;font-size:calc(3.6 * var(--q));color:#2b2b3a;text-align:center;line-height:1.35;min-height:calc(4.8 * var(--q))}
+#vsSay .who{font-weight:900;color:#55608a;margin-right:calc(1.2 * var(--q))}
+#vsNote{font-size:calc(3.9 * var(--q));font-weight:bold;color:#2c4aa0;min-height:calc(5 * var(--q))}
 
-.row{display:flex;gap:3cqw;align-items:center;width:100%;margin-top:.6cqw}
-.btn{border:0;border-radius:3.6cqw;font:inherit;font-weight:bold;color:#fff;cursor:pointer;
-  background:linear-gradient(#ff6b9a,#e0356f);box-shadow:0 1.2cqw 0 #a82350;touch-action:manipulation}
-.btn:active{transform:translateY(.8cqw);box-shadow:0 .4cqw 0 #a82350}
-#retry{flex:1;height:13cqw;font-size:5.8cqw;white-space:nowrap}
-#toList,#rShop,#share{height:10cqw;font-size:3.5cqw;background:transparent;color:#2c4aa0;white-space:nowrap;padding:0 1.5cqw;
-  border:.6cqw solid #2c4aa0;border-radius:3cqw;box-shadow:0 .6cqw 0 #2c4aa066}
+.row{display:flex;gap:calc(3 * var(--q));align-items:center;width:100%;margin-top:calc(.6 * var(--q))}
+.btn{border:0;border-radius:calc(3.6 * var(--q));font:inherit;font-weight:bold;color:#fff;cursor:pointer;
+  background:linear-gradient(#ff6b9a,#e0356f);box-shadow:0 calc(1.2 * var(--q)) 0 #a82350;touch-action:manipulation}
+.btn:active{transform:translateY(calc(.8 * var(--q)));box-shadow:0 calc(.4 * var(--q)) 0 #a82350}
+#retry{flex:1;height:calc(13 * var(--q));font-size:calc(5.8 * var(--q));white-space:nowrap}
+#toList,#rShop,#share{height:calc(10 * var(--q));font-size:calc(3.5 * var(--q));background:transparent;color:#2c4aa0;white-space:nowrap;padding:0 calc(1.5 * var(--q));
+  border:calc(.6 * var(--q)) solid #2c4aa0;border-radius:calc(3 * var(--q));box-shadow:0 calc(.6 * var(--q)) 0 #2c4aa066}
 #toList{flex:1.15}
 #rShop{flex:1}
-#share{width:23cqw}
+#share{width:calc(23 * var(--q))}
 #rShop.hot{background:#fff0f5;border-color:#e0356f;color:#c4235c}
-#toList:active,#rShop:active,#share:active{transform:translateY(.5cqw)}
+#toList:active,#rShop:active,#share:active{transform:translateY(calc(.5 * var(--q)))}
+
+/* キーボードで選んでいるボタンの目印（Tab・矢印・Enter／Space で遊べる） */
+button:focus{outline:none}
+button:focus-visible{outline:calc(.7 * var(--q)) solid #ffcf2a;outline-offset:calc(.5 * var(--q));box-shadow:0 0 0 calc(1.1 * var(--q)) #2c4aa0}
+.tn:focus-visible,.it .buy:focus-visible{z-index:2}
+
+/* ===== English：言葉が長いので、文字を少し小さく・字間をつめる ===== */
+html[lang=en] body{font-family:"Arial Rounded MT Bold","Trebuchet MS","Segoe UI","Hiragino Maru Gothic ProN","Yu Gothic UI",sans-serif;word-break:normal;line-break:auto}
+html[lang=en] #title .tag{font-size:calc(4 * var(--q));letter-spacing:calc(.5 * var(--q))}
+html[lang=en] #title .logo .l1{font-size:calc(21 * var(--q));letter-spacing:calc(.4 * var(--q))}
+html[lang=en] #title .logo .l2{font-size:calc(14 * var(--q))}
+html[lang=en] #title .catch{font-size:calc(4.8 * var(--q))}
+html[lang=en] #list .hd,html[lang=en] #shop .hd{letter-spacing:0}
+html[lang=en] .tn .nm{font-size:calc(4.2 * var(--q))}
+html[lang=en] .tn .sb{font-size:calc(3 * var(--q))}
+html[lang=en] .tn .tag{font-size:calc(3 * var(--q))}
+html[lang=en] .tn .bs{font-size:calc(3 * var(--q))}
+html[lang=en] .bar .tk{font-size:calc(3.8 * var(--q))}
+html[lang=en] .it .nm{font-size:calc(4.2 * var(--q))}
+html[lang=en] .it .ds{font-size:calc(3.2 * var(--q))}
+html[lang=en] .it .fx{font-size:calc(3.1 * var(--q))}
+html[lang=en] .it .buy{font-size:calc(4.4 * var(--q))}
+html[lang=en] .it.locked .buy{font-size:calc(3.4 * var(--q))}
+html[lang=en] #inName{letter-spacing:0;font-size:calc(4.4 * var(--q))}
+html[lang=en] #inRival{font-size:calc(6.4 * var(--q))}
+html[lang=en] #inSay{font-size:calc(4 * var(--q))}
+html[lang=en] #result .hd,html[lang=en] #cert .hd{font-size:calc(4.3 * var(--q));letter-spacing:0}
+html[lang=en] #result .ln,html[lang=en] #cert .ln{font-size:calc(3.9 * var(--q))}
+html[lang=en] #result .ln b,html[lang=en] #cert .ln b{font-size:calc(4.2 * var(--q))}
+html[lang=en] #result .big .lb,html[lang=en] #cert .big .lb{font-size:calc(4.2 * var(--q))}
+html[lang=en] #stamp.long{font-size:calc(3.6 * var(--q))}
+html[lang=en] #cStamp{font-size:calc(3.5 * var(--q))}
+html[lang=en] #vsStamp{font-size:calc(4.4 * var(--q))}
+html[lang=en] #vs .col span{font-size:calc(3.1 * var(--q))}
+html[lang=en] #vsSay{font-size:calc(3.3 * var(--q))}
+html[lang=en] #cert .sub{letter-spacing:calc(.4 * var(--q));font-size:calc(4 * var(--q))}
+html[lang=en] #cert .note{font-size:calc(3.6 * var(--q))}
+html[lang=en] #retry{font-size:calc(5.4 * var(--q))}
+html[lang=en] #toList,html[lang=en] #rShop,html[lang=en] #share{font-size:calc(3.2 * var(--q))}
+html[lang=en] #endBtn{font-size:calc(4.2 * var(--q))}
+html[lang=en] #endShare{font-size:calc(3.2 * var(--q))}
+html[lang=en] #listBack,html[lang=en] #inBack,html[lang=en] #shopBack{font-size:calc(3.5 * var(--q))}
+html[lang=en] #shopGo{font-size:calc(4.6 * var(--q))}
+html[lang=en] .t4,html[lang=en] #intro .go{letter-spacing:calc(.3 * var(--q))}
+
+/* English・縦画面：判子が左の見出し（Record）にかからないよう、少し右へ */
+@media (max-aspect-ratio:124/100){
+  html[lang=en] #stamp{left:calc(14.5 * var(--q));width:calc(17 * var(--q));height:calc(17 * var(--q))}
+  html[lang=en] #cStamp{left:calc(17 * var(--q));width:calc(17 * var(--q));height:calc(17 * var(--q))}
+}
+
+/* ===== 横画面（パソコン・横向きのスマホ）：16:9 の枠いっぱいに、横に並べた画面にする。単位 --q は枠の幅の 1/220 ===== */
+@media (min-aspect-ratio:5/4){
+  #stage{width:min(100vw,calc(100dvh*16/9));aspect-ratio:16/9;--q:.4545cqw}
+  /* タイトル：ロゴは 1 行（分身＋反復横とび）、案内は下 */
+  #title .head{top:calc(8 * var(--q));gap:calc(2 * var(--q))}
+  #title .logo{flex-direction:row;align-items:baseline;gap:calc(2.4 * var(--q))}
+  #title .logo .l1{font-size:calc(31 * var(--q))}
+  #title .logo .l2{font-size:calc(21 * var(--q));margin-top:0}
+  html[lang=en] #title .logo .l1{font-size:calc(25 * var(--q))}
+  html[lang=en] #title .logo .l2{font-size:calc(19 * var(--q))}
+  #title .tag{font-size:calc(4.6 * var(--q))}
+  #title .catch{font-size:calc(5.4 * var(--q));margin-top:calc(.6 * var(--q))}
+  #title .t4{top:calc(108 * var(--q));font-size:calc(6.4 * var(--q))}
+
+  .scr{padding:calc(6 * var(--q)) calc(9 * var(--q)) calc(5 * var(--q));gap:calc(3 * var(--q))}
+  /* 大会の一覧：上に見出しと券、まん中に 3×3 のカード、下にもどる */
+  #list.on{display:grid;grid-template-columns:1fr auto;grid-template-rows:auto minmax(0,1fr) auto;align-items:end}
+  #list .hd{grid-column:1;font-size:calc(6.4 * var(--q))}
+  #list .bar{grid-column:2;gap:calc(5 * var(--q));align-self:center}
+  #list .bar .tk{font-size:calc(4 * var(--q))}
+  #list .bar .tk b{font-size:calc(5.2 * var(--q))}
+  #list .sm{height:calc(8 * var(--q));padding:0 calc(5 * var(--q));font-size:calc(3.8 * var(--q));border-radius:calc(2.6 * var(--q))}
+  #listBody{grid-column:1/-1;display:grid;grid-template-columns:repeat(3,minmax(0,1fr));grid-auto-rows:minmax(0,1fr);gap:calc(3.6 * var(--q));padding:calc(1 * var(--q)) calc(1.4 * var(--q)) calc(1.6 * var(--q));align-self:stretch}
+  #listBody .tn{max-height:none;min-height:0;grid-template-columns:calc(9 * var(--q)) minmax(0,1fr);grid-template-rows:minmax(0,1fr) auto;grid-template-areas:"no mid" "rt rt";row-gap:calc(1 * var(--q));padding:calc(2 * var(--q)) calc(3 * var(--q)) calc(2 * var(--q)) calc(2.6 * var(--q))}
+  #listBody .tn .no{grid-area:no;width:calc(9 * var(--q));height:calc(9 * var(--q));font-size:calc(5 * var(--q));align-self:center}
+  #listBody .tn .mid{grid-area:mid;align-self:center;gap:calc(.8 * var(--q))}
+  #listBody .tn .rt{grid-area:rt;flex-direction:row;justify-content:space-between;align-items:center;border-top:calc(.3 * var(--q)) dashed #c3cadf;padding-top:calc(1.2 * var(--q))}
+  #listBody .tn .nm{font-size:calc(4.6 * var(--q))}
+  #listBody .tn .sb{font-size:calc(3.3 * var(--q))}
+  #listBody .tn .tag{font-size:calc(3.2 * var(--q))}
+  #listBody .tn .bs{font-size:calc(3.2 * var(--q))}
+  html[lang=en] #listBody .tn .nm{font-size:calc(4.1 * var(--q))}
+  html[lang=en] #listBody .tn .sb,html[lang=en] #listBody .tn .tag,html[lang=en] #listBody .tn .bs{font-size:calc(3 * var(--q))}
+  #list .back,#intro .back{height:calc(8 * var(--q));padding:0 calc(7 * var(--q));font-size:calc(3.6 * var(--q));border-radius:calc(2.6 * var(--q))}
+  #list .back{grid-column:1/-1;justify-self:center}
+
+  /* 購買部：2 列 × 3 行 */
+  #shop.on{display:grid;grid-template-columns:1fr;grid-template-rows:auto minmax(0,1fr) auto}
+  #shop .hd{font-size:calc(6.4 * var(--q))}
+  #shop .hd small{font-size:calc(4 * var(--q))}
+  #shop .hd small b{font-size:calc(5.2 * var(--q))}
+  #shopBody{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));grid-auto-rows:minmax(0,1fr);gap:calc(3.4 * var(--q));align-self:stretch}
+  #shopBody .it{max-height:none;min-height:0;grid-template-columns:minmax(0,1fr) calc(30 * var(--q));column-gap:calc(3 * var(--q));padding:0 calc(3 * var(--q)) 0 calc(4 * var(--q))}
+  #shopBody .it .nm{font-size:calc(4.6 * var(--q))}
+  #shopBody .it .pips{font-size:calc(3.2 * var(--q))}
+  #shopBody .it .ds{font-size:calc(3.5 * var(--q))}
+  #shopBody .it .fx{font-size:calc(3.5 * var(--q))}
+  #shopBody .it .buy{height:calc(12 * var(--q));font-size:calc(5.2 * var(--q));border-radius:calc(3 * var(--q))}
+  html[lang=en] #shopBody .it .nm{font-size:calc(4.3 * var(--q))}
+  html[lang=en] #shopBody .it .ds{font-size:calc(3.3 * var(--q))}
+  html[lang=en] #shopBody .it .fx{font-size:calc(3.2 * var(--q))}
+  html[lang=en] #shopBody .it .buy{font-size:calc(4.6 * var(--q))}
+  #shop .row{width:calc(110 * var(--q));margin:0 auto;gap:calc(5 * var(--q))}
+  #shopBack{height:calc(9 * var(--q));font-size:calc(4 * var(--q))}
+  #shopGo{height:calc(10.5 * var(--q));font-size:calc(5.4 * var(--q))}
+  html[lang=en] #shopBack{font-size:calc(3.8 * var(--q))}
+  html[lang=en] #shopGo{font-size:calc(4.8 * var(--q))}
+
+  /* 測定前（ライバルの紹介）：カードは左にライバル・右に記録の 2 列 */
+  #intro{left:calc(34 * var(--q));right:calc(34 * var(--q));top:calc(37 * var(--q));gap:calc(2.6 * var(--q))}
+  #inName{font-size:calc(4.8 * var(--q))}
+  #inCard{display:grid;grid-template-columns:minmax(0,1fr) minmax(0,.85fr);column-gap:calc(5 * var(--q));row-gap:calc(1.2 * var(--q));padding:calc(3.4 * var(--q)) calc(5 * var(--q)) calc(3.8 * var(--q));align-items:center;justify-items:center}
+  #inCard > :nth-child(1){grid-column:1;grid-row:1}
+  #inCard > :nth-child(2){grid-column:1;grid-row:2}
+  #inCard > :nth-child(3){grid-column:1;grid-row:3;margin:0}
+  #inCard > :nth-child(4){display:none}
+  #inCard > :nth-child(5){grid-column:2;grid-row:1}
+  #inCard > :nth-child(6){grid-column:2;grid-row:2}
+  #inCard > :nth-child(7){grid-column:2;grid-row:3}
+  #inCard .lb{font-size:calc(3.3 * var(--q))}
+  #inRival{font-size:calc(7.2 * var(--q))}
+  #inSay{font-size:calc(3.9 * var(--q))}
+  #inRec{font-size:calc(17 * var(--q))}
+  #inRec small{font-size:calc(4.8 * var(--q))}
+  #inBest{font-size:calc(3.4 * var(--q))}
+  #intro .go{font-size:calc(5.6 * var(--q));padding:calc(1.8 * var(--q)) calc(8 * var(--q))}
+  html[lang=en] #inRival{font-size:calc(5.8 * var(--q))}
+  html[lang=en] #inSay{font-size:calc(3.6 * var(--q))}
+
+  /* 記録用紙：左に記録・右にライバルとの比べ。ボタンは下に横ならび */
+  #result{left:calc(31 * var(--q));right:calc(31 * var(--q));top:calc(8 * var(--q));padding:calc(3.4 * var(--q)) calc(6 * var(--q)) calc(3.6 * var(--q));gap:calc(1.8 * var(--q)) calc(7 * var(--q))}
+  #result.show{display:grid;grid-template-columns:minmax(0,1fr) minmax(0,1fr);
+    grid-template-areas:"hd hd" "kind vs" "big vs" "judge vnote" "tk steps" "max trips" "best best" "retry retry" "btns btns";align-items:center}
+  #result .r-hd{grid-area:hd;font-size:calc(4.8 * var(--q))}
+  #result .r-kind{grid-area:kind}
+  #result .r-big{grid-area:big;margin:calc(1 * var(--q)) 0;display:grid;grid-template-columns:auto 1fr;grid-template-rows:auto auto;row-gap:calc(.4 * var(--q))}
+  #result .r-big .lb{grid-column:1/-1;grid-row:1;text-align:left}
+  #result .r-big .num{grid-column:2;grid-row:2;justify-self:end}
+  #rJudge{grid-area:judge}
+  #vs{grid-area:vs;align-self:stretch}
+  #vsNote{grid-area:vnote}
+  #result .r-tk{grid-area:tk}
+  #result .r-steps{grid-area:steps}
+  #result .r-max{grid-area:max}
+  #result .r-trips{grid-area:trips}
+  #rBest{grid-area:best}
+  #result .r-retry{grid-area:retry;justify-content:center}
+  #result .r-btns{grid-area:btns;justify-content:center}
+  #result .ln{font-size:calc(3.8 * var(--q))}
+  #result .ln b{font-size:calc(4.2 * var(--q))}
+  #result .big .lb{font-size:calc(4.2 * var(--q))}
+  #result .big .num{font-size:calc(11.5 * var(--q))}
+  #result .big .num small{font-size:calc(4.6 * var(--q))}
+  #stamp{left:calc(.5 * var(--q));top:calc(3.4 * var(--q));width:calc(15.5 * var(--q));height:calc(15.5 * var(--q));font-size:calc(8.4 * var(--q))}
+  #stamp.long{font-size:calc(3.6 * var(--q))}
+  html[lang=en] #stamp.long{font-size:calc(3.1 * var(--q))}
+  #vs{grid-template-columns:minmax(0,1fr) calc(17 * var(--q)) minmax(0,1fr);padding:calc(2.4 * var(--q)) calc(2 * var(--q))}
+  #vs .col span{font-size:calc(3.2 * var(--q))}
+  #vs .col b{font-size:calc(6.6 * var(--q))}
+  #vs .col b.l2{font-size:calc(5 * var(--q))}
+  #vs .col b.l3{font-size:calc(4 * var(--q))}
+  #vsStamp{width:calc(15.5 * var(--q));height:calc(13.5 * var(--q));margin:calc(-6.75 * var(--q)) 0 0 calc(-7.75 * var(--q));font-size:calc(4.6 * var(--q))}
+  #vsSay{font-size:calc(3.4 * var(--q))}
+  #vsNote{font-size:calc(3.8 * var(--q))}
+  #rJudge{font-size:calc(3.5 * var(--q))}
+  #rBest{font-size:calc(3.4 * var(--q))}
+  #retry{flex:none;width:calc(70 * var(--q));height:calc(11 * var(--q));font-size:calc(5.4 * var(--q));border-radius:calc(3.2 * var(--q))}
+  #toList,#rShop,#share{height:calc(8.6 * var(--q));font-size:calc(3.5 * var(--q));padding:0 calc(5 * var(--q))}
+  #toList,#rShop{flex:none}
+  #share{width:auto}
+  html[lang=en] #retry{font-size:calc(5 * var(--q))}
+  html[lang=en] #toList,html[lang=en] #rShop,html[lang=en] #share{font-size:calc(3.3 * var(--q))}
+  html[lang=en] #vsStamp{font-size:calc(4 * var(--q))}
+
+  /* エンディングの記録用紙（宇宙記録）*/
+  #ending{padding:calc(4 * var(--q))}
+  #endSkip{right:calc(8 * var(--q));bottom:calc(5 * var(--q));font-size:calc(3.6 * var(--q))}
+  #cert{width:calc(150 * var(--q));margin-top:calc(5 * var(--q));padding:calc(3.4 * var(--q)) calc(6 * var(--q)) calc(3.6 * var(--q));
+    display:none;grid-template-columns:minmax(0,1fr) minmax(0,1fr);gap:calc(1.8 * var(--q)) calc(7 * var(--q));
+    grid-template-areas:"sub sub" "hd hd" "kind big" "tn big" "who note" "wit note" "row row";align-items:center}
+  #ending.cert #cert{display:grid}
+  #cert .sub{grid-area:sub;justify-self:center;margin-top:calc(-7.4 * var(--q));font-size:calc(4 * var(--q))}
+  #cert .hd{grid-area:hd;font-size:calc(4.8 * var(--q))}
+  #cert .c-kind{grid-area:kind}
+  #cert .c-tn{grid-area:tn}
+  #cert .c-big{grid-area:big;margin:0;display:grid;grid-template-columns:auto 1fr;grid-template-rows:auto auto;row-gap:calc(.4 * var(--q))}
+  #cert .c-big .lb{grid-column:1/-1;grid-row:1;text-align:left}
+  #cert .c-big .num{grid-column:2;grid-row:2;justify-self:end}
+  #cert .c-who{grid-area:who}
+  #cert .c-wit{grid-area:wit}
+  #cert .c-note{grid-area:note;flex-direction:column;align-items:flex-start;gap:calc(1 * var(--q));text-align:left;border-bottom:0}
+  #cert .c-row{grid-area:row;justify-content:center;margin-top:calc(1 * var(--q))}
+  #cert .ln{font-size:calc(3.8 * var(--q))}
+  #cert .ln b{font-size:calc(4.2 * var(--q))}
+  #cert .note{font-size:calc(3.8 * var(--q))}
+  #cert .big .lb{font-size:calc(4.2 * var(--q))}
+  #cert .big .num{font-size:calc(10 * var(--q))}
+  #cert .big .num small{font-size:calc(4.4 * var(--q))}
+  #cStamp{left:calc(.5 * var(--q));top:calc(3 * var(--q));width:calc(13.5 * var(--q));height:calc(13.5 * var(--q));font-size:calc(3.4 * var(--q))}
+  html[lang=en] #cStamp{font-size:calc(2.7 * var(--q))}
+  #endBtn{flex:none;width:calc(62 * var(--q));height:calc(10 * var(--q));font-size:calc(4.6 * var(--q))}
+  #endShare{flex:none;width:auto;height:calc(8.6 * var(--q));padding:0 calc(5 * var(--q));font-size:calc(3.5 * var(--q))}
+  html[lang=en] #endBtn{font-size:calc(4.2 * var(--q))}
+}
 </style>
 </head>
 <body>
 <canvas id="cv"></canvas>
 <div id="stage">
   <div id="title">
-    <div class="t2" data-p="title.name"></div>
-    <div class="t3" data-p="title.catch"></div>
+    <div class="head">
+      <div class="tag" data-s="title.tag"></div>
+      <div class="logo"><span class="l1" id="logo1"></span><span class="l2" id="logo2"></span></div>
+      <div class="catch" data-p="title.catch"></div>
+    </div>
     <div class="t4" data-s="title.tap"></div>
   </div>
   <div id="list" class="scr">
@@ -231,9 +442,9 @@ body{display:flex;align-items:center;justify-content:center}
     <button id="inBack" class="btn back" data-s="intro.back"></button>
   </div>
   <div id="result">
-    <div class="hd" data-s="sheet.head"></div>
-    <div class="ln"><span data-s="sheet.kind"></span><b id="rName"></b></div>
-    <div class="big">
+    <div class="hd r-hd" data-s="sheet.head"></div>
+    <div class="ln r-kind"><span data-s="sheet.kind"></span><b id="rName"></b></div>
+    <div class="big r-big">
       <span class="lb" data-s="sheet.rec"></span>
       <span class="num"><span id="rRec">0</span><small data-s="sheet.unit"></small></span>
       <div id="stamp"></div>
@@ -246,15 +457,15 @@ body{display:flex;align-items:center;justify-content:center}
       <div id="vsSay"></div>
     </div>
     <div id="vsNote"></div>
-    <div class="ln"><span data-s="sheet.tickets"></span><b id="rTk"></b></div>
-    <div class="ln"><span data-s="sheet.steps"></span><b><span id="rSteps">0</span><span data-s="sheet.times"></span></b></div>
-    <div class="ln"><span data-s="sheet.maxN"></span><b><span id="rMaxN">0</span><span data-s="sheet.people"></span></b></div>
-    <div class="ln"><span data-s="sheet.trips"></span><b><span id="rTrips">0</span><span data-s="sheet.times"></span></b></div>
+    <div class="ln r-tk"><span data-s="sheet.tickets"></span><b id="rTk"></b></div>
+    <div class="ln r-steps"><span data-s="sheet.steps"></span><b><span id="rSteps">0</span><span data-s="sheet.times"></span></b></div>
+    <div class="ln r-max"><span data-s="sheet.maxN"></span><b><span id="rMaxN">0</span><span data-s="sheet.people"></span></b></div>
+    <div class="ln r-trips"><span data-s="sheet.trips"></span><b><span id="rTrips">0</span><span data-s="sheet.times"></span></b></div>
     <div id="rBest"></div>
-    <div class="row">
+    <div class="row r-retry">
       <button id="retry" class="btn" data-s="sheet.retry"></button>
     </div>
-    <div class="row">
+    <div class="row r-btns">
       <button id="toList" class="btn"></button>
       <button id="rShop" class="btn" data-s="sheet.shop"></button>
       <button id="share" class="btn" data-s="sheet.share"></button>
@@ -265,17 +476,17 @@ body{display:flex;align-items:center;justify-content:center}
     <div id="cert">
       <div class="sub" data-s="ending.cert.sub"></div>
       <div class="hd" data-s="ending.cert.head"></div>
-      <div class="ln"><span data-s="ending.cert.kind"></span><b data-s="ending.cert.kindVal"></b></div>
-      <div class="ln"><span data-s="ending.cert.tn"></span><b data-s="ending.cert.tnVal"></b></div>
-      <div class="big">
+      <div class="ln c-kind"><span data-s="ending.cert.kind"></span><b data-s="ending.cert.kindVal"></b></div>
+      <div class="ln c-tn"><span data-s="ending.cert.tn"></span><b data-s="ending.cert.tnVal"></b></div>
+      <div class="big c-big">
         <span class="lb" data-s="ending.cert.rec"></span>
         <span class="num"><span id="cRec">0</span><small data-s="ending.cert.unit"></small></span>
-        <div id="cStamp" data-p="ending.cert.stamp"></div>
+        <div id="cStamp"><span data-p="ending.cert.stamp"></span></div>
       </div>
-      <div class="ln"><span data-s="ending.cert.who"></span><b data-s="ending.cert.whoVal"></b></div>
-      <div class="ln"><span data-s="ending.cert.witness"></span><b data-s="ending.cert.witnessVal"></b></div>
-      <div class="ln"><span data-s="ending.cert.note"></span><b class="note" data-p="ending.cert.noteVal"></b></div>
-      <div class="row"><button id="endBtn" class="btn" data-s="ending.list"></button><button id="endShare" class="btn" data-s="ending.share"></button></div>
+      <div class="ln c-who"><span data-s="ending.cert.who"></span><b data-s="ending.cert.whoVal"></b></div>
+      <div class="ln c-wit"><span data-s="ending.cert.witness"></span><b data-s="ending.cert.witnessVal"></b></div>
+      <div class="ln c-note"><span data-s="ending.cert.note"></span><b class="note" data-p="ending.cert.noteVal"></b></div>
+      <div class="row c-row"><button id="endBtn" class="btn" data-s="ending.list"></button><button id="endShare" class="btn" data-s="ending.share"></button></div>
     </div>
   </div>
 </div>
@@ -299,7 +510,7 @@ const CFG = {
   bodies: [1, 2, 4, 8, 16, 32, 48],   // 段階ごとの体の数（本人を含む）。段階1から分身する
 
   // 判定（記録の下限）
-  judge: [[0, 'E'], [40, 'D'], [80, 'C'], [150, 'B'], [400, 'A'], [1000, 'S'], [3000, '測定不能'], [7000, '人類の範囲外']],   // 分身が早く出るようにしたので記録の桁が上がった（元は 130/200/400/1000/3000）
+  judge: [[0, 'E'], [40, 'D'], [80, 'C'], [150, 'B'], [400, 'A'], [1000, 'S'], [3000, 'x'], [7000, 'y']],   // 名前は STR.judge（言語ごと）。ここは下限の数と並びだけ使う。分身が早く出るようにしたので記録の桁が上がった（元は 130/200/400/1000/3000）
 
   // v2 大会：ライバルの記録（これを超えると勝ち）。数字は仮。Phase 2 でボットを使って調整する
   targets: [80, 200, 500, 1200, 3000, 8000, 20000, 45000, 100000],
@@ -323,12 +534,31 @@ const CFG = {
   },
 
   cloneDelay: 0.022,     // 分身1体あたりの遅れ（秒）
-  shareUrl: 'https://fish-suika.github.io/hanpuku-yokotobi/',
 };
-// ===== 画面に出す言葉（ここに集める。Phase 4 で英語を足す）=====
+// ===== 言語（日本語 / 英語）=====
+// ブラウザの言語が ja で始まれば日本語、それ以外は英語（ほかのポータル版と同じ規則）。?lang=ja / ?lang=en で上書きできる（確認用）。
+// PORTAL はビルドで埋め込む（false＝GitHub 版：Xの共有ボタンあり／true＝ポータル版：外部リンク・共有ボタンなし）
+const PORTAL = false;
+function pickLang(nav, query) {
+  if (query === 'ja' || query === 'en') return query;
+  return /^ja/i.test(nav || '') ? 'ja' : 'en';
+}
+const LANG = (function () {
+  let q = '';
+  try { q = new URLSearchParams(location.search).get('lang') || ''; } catch (_) {}
+  try { if (typeof window !== 'undefined' && window.__FORCE_LANG) q = window.__FORCE_LANG; } catch (_) {}
+  let nav = '';
+  try { nav = navigator.language || ''; } catch (_) {}
+  return pickLang(nav, q);
+})();
+const EN = LANG === 'en';
+// ===== 画面に出す言葉（ここに集める。日本語は STR_JA、英語は STR_EN。同じ形で書く）=====
 // 「|」は文節の切れ目。画面では文節ごとに改行しない塊（.nb）になる。ph() で「|」を取れば普通の文字列
-const STR = {
-  title: { name: '分身|反復横とび', catch: '20秒で|何人 分身できる？', tap: 'タップで スタート' },
+const STR_JA = {
+  title: { name: '分身|反復横とび', logo: ['分身', '反復横とび'], tag: '体力測定', catch: '20秒で|何人 分身できる？', tap: 'タップで スタート' },
+
+  // 判定の名前（CFG.judge と同じ並び）。「|」は判子の中で改行できる場所
+  judge: ['E', 'D', 'C', 'B', 'A', 'S', '測定|不能', '人類の|範囲外'],
 
   list: {
     head: '大会の一覧', back: 'タイトルへ',
@@ -336,6 +566,7 @@ const STR = {
     vs: 'VS', unit: '回', best: 'ベスト', noBest: 'ベスト ---',
     tagWon: '勝ち', tagNext: '挑戦！', tagLocked: 'ロック', hidden: '？？？',
     tickets: '引換券', shop: '購買部',
+    sub: (short, n) => 'VS ' + short + '　' + n + '回', bestOf: n => 'ベスト ' + n,
   },
 
   // 購買部。品物は 6 つ。name・desc（何が強くなるか 1 行）・lb（効果の見出し）・v（段階ごとの効果の短い表示。引数は Shop.effect の値）。画面には「lb v → 次の v」
@@ -354,7 +585,7 @@ const STR = {
     },
   },
 
-  intro: { rival: 'ライバル', rec: 'ライバルの記録', unit: '回', best: 'ベスト', start: 'タップで スタート', back: 'もどる' },
+  intro: { rival: 'ライバル', rec: 'ライバルの記録', unit: '回', bestOf: n => 'ベスト ' + n + ' 回', start: 'タップで スタート', back: 'もどる' },
 
   // 大会 9 つ。順番が進む順番（CFG.targets と同じ並び）
   tournaments: [
@@ -455,28 +686,164 @@ const STR = {
     card: { head: '体力測定 記録用紙', kind: '種目', kindVal: '反復横とび', rec: '記録', unit: '回', steps: '本当の回数', maxN: '最高の分身', trips: '転んだ回数', times: ' 回', people: ' 人' },
   },
 };
-const ph = s => s.replace(/\|/g, '');   // 「|」を取った普通の文字列
 
-// ===== 大きな数字の表示（ここ 1 か所。Phase 4 で英語の K / M / B を足すときは units と、読みを変えるところだけ）=====
-// 1 万未満はそのまま（3 桁ごとにカンマ）。1 万以上は 万・億・兆 を付けて、有効数字 4 桁まで（例 12.34万・123.4万・1234万・1.5億）
-STR.num = { units: [[1e4, '万'], [1e8, '億'], [1e12, '兆']], sep: ',', sig: 4 };
-function fmtNum(v) {
+// ===== English（日本語と同じ形で書く。「|」は文節の切れ目で、英語では画面に出るとき空白になる）=====
+// 学校の体力測定のまじめな言い方のまま、記録だけが大げさになる味を残す
+const STR_EN = {
+  title: { name: 'Clone|Side Step', logo: ['CLONE', 'SIDE STEP'], tag: 'FITNESS TEST', catch: 'How many clones|in 20 seconds?', tap: 'Tap to Start' },
+
+  judge: ['E', 'D', 'C', 'B', 'A', 'S', 'Off the|Charts', 'Beyond|Human'],
+
+  list: {
+    head: 'Tournaments', back: 'Title',
+    progress: (n, m) => n + ' / ' + m,
+    vs: 'VS', unit: 'reps', best: 'Best', noBest: 'Best ---',
+    tagWon: 'WON', tagNext: 'NEXT!', tagLocked: 'LOCKED', hidden: '???',
+    tickets: 'Coupons', shop: 'Shop',
+    sub: (short, n) => 'VS ' + short + ' · ' + n + ' reps', bestOf: n => 'Best ' + n,
+  },
+
+  shop: {
+    head: 'School Shop', tickets: 'Coupons', back: 'Tournaments', go: 'Try Again',
+    price: n => n, max: 'MAX', soldOut: 'Maxed', poor: 'Short', lock: 'Locked',
+    gate: name => 'Win|' + name + '|to unlock',
+    arrow: ' → ',
+    items: {
+      shoes: { name: 'Gym Shoes', desc: 'Keeps your|momentum|longer', lb: 'Hold', v: e => '×' + e.mul.toFixed(1) },
+      clothes: { name: 'New Gym Clothes', desc: 'Clones appear|more easily', lb: 'Speed needed', v: e => e.mul < 1 ? '-' + Math.round((1 - e.mul) * 100) + '%' : '±0%' },
+      fall: { name: 'Fall Practice', desc: 'Recover|faster from|tumbles', lb: '', v: e => '-' + e.drop + ' lvl ' + e.secs.toFixed(2) + 's' },
+      recorder: { name: 'More Recorders', desc: 'Bigger|records', lb: 'Record', v: e => '×' + (e.mul % 1 ? e.mul.toFixed(1) : e.mul) },
+      cheer: { name: 'Cheer Squad', desc: 'Start with|high momentum', lb: 'Start', v: e => fmtNum(e.bodies) + (e.bodies === 1 ? ' clone' : ' clones') },
+      book: { name: 'Clone Scroll', desc: 'Raises the|clone cap', lb: 'Max', v: e => fmtNum(e.bodies) + ' clones' },
+    },
+  },
+
+  intro: { rival: 'Rival', rec: 'Rival Record', unit: 'reps', bestOf: n => 'Best ' + n + ' reps', start: 'Tap to Start', back: 'Back' },
+
+  tournaments: [
+    { name: 'Class Fitness Test', rival: { name: 'Tanaka from|the Front Seat', short: 'Tanaka', say: 'Aiming for|the same record|as last year.', win: 'Guess I get|milk again|next year.', lose: 'Won with the|same record|as last year.' } },
+    { name: 'Grade Fitness Test', rival: { name: 'Grade Champ|Suzuki', short: 'Suzuki', say: 'I drink milk|every morning.', win: 'We were short|on milk.', lose: 'Thanks to|the milk.' } },
+    { name: 'School Meet', rival: { name: 'PE Committee|Chair Sato', short: 'Sato', say: 'The whole school|is watching.|I do not mind.', win: 'Lost in front|of the whole|school.', lose: 'The whole school|seems to have|watched.' } },
+    { name: 'City Meet', rival: { name: 'City Rep|Takahashi', short: 'Takahashi', say: 'My excuses|are already|prepared.', win: 'Time to use|my excuse.', lose: 'No excuse|was needed.' } },
+    { name: 'Prefecture Meet', rival: { name: 'Prefecture Champ|Ito', short: 'Ito', say: 'I am waiting|for the prize|rice.', win: 'You can|have the rice.', lose: 'I will take|the rice.' } },
+    { name: 'National Meet', rival: { name: 'Two-Time National|Champ Watanabe', short: 'Watanabe', say: 'I will be on TV,|so I fixed|my hair.', win: 'My hair|got messy.', lose: 'My hair is|not messy.' } },
+    { name: 'World Meet', rival: { name: 'World Champ|Jean', short: 'Jean', say: 'We share no|language, but|records translate.', win: 'The record|translated.|I concede.', lose: 'The record|did not|translate.' } },
+    { name: 'Lunar Meet', rival: { name: 'Astronaut|Yamamoto', short: 'Yamamoto', say: 'Low gravity|helps me|a lot.', win: 'I will blame|the gravity.', lose: 'Gravity was|on my side.' } },
+    { name: 'Space Meet', rival: { name: 'Alien|Popo', short: 'Popo', say: 'My recorder|has six arms.', win: 'Six arms|still cannot|count that.', lose: 'I have|six arms,|you see.' } },
+  ],
+
+  sheet: {
+    head: 'Fitness Test Record Sheet', kind: 'Event', rec: 'Record', unit: 'reps',
+    steps: 'Real hops', maxN: 'Most clones', trips: 'Falls', times: '', people: '',
+    judgeAll: 'The recorders|counted everyone.', judgeClone: 'Clones were|counted too.',
+    bestNew: 'New best!', best: n => 'Best ' + n + ' reps',
+    rival: s => 'Rival ' + s, you: 'You', vs: 'VS', win: 'WIN!', lose: 'LOSE...',
+    noteLose: n => n + ' more reps|to win!',
+    noteUnlock: s => s + '|is now open!',
+    noteReplay: 'Beat the rival|again.',
+    noteEnd: 'All tournaments|cleared!',
+    rivalSay: s => '“' + s + '”',
+    retry: 'Try Again', toList: 'Tournaments', cont: 'Continue', share: 'Share on X',
+    tickets: 'Coupons', ticketGain: n => '+' + n, shop: 'Shop',
+  },
+
+  venues: [
+    { banner: 'FITNESS TEST', sign: '', tag: 'Homeroom Teacher', ready: 'Ready...', fin: 'Time! Recording...', over: n => '...' + n + ' reps.',
+      rec: ['One, two...', 'W-whoa, fast!', 'Huh...? Two, four...', 'There are more of them...', 'The f-floor...!', 'Calculator! Calculator...!', 'Un... unmeasurable...!',
+        '100 people...? Counting!', 'Not enough attendance sheets', 'Teacher is going outside', 'Can teacher go home now?'] },
+    { banner: 'GRADE FITNESS TEST', sign: '', tag: 'Grade Teachers', ready: 'Three of us are watching...', fin: 'Time! Tallying up', over: n => 'Grade record: ' + n + ' reps',
+      rec: ['Class 1 teacher, count!', 'My count does not match', 'Three of us will count!', 'There are two grade heads', 'The gym teacher is crying', 'Pass the calculator around', 'Calling a meeting! Unmeasurable',
+        'Everyone count... but...', 'Send help from the staff room!', 'The vice principal fainted', 'Reporting to the principal'] },
+    { banner: 'SCHOOL MEET', sign: '', tag: 'PE Committee Teacher', ready: 'Whole school, quiet...', fin: 'Time! Announcing to all', over: n => 'School record: ' + n + ' reps!',
+      rec: ['The whole school is watching', 'Quiet! I cannot see!', 'PE committee, line up!', 'Murmuring across the school...', 'Even the principal stood up', 'Broadcast room! Commentary!', 'The school record is broken',
+        'The yard is all clones', 'Neighbors are watching too', 'What about next year...?', 'Please sing the school song'] },
+    { banner: 'CITY MEET', sign: 'CITY GYM', tag: 'Referee', ready: 'Take your marks...', fin: 'Time. Checking the record', over: n => 'Record: ' + n + ' reps. Valid.',
+      rec: ['Take your marks.', 'That motion: valid.', 'Looks like two. Still valid', 'Counting competitors...', 'No precedent in the rules', 'Chief referee, confer!', 'Per the rules: unmeasurable',
+        'Clones are not registered', 'Contacted the mayor', 'After review: continuing', 'Adding more referees'] },
+    { banner: 'PREFECTURE MEET', sign: '', tag: 'Judge', ready: 'Scoring begins...', fin: 'Scoring is closed', over: n => 'Score: ' + n + ' reps',
+      rec: ['Judges, get ready to score!', 'Judge one: 7 points!', 'Judge two is hesitating', 'All three paddles split', 'Cannot keep up with scoring', 'Need a bigger scoreboard!', 'Beyond a perfect score',
+        'The judges cloned too', 'The governor stood up', 'Scoring is left to heaven', 'Rewriting the judging rules'] },
+    { banner: 'NATIONAL MEET', sign: 'LIVE', tag: 'Announcer', ready: 'Going live...', fin: 'And that is it! The result is...', over: n => 'The record is... ' + n + ' reps!',
+      rec: ['And we are underway!', 'Oh! Two of them now?!', 'Analyst Tamura, what is this?', 'More and more of them!', 'Ratings are spiking!', 'Broadcast accident incoming!', 'The camera cannot follow!',
+        'Living rooms nationwide erupt!', 'We are extending the show!', 'Witnessing history!', 'No time for commercials!'] },
+    { banner: 'WORLD MEET', sign: '', tag: 'International Referee', ready: 'Ready...', fin: 'Finish. Judges confer', over: n => n + ' reps. Official record.',
+      rec: ['Umm... ready?', 'Interpreter! Interpreter!', 'Wonderful...? Two?', 'Smells like a world record', 'No words needed', 'Referees of all nations confer', 'No count... no, we count it',
+        'Reporting to the UN', 'Every continent is watching', 'We ran out of rulebook', 'Which country is this now?'] },
+    { banner: 'LUNAR MEET', sign: '', tag: 'Astronaut', ready: 'To Earth. Starting...', fin: 'Finish. Sending the data', over: n => 'To Earth. ' + n + ' reps.',
+      rec: ['To Earth. Measurement start', 'To Earth. I see two', 'This is Moon. Four of them', 'Crrk... they are increasing', 'The dust will not settle', 'Earth, respond! The count...', 'Unmeasurable. Ending comms',
+        '100 confirmed. Over.', '500. Oxygen is running low', '3,000. The Moon is cramped', 'To Earth. I am moving out'] },
+    { banner: 'SPACE MEET', sign: '', tag: 'Alien Popo', ready: 'Pipo. Ready...', fin: 'Pipo. All done', over: n => n + ' reps... maybe',
+      rec: ['Pipo. One... yes?', 'Two. Or 8 millimeters', 'Four... no, ninety thousand', 'More. Stars more', 'I read 16 as 3', 'I forgot how to count', 'Digits exceeded the galaxy',
+        '100. So, blue', '500. Tasty smell', '3,000. My planet population', 'Popo loves counting all'] },
+  ],
+
+  ending: {
+    cap: {
+      galaxy: ['Your clones|lined up and|flew off|into space.', 'They fill|every corner|of the galaxy.'],
+      sheet: ['Recorder Popo|writes it down|with six arms.', 'Cosmic scale,|same format|as always.'],
+      teacher: ['Meanwhile,|at the gym.'],
+    },
+    sheetRow: { kind: 'Event', kindVal: 'Side Step Test', rec: 'Record', unit: 'reps', judge: 'Verdict', judgeVal: 'Cosmic scale' },
+    teacher: ['...Yes.|Recorded.', n => 'Space record:|' + n + ' reps.', 'Nothing unusual|this year.'],
+    pop: 'That Doesn’t Happen',
+    cert: {
+      head: 'Fitness Test Record Sheet', sub: 'Space Record', kind: 'Event', kindVal: 'Side Step Test', tn: 'Meet', tnVal: 'Space Meet', rec: 'Record', unit: 'reps',
+      who: 'Recorder', whoVal: 'Popo (6 arms)', witness: 'Witness', witnessVal: 'Homeroom Teacher', note: 'Notes', noteVal: 'Nothing unusual|this year', stamp: 'COSMIC|SCALE',
+    },
+    skip: 'Skip ▶', list: 'To Tournaments', share: 'Share on X',
+    shareText: (n) => 'I won the Space Meet in Clone Side Step! Space record: ' + n + ' reps. Notes: “Nothing unusual this year.” #CloneSideStep',
+  },
+
+  hud: {
+    rec: 'Record', real: n => 'Real hops: ' + n, left: 'Left', bodies: n => n + ' clones',
+    ready: 'Ready...', vs: 'VS', passed: 'Passed!',
+  },
+  pop: {
+    start: 'GO!', stumble: 'Tangled!', out: 'Out of bounds!', down: 'Momentum down', end: 'Time!', pant: 'huff',
+    rival: 'Passed the rival!',
+    lv: ['', 'Clone!', '4 clones!', '8 clones!!', '16 clones!!', '32 clones!!!', 'Off the charts!!!'],
+    lvN: n => fmtNum(n) + ' clones!!!',
+    crowd: ['Woah!', 'So fast!', 'What is that?!', 'Clones?!', 'No way!', 'There are two!', 'I can’t see!', 'Go go go!'],
+  },
+
+  share: {
+    text: (t, rec, steps, judge, maxN, win) =>
+      'I scored ' + rec + ' reps (' + steps + ' real hops) at the ' + t + ' in Clone Side Step. Verdict: “' + judge + '”!' + (win ? ' Beat the rival!' : '') + ' ' + maxN + ' clones #CloneSideStep',
+    card: { head: 'Fitness Test Record Sheet', kind: 'Event', kindVal: 'Side Step Test', rec: 'Record', unit: 'reps', steps: 'Real hops', maxN: 'Most clones', trips: 'Falls', times: '', people: '' },
+  },
+};
+
+// 言語ごとの数字の書き方。units＝[基準, 記号]、from＝この数からまとめる
+STR_JA.num = { units: [[1e4, '万'], [1e8, '億'], [1e12, '兆']], sep: ',', sig: 4, from: 1e4 };
+STR_EN.num = { units: [[1e3, 'K'], [1e6, 'M'], [1e9, 'B']], sep: ',', sig: 4, from: 1e4 };
+const STRS = { ja: STR_JA, en: STR_EN };
+const STR = STRS[LANG];
+
+// 「|」を、日本語では何もなし・英語では空白にした普通の文字列
+const STRSEP = EN ? ' ' : '';
+const phL = (s, lang) => s.replace(/\|/g, lang === 'en' ? ' ' : '');
+const ph = s => s.replace(/\|/g, STRSEP);
+
+// ===== 大きな数字の表示（ここ 1 か所）=====
+// 日本語：1 万未満はカンマ、1 万以上は 万・億・兆。英語：1 万（10,000）未満はカンマ、以上は K / M / B。
+// どちらも有効数字 4 桁まで・最大 6 文字（例 12.34万・123.4万・1234万・1.5億／12.35K・123.5K・1.235M）。lang を省くと今の言語
+function fmtNum(v, lang) {
   let n = Math.round(Number(v));
   if (!Number.isFinite(n)) return '0';
   const neg = n < 0; if (neg) n = -n;
-  const U = STR.num.units;
+  const N = STRS[lang === 'ja' || lang === 'en' ? lang : LANG].num, U = N.units;   // map(fmtNum) のように添字が渡っても無視
   let out;
-  if (n < U[0][0]) {
-    out = String(n).replace(/\B(?=(\d{3})+(?!\d))/g, STR.num.sep);
+  if (n < N.from) {
+    out = String(n).replace(/\B(?=(\d{3})+(?!\d))/g, N.sep);
   } else {
     let u = 0;
     while (u + 1 < U.length && n >= U[u + 1][0]) u++;
     const body = k => {   // 有効数字 sig 桁に丸めて、余分な 0 を落とす
-      const m = n / U[k][0], d = Math.max(0, STR.num.sig - 1 - Math.floor(Math.log10(m)));
+      const m = n / U[k][0], d = Math.max(0, N.sig - 1 - Math.floor(Math.log10(m)));
       return Number(m.toFixed(d));
     };
     let m = body(u);
-    if (m >= 10000 && u + 1 < U.length) { u++; m = body(u); }   // 9999.6万 → 1億 のような繰り上がり
+    if (u + 1 < U.length && m >= U[u + 1][0] / U[u][0]) { u++; m = body(u); }   // 9999.6万 → 1億、999.96K → 1M のような繰り上がり
     out = String(m) + U[u][1];
   }
   return neg ? '-' + out : out;
@@ -547,6 +914,29 @@ VENUES.forEach((v, i) => { v.i = i; });
 // エンディングの長さ（秒）。3 つの場面のあとに記録用紙（宇宙記録）が出る。タップでとばせる
 const ENDING_TIMES = { galaxy: 5.2, sheet: 5.2, teacher: 5.6 };
 const endingTotal = () => ENDING_TIMES.galaxy + ENDING_TIMES.sheet + ENDING_TIMES.teacher;
+
+// ===== 横画面：レーンと分身の立つ場所（画面を使わない。描くのは 40-render.js）=====
+// レーン＝右左左右の 3 本線のひとまとまり。縦画面は 1 つ、横に広いほど増える（本人はまん中）。LANE_W は床の線 1 間隔を 1 としたレーンの間隔
+const LANE_W = 2.6;
+// wide＝画面の幅（遊ぶ場所の幅 100 を単位に）、step＝床の線 1 間隔（40-render の LS）。レーンの数は 1・3・5・7
+function lanesFor(wide, step) {
+  const m = Math.floor((wide / 2 - 8) / (LANE_W * step));
+  return (m >= 0 ? Math.min(3, m) : 0) * 2 + 1;
+}
+// 本人のレーンが先頭、そのあと左右へ 1 つずつ（0, -1, 1, -2, 2 …）
+function laneOrder(n) { const o = [0]; for (let j = 1; o.length < n; j++) o.push(-j, j); return o.slice(0, n); }
+// 分身 count 人の立つ場所。1 レーンは今までどおり（奥へ 3 人ずつ）。複数レーンは、1 行目が本人の横（本人のレーンはあけておく）・2 行目から全レーンで、ずらして立つ
+function buildSlots(lanes, count) {
+  const out = [], L = laneOrder(lanes);
+  for (let i = 0; out.length < count; i++) {
+    if (lanes === 1) { out.push({ z: 1 + Math.floor(i / 3), lane: 0, wx: (i % 3 - 1) * 0.3 }); continue; }
+    const first = L.length - 1;
+    if (i < first) { out.push({ z: 0, lane: L[i + 1], wx: 0 }); continue; }
+    const j = i - first, z = 1 + Math.floor(j / lanes), idx = j % lanes;
+    out.push({ z, lane: L[idx], wx: ((z + idx) % 3 - 1) * 0.28 });
+  }
+  return out;
+}
 // ===== ゲームのロジック（画面を使わない）=====
 const clamp = (v, a, b) => Math.max(a, Math.min(b, v));
 function mulberry32(a) {
@@ -696,12 +1086,14 @@ const Game = {
   },
 };
 
-// 判定（記録から）
-function judgeFor(rec) {
-  let j = CFG.judge[0][1];
-  for (const [min, name] of CFG.judge) if (rec >= min) j = name;
+// 判定（記録から）。名前は STR.judge（言語ごと。「|」は判子の中の改行位置）。judgeFor は「|」を取った名前
+function judgeIdx(rec) {
+  let j = 0;
+  for (let i = 0; i < CFG.judge.length; i++) if (rec >= CFG.judge[i][0]) j = i;
   return j;
 }
+function judgeRaw(rec) { return STR.judge[judgeIdx(rec)]; }
+function judgeFor(rec) { return ph(judgeRaw(rec)); }
 // ===== 購買部と引換券（画面を使わない）=====
 // 強化の段階は保存の up（品物ごと 0〜最大）。測定のはじめに Shop.apply(save) が CFG へ掛け算・足し算で反映する。
 // Shop.apply は「素の値」から計算し直すので、何度呼んでも重ならない。20-logic.js の仕組みは変えない
@@ -797,10 +1189,10 @@ const Shop = {
 };
 // ===== 大会のくり返し（画面を使わない）=====
 // 保存の形：{ v, unlocked（遊べる一番先の大会 0始まり）, won[大会ごとの勝ち], best[大会ごとのベスト] }
-// Phase 2 で tickets（引換券の残り）と up（品物ごとの強化の段階）を足した。知らない項目は読み書きしても消さない
+// Phase 2 で tickets（引換券の残り）と up（品物ごとの強化の段階）を、Phase 4 で endingSeen（エンディングを最後まで見たか）を足した。知らない項目は読み書きしても消さない
 const SAVE_KEY = 'hanpuku-yokotobi-save';
 const V1_BEST_KEY = 'hanpuku-yokotobi-best';   // v1 のベスト（引き継ぎ用に読むだけ）
-const SAVE_VER = 2;   // 1＝Phase 1（大会だけ）／2＝引換券と強化
+const SAVE_VER = 3;   // 1＝Phase 1（大会だけ）／2＝引換券と強化／3＝endingSeen（エンディングを見たか）
 
 const Tourney = {
   count() { return CFG.targets.length; },
@@ -810,7 +1202,7 @@ const Tourney = {
 
   newSave() {
     const n = this.count();
-    return { v: SAVE_VER, unlocked: 0, won: new Array(n).fill(false), best: new Array(n).fill(0), tickets: 0, up: Shop.zeroUp() };
+    return { v: SAVE_VER, unlocked: 0, won: new Array(n).fill(false), best: new Array(n).fill(0), tickets: 0, up: Shop.zeroUp(), endingSeen: false };
   },
 
   // どんな値が来ても、使える形に直す（壊れた保存・古い保存・手で書き換えた保存）
@@ -837,6 +1229,8 @@ const Tourney = {
       const l = Math.floor(Number(o.up && o.up[id]));
       out.up[id] = Number.isFinite(l) ? clamp(l, 0, Shop.maxLevel(id)) : 0;
     }
+    // エンディングを見たか（版 2 までの保存にはないので false。全部勝っているのに false なら、次に大会の一覧を開いたとき 1 回だけ出る）
+    out.endingSeen = o.endingSeen === true;
     out.v = SAVE_VER;
     return out;
   },
@@ -849,6 +1243,10 @@ const Tourney = {
   playable(save, i) { return i >= 0 && i < this.count() && i <= save.unlocked; },
   focusIndex(save) { return save.unlocked; },
   wonCount(save) { return save.won.filter(Boolean).length; },
+  allWon(save) { return save.won.length > 0 && save.won.every(Boolean); },
+  // エンディングを出すか：9 大会ぜんぶ勝っていて、まだ最後まで見ていない（ページを閉じて見損ねても、次に出る）
+  shouldShowEnding(save) { return this.allWon(save) && !save.endingSeen; },
+  markEndingSeen(save) { save.endingSeen = true; },
 
   // 1回の結果を保存の形に反映する。勝てば次の大会が開く。遊べない大会は何も変えない
   record(save, i, rec) {
@@ -890,7 +1288,7 @@ const Tourney = {
 const $ = id => document.getElementById(id);
 const cv = $('cv');
 let cx = cv.getContext('2d');   // 静かな背景を 1 枚の画像に描くときだけ、一時的に別の canvas に差し替える（42-venues-art.js）
-const FONT = '"Hiragino Maru Gothic ProN","Yu Gothic UI","Meiryo",sans-serif';
+const FONT = EN ? '"Arial Rounded MT Bold","Trebuchet MS","Segoe UI","Hiragino Maru Gothic ProN","Yu Gothic UI",sans-serif' : '"Hiragino Maru Gothic ProN","Yu Gothic UI","Meiryo",sans-serif';
 let W = 0, H = 0, DPR = 1, U = 1, OX = 0, OY = 0;
 let EX0 = 0, EX1 = 100, EY0 = 0, EY1 = 177.78;   // 画面いっぱいの範囲（遊ぶ場所の単位で）
 let nowT = 0;
@@ -902,7 +1300,18 @@ function resize() {
   const sw = Math.min(W, H * 9 / 16);
   U = sw / 100; OX = (W - sw) / 2; OY = (H - sw * 16 / 9) / 2;
   EX0 = -OX / U; EX1 = 100 + OX / U; EY0 = -OY / U; EY1 = 177.78 + OY / U;
+  LANES = lanesFor(EX1 - EX0, LS);
 }
+
+// ---- 横画面：同じ体育館に、ならんだレーン（右左左右の 3 本線のセット）を横にも並べ、分身は奥だけでなく横にも並ぶ ----
+// 縦画面（幅 100）では 1 レーン＝今までどおり。横に広いほどレーンが増える（16:9 で 5 レーン）。本人はまん中のレーン。数え方は 15-venues.js
+let LANES = 1;
+const SLOTS = { n: 0, list: [] };
+function slotOf(k) {   // 分身 k（1 から）が立つ場所 {z 奥行き, lane レーン番号, wx レーンの中でのずれ}
+  if (SLOTS.n !== LANES) { SLOTS.n = LANES; SLOTS.list = buildSlots(LANES, CL.length - 1); }
+  return SLOTS.list[k - 1];
+}
+function crowdZ0() { return LANES === 1 ? 18 : Math.max(11, slotOf(CL.length - 1).z + 2.5); }
 
 // 床の遠近。z は奥行き（0 が本人）
 const YH = 62, Y0 = 140, LS = 26, KS = 1.12;
@@ -1030,19 +1439,47 @@ function drawLines() {
   const sMax = (EY1 - YH) / (Y0 - YH) + 0.05;
   const glow = (Game.mode === 'play' && Game.stun <= 0) ? Game.nextLines() : [];
   const pulse = 0.5 + 0.5 * Math.sin(nowT * 9);
-  for (let i = 0; i < 3; i++) {
-    const wx = i - 1;
-    if (glow.indexOf(i) >= 0) {
-      cx.fillStyle = 'rgba(255,240,90,' + (0.22 + 0.2 * pulse) + ')';
-      lineQuad(wx, 4.2, 0.02, sMax); cx.fill();
-      cx.fillStyle = 'rgba(255,255,170,' + (0.25 + 0.25 * pulse) + ')';
-      lineQuad(wx, 2.4, 0.02, sMax); cx.fill();
+  const title = App.screen === 'title';
+  for (const lane of laneOrder(LANES)) {
+    // 本人のレーンはいつも。となりのレーンは、そこに分身が出てきたぶんだけ現れる
+    let amt = lane === 0 ? 1 : 0;
+    if (lane !== 0) for (let k = 1; k < CL.length; k++) if (slotOf(k).lane === lane && CL[k].app > amt) amt = CL[k].app;
+    if (amt <= 0.01 || title) continue;
+    cx.save(); cx.globalAlpha = Math.min(1, amt * 1.5) * (lane === 0 ? 1 : 0.8);
+    for (let i = 0; i < 3; i++) {
+      const wx = lane * LANE_W + i - 1, on = lane === 0 && glow.indexOf(i) >= 0;
+      if (on) {
+        cx.fillStyle = 'rgba(255,240,90,' + (0.22 + 0.2 * pulse) + ')';
+        lineQuad(wx, 4.2, 0.02, sMax); cx.fill();
+        cx.fillStyle = 'rgba(255,255,170,' + (0.25 + 0.25 * pulse) + ')';
+        lineQuad(wx, 2.4, 0.02, sMax); cx.fill();
+      }
+      cx.fillStyle = on ? '#fffbe0' : '#fbfbf5';
+      lineQuad(wx, 0.85, 0.02, sMax); cx.fill();
+      cx.fillStyle = 'rgba(0,0,0,.08)';
+      lineQuad(wx, 0.3, 0.02, sMax); cx.fill();
     }
-    cx.fillStyle = glow.indexOf(i) >= 0 ? '#fffbe0' : '#fbfbf5';
-    lineQuad(wx, 0.85, 0.02, sMax); cx.fill();
-    cx.fillStyle = 'rgba(0,0,0,.08)';
-    lineQuad(wx, 0.3, 0.02, sMax); cx.fill();
+    cx.restore();
   }
+}
+
+// ---- タイトルの絵：記録板なし。体育館のまえに、体操服の分身がずらりと並んで、波のように反復横とびをしている ----
+function drawTitleScene() {
+  const t = nowT, wide = EX1 - EX0, mid = (EX0 + EX1) / 2;
+  const g = cx.createLinearGradient(0, EY0, 0, 72);   // 上は少し暗くして、ロゴを読みやすく
+  g.addColorStop(0, 'rgba(14,24,66,.62)'); g.addColorStop(1, 'rgba(14,24,66,0)');
+  cx.fillStyle = g; cx.fillRect(EX0 - 5, EY0 - 5, wide + 10, 72 - EY0 + 5);
+  const rows = [[6, 1.3, 0.2], [3, 0.7, 0.5], [0, 0, 0]];   // [奥行き z, 波のずれ, 列のずらし]
+  rows.forEach(([z, ph0, off], ri) => {
+    const s = sOf(z), y = z === 0 ? Y0 : yOf(s), gap = 19 * s + 1;
+    let n = Math.min(15, Math.floor((wide - 14) / gap) + 1); if (n % 2 === 0) n--;
+    for (let i = 0; i < n; i++) {
+      const ph = t * 2.3 - i * 0.55 + ph0, x = mid + (i - (n - 1) / 2) * gap + off * gap + Math.sin(ph) * 5 * s;
+      if (x < EX0 - 12 || x > EX1 + 12) continue;
+      const c = Math.cos(ph);
+      drawKid(cx, x, y, s * KS, { lean: clamp(c * 0.8, -1, 1), hop: Math.abs(c) * 0.5, ph: t * 9 + i * 1.7, face: 0, alpha: 0.78 + 0.22 * s });
+    }
+  });
 }
 
 // ---- 見ている人たち ----
@@ -1111,14 +1548,14 @@ function drawBodies() {
   // 分身（奥から手前へ）
   const list = [];
   for (let k = 1; k < CL.length; k++) if (CL[k].app > 0.01) list.push(k);
-  list.sort((a, b) => b - a);   // 大きい k = 奥
+  list.sort((a, b) => slotOf(b).z - slotOf(a).z || b - a);   // 奥（z が大きい）から
   const px = xOf(Game.xv, 1);
   for (const k of list) {
-    const z = 1 + Math.floor((k - 1) / 3), col = (k - 1) % 3 - 1;
+    const sl = slotOf(k), z = sl.z;
     const s = sOf(z), a = CL[k].app, ea = easeOut(Math.min(1, a));
     const d = k * CFG.cloneDelay;
     const o = bodyOpts(nowT - d, k, false, finishing);
-    const slotX = xOf(o.x + col * 0.3, s), slotY = yOf(s);
+    const slotX = xOf(o.x + sl.wx + sl.lane * LANE_W, s), slotY = yOf(s);
     const x = px + (slotX - px) * ea, y = Y0 + (slotY - Y0) * ea;
     const fa = fallAmt(z * 0.02, false);
     drawKid(cx, x, y, s * KS * (0.7 + 0.3 * ea), {
@@ -1155,7 +1592,7 @@ function drawCrowd() {
   const wide = EX1 - EX0 + 24;
   cx.save(); cx.globalAlpha = 0.9 * Math.min(1, crowdAmt * 8);
   for (let r = rows - 1; r >= 0; r--) {   // 奥の列から
-    const z = 18 + r * 3.2, s = sOf(z), y = yOf(s), sc = s * KS * 1.25;
+    const z = crowdZ0() + r * 3.2, s = sOf(z), y = yOf(s), sc = s * KS * 1.25;
     const step = Math.max(8 * sc, wide / maxPer), n = Math.floor(wide / step);
     const shift = histX(nowT - (48 + r * 6) * CFG.cloneDelay) * LS * s;   // 本人の動きに少し遅れてついていく
     const x0 = EX0 - 12 + (r % 2 ? step * 0.5 : 0) + shift;
@@ -1204,7 +1641,13 @@ function drawSmoke() {
 }
 
 // ---- 画面上のしるし（記録・時間・記録係）----
-function drawHud() {
+function drawHud() {   // 横画面は記録板を少し大きく（画面が広いぶん、文字が小さく見えないように）
+  cx.save();
+  if (LANES > 1) { cx.translate(50, 0); cx.scale(1.3, 1.3); cx.translate(-50, 0); }
+  drawHudBody();
+  cx.restore();
+}
+function drawHudBody() {
   const play = Game.mode === 'play', lv = Game.lvl;
   // 記録板
   cx.fillStyle = '#0003'; rr(cx, 3, 3.8, 94, 35, 3); cx.fill();
@@ -1245,7 +1688,8 @@ function drawRival() {
   const passed = rivalPassed, prog = clamp(Game.rec / tg, 0, 1);
   const w = 18, h = 13.2, q = clamp((nowT - rivalPassAt) / 0.6, 0, 1);
   const sc = passed && q < 1 ? 1 + 0.25 * Math.sin(q * Math.PI) : 1;
-  cx.save(); cx.translate(79 + w / 2, 40 + h / 2); cx.scale(sc, sc); cx.translate(-w / 2, -h / 2);
+  const k = LANES > 1 ? 1.5 : 1, rx = LANES > 1 ? EX1 - w * k - 5 : 79, ry = LANES > 1 ? 5 : 40;   // 横画面：画面の右上すみに、少し大きく
+  cx.save(); cx.translate(rx + w * k / 2, ry + h * k / 2); cx.scale(sc * k, sc * k); cx.translate(-w / 2, -h / 2);
   cx.fillStyle = '#0002'; rr(cx, 0, 0.7, w, h, 1.6); cx.fill();
   cx.fillStyle = 'rgba(255,253,242,.94)'; rr(cx, 0, 0, w, h, 1.6); cx.fill();
   cx.save(); rr(cx, 0, 0, w, h, 1.6); cx.clip();
@@ -1281,13 +1725,15 @@ function render() {
   cx.setTransform(DPR * U, 0, 0, DPR * U, DPR * (OX + shx * U), DPR * (OY + shy * U));
   drawVenue();
   drawLines();
+  if (App.screen === 'title') { drawTitleScene(); } else {
   drawRays();
   drawCrowd();
   drawSpectators();
   drawBodies();
   drawSmoke();
+  }
   cx.setTransform(DPR * U, 0, 0, DPR * U, DPR * OX, DPR * OY);
-  if (App.screen !== 'result') drawHud();   // 記録用紙のあいだは、記録板をひっこめる
+  if (App.screen !== 'result' && App.screen !== 'title') drawHud();   // 記録用紙のあいだは、記録板をひっこめる。タイトルは記録板なしの絵
   if (App.screen === 'play') drawCount();
   if (App.screen === 'play') drawRival();
   drawPopups();
@@ -1312,7 +1758,7 @@ function updateVisual(dt) {
     if (k < N) c.app = Math.min(1, c.app + dt * 4.5);
     else {
       // 転んだときは、倒れてから消える（手前から順に）。ゆっくり減速したときは、そのままふっと消える
-      const z = 1 + Math.floor((k - 1) / 3);
+      const z = slotOf(k).z || 1;
       const falling = nowT - tripAt < 0.12 + z * 0.02 + 0.1;
       if (!falling) c.app = Math.max(0, c.app - dt * 3.2);
     }
@@ -1337,11 +1783,13 @@ function puffSmoke(n) {
 // 動かない部分は画面の外の canvas に 1 枚描いて使い回す（大きさ・会場が変わったときだけ描き直す）。動く部分（窓のガタガタ・点滅・星のまたたき）だけ毎フレーム描く。
 // 見えるのは主に「記録板の下から床まで」（遊ぶ場所の高さ 38〜62）。ここに会場らしさをまとめる
 function venueIdx() { return App.screen === 'title' ? 0 : clamp(App.idx, 0, VENUES.length - 1); }
-function curVenue() { return VENUES[venueIdx()]; }
+// タイトルは 1 つ目の体育館から横断幕だけ外したもの（ロゴと重ならないように）。キャッシュは別の鍵 ck で持つ
+const TITLE_VENUE = Object.assign({}, VENUES[0], { props: VENUES[0].props.filter(n => n !== 'banner'), ck: 'title' });
+function curVenue() { return App.screen === 'title' ? TITLE_VENUE : VENUES[venueIdx()]; }
 
 const VCache = { cv: null, key: '' };
 function venueLayer(V) {
-  const key = V.i + '|' + W + 'x' + H + '|' + DPR;
+  const key = (V.ck || V.i) + '|' + W + 'x' + H + '|' + DPR;
   if (VCache.key === key) return VCache.cv;
   const w = EX1 - EX0 + 10, h = EY1 - EY0 + 10;
   const pw = Math.max(1, Math.round(w * U * DPR)), phh = Math.max(1, Math.round(h * U * DPR));
@@ -1539,12 +1987,12 @@ const PROP = {
       }
     },
   },
-  banner: {   // 横断幕
+  banner: {   // 横断幕。アリーナは審査員の頭にかからないよう、少し上で低め
     draw(V) {
-      const S = STR.venues[V.i], hall = V.kind === 'hall', x = hall ? 32 : 22, w = hall ? 36 : 56, y = 40.5;
-      cx.fillStyle = V.banner[0]; rr(cx, x, y, w, 9, 1); cx.fill();
-      cx.fillStyle = V.banner[1]; cx.fillRect(x, y, w, 0.8); cx.fillRect(x, y + 8.2, w, 0.8);
-      fitTxt(S.banner, 50, y + 4.7, 6.2, w - 6, '#fff', { stroke: 'rgba(0,0,0,.45)', sw: 1.1 });
+      const S = STR.venues[V.i], hall = V.kind === 'hall', arena = V.kind === 'arena', x = hall ? 32 : 22, w = hall ? 36 : 56, y = arena ? 38.2 : 40.5, bh = arena ? 7.8 : 9;
+      cx.fillStyle = V.banner[0]; rr(cx, x, y, w, bh, 1); cx.fill();
+      cx.fillStyle = V.banner[1]; cx.fillRect(x, y, w, 0.8); cx.fillRect(x, y + bh - 0.8, w, 0.8);
+      fitTxt(S.banner, 50, y + bh / 2 + 0.2, arena ? 5.2 : 6.2, w - 6, '#fff', { stroke: 'rgba(0,0,0,.45)', sw: 1.1 });
     },
   },
   curtain: {   // 舞台の幕と舞台
@@ -2060,7 +2508,7 @@ function chunkLines(s, size, maxW) {
   cx.font = 'bold ' + size + 'px ' + FONT;
   const lines = []; let cur = '';
   for (const p of s.split('|')) {
-    if (cur && cx.measureText(cur + p).width > maxW) { lines.push(cur); cur = p; } else cur += p;
+    if (cur && cx.measureText(cur + STRSEP + p).width > maxW) { lines.push(cur); cur = p; } else cur += (cur ? STRSEP : '') + p;
   }
   lines.push(cur);
   return lines;
@@ -2105,6 +2553,8 @@ function updateEnding(dt) {
     End.cert = true; End.flashAt = nowT;
     $('cRec').textContent = fmt(End.rec); fitRec($('cRec'));
     $('ending').classList.add('cert');
+    Tourney.markEndingSeen(SAVE); Tourney.persist(store, SAVE);   // 最後まで見た（途中でページを閉じたら、次に大会の一覧を開いたときもう一度出る）
+    focusMain();
     Snd.endJingle();
     setTimeout(() => { $('cStamp').classList.add('on'); Snd.stamp(); }, 700);
   }
@@ -2139,11 +2589,13 @@ function endCaption(s, y, a) {
 
 // ① 分身が整列して、銀河へ散らばっていく
 function sceneGalaxy(t, caps) {
-  const N = 84, q = eIO(clamp((t - 1.8) / 1.6, 0, 1)), ex = Math.max(0, t - 3.6);
+  const wide = EX1 - EX0, C = wide > 110 ? clamp(Math.round((wide - 16) / 7.1), 12, 26) : 12, N = C * 7;   // 横画面は列を増やして横いっぱいに
+  const step = wide > 110 ? (wide - 16) / (C - 1) : 7.1, fx0 = wide > 110 ? EX0 + 8 : 12, radMax = Math.max(86, wide * 0.5);
+  const q = eIO(clamp((t - 1.8) / 1.6, 0, 1)), ex = Math.max(0, t - 3.6);
   for (let i = 0; i < N; i++) {
-    const col = i % 12, row = (i / 12) | 0;
-    const fx = 12 + col * 7.1 + Math.sin(t * 9 + (row % 2) * 3.14) * 1.8 * (1 - q), fy = 82 + row * 11;
-    const ang = i * 0.42 + t * 0.5, rad = (6 + i * 0.95) * (1 + ex * 0.35);
+    const col = i % C, row = (i / C) | 0;
+    const fx = fx0 + col * step + Math.sin(t * 9 + (row % 2) * 3.14) * 1.8 * (1 - q), fy = 82 + row * 11;
+    const ang = i * 0.42 + t * 0.5, rad = (6 + i / N * (radMax - 6)) * (1 + ex * 0.35);
     const sx = 50 + Math.cos(ang) * rad, sy = 112 + Math.sin(ang) * rad * 0.55;
     const x = fx + (sx - fx) * q, y = fy + (sy - fy) * q;
     const a = clamp((t - i * 0.012) / 0.3, 0, 1) * (1 - 0.45 * clamp(ex / 1.6, 0, 1));
@@ -2170,7 +2622,7 @@ function sceneSheet(t) {
   show(1.3, () => {
     txt(S.rec, 17, 70, 4.6, '#55608a', { align: 'left' });
     const v = fmt(Math.round(End.rec * easeOut(clamp((t - 1.3) / 1.7, 0, 1))));
-    cx.font = '900 15px ' + FONT; const w = cx.measureText(v).width, fs = w > 44 ? 15 * 44 / w : 15;
+    cx.font = '900 15px ' + FONT; const w = cx.measureText(v).width, mx = EN ? 36 : 44, fs = w > mx ? 15 * mx / w : 15;   // 英語は左の「Record」が長いので、数字を少し細く
     txt(v, 70, 70, fs, '#d2382f', { weight: '900', align: 'right' }); txt(S.unit, 83, 72, 4.4, '#55608a', { align: 'right' });
     cx.fillStyle = '#9aa7d0'; cx.fillRect(16, 79, 68, 0.3);
   });
@@ -2179,7 +2631,7 @@ function sceneSheet(t) {
     const q = clamp((t - 3.3) / 0.28, 0, 1), sc = 2.4 - 1.4 * easeOut(q);
     cx.save(); cx.globalAlpha = q; cx.translate(62, 92); cx.rotate(-0.25); cx.scale(sc, sc);
     cx.strokeStyle = '#d2382f'; cx.lineWidth = 1.2; cx.beginPath(); cx.arc(0, 0, 10.5, 0, 6.283); cx.stroke();
-    drawChunks('宇宙|規模', 0, 0, 5.2, 18, '#d2382f', { weight: '900' });
+    drawChunks(STR.ending.cert.stamp, 0, 0, EN ? 3.8 : 5.2, 18, '#d2382f', { weight: '900' });
     cx.restore();
   }
   // 宇宙人の記録係：腕が 6本。ペン・はんこ・電卓・バインダー…を持って、いそがしい
@@ -2473,7 +2925,7 @@ const Snd = (() => {
 const fmt = fmtNum;   // 大きな数字の表示は fmtNum（12-strings.js）1 か所
 const esc = s => s.replace(/[&<>"]/g, c => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;' }[c]));
 // 「|」で区切った言葉を、文節ごとに途中で改行しない塊にして HTML にする
-const phHtml = s => s.split('|').map(p => '<span class="nb">' + esc(p) + '</span>').join('');
+const phHtml = s => s.split('|').map(p => '<span class="nb">' + esc(p) + '</span>').join(STRSEP);   // 英語は塊のあいだに空白（折り返せる場所）
 
 // 保存（localStorage が使えないとき＝data: URL やプライベートモードでも止まらない）
 const store = {
@@ -2492,8 +2944,39 @@ let crowdT = 0;
 // 文字を画面に入れる（data-s＝そのまま、data-p＝「|」で文節に分ける）
 function strAt(path) { return path.split('.').reduce((o, k) => o[k], STR); }
 function applyStrings() {
+  document.documentElement.lang = LANG;
+  document.title = ph(STR.title.name);
   for (const el of document.querySelectorAll('[data-s]')) el.textContent = strAt(el.dataset.s);
   for (const el of document.querySelectorAll('[data-p]')) el.innerHTML = phHtml(strAt(el.dataset.p));
+  $('logo1').textContent = STR.title.logo[0]; $('logo2').textContent = STR.title.logo[1];
+}
+
+// 横画面か（CSS の @media と同じ条件）
+const landQ = window.matchMedia ? window.matchMedia('(min-aspect-ratio: 5/4)') : null;
+const isLand = () => !!(landQ && landQ.matches);
+
+// いま見えている画面の、まず選ばれるボタン（キーボードの Enter / Space で押せる）
+function focusMain() {
+  const s = App.screen;
+  let el = null;
+  if (s === 'list') el = $('listBody').querySelector('.tn.next') || $('listBody').querySelector('.tn:not(.locked)');
+  else if (s === 'shop') el = $('shopBody').querySelector('.it.ok .buy') || ($('shopGo').style.display === 'none' ? $('shopBack') : $('shopGo'));
+  else if (s === 'result') el = $('retry');
+  else if (s === 'ending' && End.cert) el = $('endBtn');
+  if (el) { try { el.focus({ preventScroll: true }); } catch (_) {} }
+  else if (document.activeElement && document.activeElement.blur) document.activeElement.blur();
+}
+// 一覧と購買部：矢印キーでボタンからボタンへ
+function arrowFocus(e) {
+  const root = App.screen === 'list' ? $('listBody') : App.screen === 'shop' ? $('shop') : null;
+  if (!root) return false;
+  const all = [...root.querySelectorAll('button:not(:disabled)')].filter(b => b.offsetParent !== null);
+  if (!all.length) return false;
+  const i = all.indexOf(document.activeElement);
+  const k = e.key, step = k === 'ArrowLeft' || k === 'ArrowUp' ? -1 : 1;
+  const n = i < 0 ? (step > 0 ? 0 : all.length - 1) : (i + step + all.length) % all.length;
+  all[n].focus({ preventScroll: true }); all[n].scrollIntoView({ block: 'nearest' });
+  return true;
 }
 
 function setScreen(s) {
@@ -2523,6 +3006,7 @@ function bindUI() {
   window.addEventListener('keydown', e => {
     if (e.repeat) return;
     const k = e.key;
+    if ((App.screen === 'list' || App.screen === 'shop') && /^Arrow(Left|Right|Up|Down)$/.test(k)) { if (arrowFocus(e)) { e.preventDefault(); return; } }
     if (k === 'ArrowLeft' || k === 'a' || k === 'A') { e.preventDefault(); tap(-1); }
     else if (k === 'ArrowRight' || k === 'd' || k === 'D') { e.preventDefault(); tap(1); }
     else if (k === ' ' || k === 'Enter') {
@@ -2536,10 +3020,11 @@ function bindUI() {
     }
   });
   window.addEventListener('resize', resize);
+  if (landQ && landQ.addEventListener) landQ.addEventListener('change', () => { if (App.screen === 'result') fitRec($('rRec')); });
   window.addEventListener('contextmenu', e => e.preventDefault());
   $('retry').addEventListener('click', () => { Snd.init(); retry(); });
   $('toList').addEventListener('click', () => { Snd.init(); if (App.pendingEnding) showEnding(); else openList(); });
-  $('share').addEventListener('click', share);
+  bindShare();
   $('listBack').addEventListener('click', () => { resetRun(); setScreen('title'); });
   $('toShop').addEventListener('click', () => { Snd.init(); openShop('list'); });
   $('rShop').addEventListener('click', () => { Snd.init(); openShop('result'); });
@@ -2550,8 +3035,7 @@ function bindUI() {
     if (b) { Snd.init(); buyItem(b.closest('.it').dataset.id); }
   });
   $('inBack').addEventListener('click', () => openList());
-  $('endBtn').addEventListener('click', () => { Snd.init(); End.on = false; openList(); });
-  $('endShare').addEventListener('click', shareEnding);
+  $('endBtn').addEventListener('click', () => { Snd.init(); finishEnding(); });
   $('ending').addEventListener('click', e => { if (!End.cert && !e.target.closest('button')) { Snd.init(); skipEnding(); } });
   $('listBody').addEventListener('click', e => {
     const b = e.target.closest('.tn');
@@ -2575,8 +3059,17 @@ function openList() {
   End.on = false;
   Snd.setVenue(0);
   App.pendingEnding = false;
+  // 9 大会ぜんぶ勝っているのに、エンディングをまだ最後まで見ていない（ページを閉じて見損ねた）なら、ここで 1 回だけ出す
+  if (Tourney.shouldShowEnding(SAVE)) { showEnding(); return; }
   renderList();
   setScreen('list');
+  focusMain();
+}
+// エンディングを見終わった：見たと保存して、大会の一覧へ
+function finishEnding() {
+  Tourney.markEndingSeen(SAVE); Tourney.persist(store, SAVE);
+  End.on = false;
+  openList();
 }
 
 function renderList() {
@@ -2585,8 +3078,8 @@ function renderList() {
   for (let i = 0; i < n; i++) {
     const st = Tourney.status(SAVE, i), T = STR.tournaments[i], R = T.rival;
     const locked = st === 'locked';
-    const sub = locked ? L.hidden : L.vs + ' ' + R.short + '　' + fmt(CFG.targets[i]) + L.unit;
-    const best = SAVE.best[i] > 0 ? L.best + ' ' + fmt(SAVE.best[i]) : (locked ? '' : L.noBest);
+    const sub = locked ? L.hidden : L.sub(R.short, fmt(CFG.targets[i]));
+    const best = SAVE.best[i] > 0 ? L.bestOf(fmt(SAVE.best[i])) : (locked ? '' : L.noBest);
     const tag = st === 'won' ? L.tagWon : st === 'next' ? L.tagNext : L.tagLocked;
     html += '<button class="tn ' + st + '" data-i="' + i + '"' + (locked ? ' disabled' : '') + '>'
       + '<span class="no">' + (i + 1) + '</span>'
@@ -2610,6 +3103,7 @@ function openShop(from) {
   renderShop();
   $('shopGo').style.display = from === 'result' && !App.pendingEnding ? '' : 'none';
   setScreen('shop');
+  focusMain();
 }
 
 function renderShop() {
@@ -2649,9 +3143,9 @@ function openIntro(i) {
   const T = STR.tournaments[i], I = STR.intro;
   $('inName').textContent = ph(T.name);
   $('inRival').innerHTML = phHtml(T.rival.name);
-  $('inSay').innerHTML = '「' + phHtml(T.rival.say) + '」';
+  $('inSay').innerHTML = STR.sheet.rivalSay(phHtml(T.rival.say));
   $('inRec').innerHTML = esc(fmt(CFG.targets[i])) + '<small>' + esc(I.unit) + '</small>';
-  $('inBest').textContent = SAVE.best[i] > 0 ? I.best + ' ' + fmt(SAVE.best[i]) + ' ' + I.unit : '';
+  $('inBest').textContent = SAVE.best[i] > 0 ? I.bestOf(fmt(SAVE.best[i])) : '';
   setScreen('intro');
   App.introAt = nowT;
 }
@@ -2669,16 +3163,21 @@ function showEnding() {
   App.pendingEnding = false;
   setScreen('ending');
   startEnding(SAVE.best[Tourney.count() - 1]);
+  if (document.activeElement && document.activeElement.blur) document.activeElement.blur();
 }
 
 // ---- 結果 ----
 function resultInfo() {
-  return { rec: Game.rec, steps: Game.steps, maxN: Game.maxN, trips: Game.trips, judge: judgeFor(Game.rec) };
+  return { rec: Game.rec, steps: Game.steps, maxN: Game.maxN, trips: Game.trips, judge: judgeFor(Game.rec), judgeRaw: judgeRaw(Game.rec) };
 }
 
 // 長い数字は小さく（枠からはみ出さないように）
 // 記録の大きな数字：長いときは文字を小さくして、判子や単位とぶつからないようにする
-function fitRec(el) { el.parentNode.style.fontSize = el.textContent.length > 5 ? '9.5cqw' : el.textContent.length > 4 ? '11cqw' : ''; }
+function fitRec(el) {
+  const L = el.textContent.length, base = isLand() ? (el.id === 'cRec' ? 10 : 11.5) : 12;
+  const f = L > 5 ? base * 0.8 : L > 4 ? base * 0.92 : 0;
+  el.parentNode.style.fontSize = f ? 'calc(' + f.toFixed(2) + ' * var(--q))' : '';
+}
 function fitNum(el) { el.className = el.textContent.length > 7 ? 'l3' : el.textContent.length > 5 ? 'l2' : ''; }
 
 function showResult() {
@@ -2686,7 +3185,7 @@ function showResult() {
   const r = resultInfo(), i = App.idx, S = STR.sheet, T = STR.tournaments[i];
   const info = Tourney.record(SAVE, i, r.rec);
   Tourney.persist(store, SAVE);
-  App.res = info; App.pendingEnding = info.ending;
+  App.res = info; App.pendingEnding = info.ending && Tourney.shouldShowEnding(SAVE);
   setScreen('result');
   $('rName').textContent = T.name;
   $('rSteps').textContent = fmt(r.steps);
@@ -2697,7 +3196,7 @@ function showResult() {
   $('rTk').textContent = S.ticketGain(fmt(info.gain));
   $('rShop').classList.toggle('hot', anyBuyable());
   const st = $('stamp');
-  st.textContent = r.judge;
+  st.innerHTML = '<span>' + phHtml(r.judgeRaw) + '</span>';   // 中身は 1 つの塊（判子は flex なので、塊が横にならばないように）
   st.className = r.judge.length > 1 ? 'long' : '';
   $('rJudge').innerHTML = r.rec >= 1000 ? phHtml(S.judgeAll) : r.maxN >= 2 ? phHtml(S.judgeClone) : '';
   const best = SAVE.best[i];
@@ -2719,7 +3218,7 @@ function showResult() {
   $('toList').textContent = info.ending ? S.cont : S.toList;
   const el = $('result');
   el.classList.add('show', 'wait');   // 指が離れる前にボタンを押してしまわないように、少しの間は触れない
-  setTimeout(() => el.classList.remove('wait'), 700);
+  setTimeout(() => { el.classList.remove('wait'); if (App.screen === 'result') focusMain(); }, 700);
   rollT = 0; stampDone = false; vsT = -1;
 }
 
@@ -2797,7 +3296,7 @@ function crowdTalk(dt) {
   crowdT -= dt;
   if (crowdT > 0) return;
   crowdT = 0.9 - Game.lvl * 0.09;
-  const cand = SP.filter(p => p.app > 0.7 && p.x > 2 && p.x < 98);
+  const cand = SP.filter(p => p.app > 0.7 && p.x > EX0 + 2 && p.x < EX1 - 2);
   if (!cand.length) return;
   const p = cand[Math.floor(Math.random() * cand.length)];
   addPopup(STR.pop.crowd[Math.floor(Math.random() * STR.pop.crowd.length)], p.x, p.y - 22, 3.8, '#2b2b3a', 0.9, 5, '#fff');
@@ -2818,14 +3317,15 @@ function frame(ts) {
   requestAnimationFrame(frame);
 }
 
-// ===== 共有（記録用紙のカード）=====
+// ===== 共有（記録用紙のカード・Xへの投稿）。GitHub 版だけ。ポータル版では 65-share-stub.js に置き換わり、ボタンも外部リンクもない =====
+const SHARE_URL = 'https://fish-suika.github.io/hanpuku-yokotobi/';
 function shareText() {
   const r = resultInfo(), win = !!(App.res && App.res.win);
   return STR.share.text(ph(STR.tournaments[App.idx].name), fmt(r.rec), r.steps, r.judge, r.maxN, win);
 }
 function shareUrl() {
   const web = /^https?:/.test(location.protocol) && !/^(localhost|127\.0\.0\.1)/.test(location.host);
-  return web ? location.origin + location.pathname : CFG.shareUrl;
+  return web ? location.origin + location.pathname : SHARE_URL;
 }
 function makeShareImage() {
   return new Promise(resolve => {
@@ -2853,9 +3353,10 @@ function makeShareImage() {
     c.save(); c.translate(Wd - 230, 360); c.rotate(-0.25);
     c.strokeStyle = '#d2382f'; c.fillStyle = '#d2382f'; c.lineWidth = 12;
     c.beginPath(); c.arc(0, 0, 112, 0, 6.283); c.stroke();
-    c.textAlign = 'center'; c.font = '900 ' + (r.judge.length > 1 ? 40 : 110) + 'px ' + FONT;
-    if (r.judge.length > 3) { c.fillText(r.judge.slice(0, 3), 0, -6); c.fillText(r.judge.slice(3), 0, 40); }
-    else c.fillText(r.judge, 0, r.judge.length > 1 ? 14 : 38);
+    c.textAlign = 'center';
+    const jl = r.judgeRaw.split('|');
+    if (jl.length > 1) { c.font = '900 40px ' + FONT; jl.forEach((l, i) => c.fillText(l, 0, 14 + (i - (jl.length - 1) / 2) * 46)); }
+    else { c.font = '900 ' + (r.judge.length > 1 ? 40 : 110) + 'px ' + FONT; c.fillText(r.judge, 0, r.judge.length > 1 ? 14 : 38); }
     c.restore();
     const rows = [[K.steps, fmt(r.steps) + K.times], [K.maxN, fmt(r.maxN) + K.people], [K.trips, fmt(r.trips) + K.times]];
     rows.forEach(([a, b], i) => {
@@ -2869,10 +3370,13 @@ function makeShareImage() {
     cc.toBlob(resolve, 'image/png');
   });
 }
+function openTweet(text, url) {
+  window.open('https://twitter.com/intent/tweet?text=' + encodeURIComponent(text) + '&url=' + encodeURIComponent(url), '_blank', 'noopener');
+}
 function shareEnding() {
   const text = STR.ending.shareText(fmt(SAVE.best[Tourney.count() - 1])), url = shareUrl();
   try { if (navigator.share) { navigator.share({ text, url }).catch(() => {}); return; } } catch (_) {}
-  window.open('https://twitter.com/intent/tweet?text=' + encodeURIComponent(text) + '&url=' + encodeURIComponent(url), '_blank', 'noopener');
+  openTweet(text, url);
 }
 async function share() {
   const text = shareText(), url = shareUrl();
@@ -2887,7 +3391,11 @@ async function share() {
   } catch (err) {
     if (err && err.name === 'AbortError') return;
   }
-  window.open('https://twitter.com/intent/tweet?text=' + encodeURIComponent(text) + '&url=' + encodeURIComponent(url), '_blank', 'noopener');
+  openTweet(text, url);
+}
+function bindShare() {
+  $('share').addEventListener('click', share);
+  $('endShare').addEventListener('click', shareEnding);
 }
 applyStrings();
 Game.reset();

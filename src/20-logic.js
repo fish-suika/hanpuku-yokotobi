@@ -147,9 +147,11 @@ const Game = {
   },
 };
 
-// 判定（記録から）
-function judgeFor(rec) {
-  let j = CFG.judge[0][1];
-  for (const [min, name] of CFG.judge) if (rec >= min) j = name;
+// 判定（記録から）。名前は STR.judge（言語ごと。「|」は判子の中の改行位置）。judgeFor は「|」を取った名前
+function judgeIdx(rec) {
+  let j = 0;
+  for (let i = 0; i < CFG.judge.length; i++) if (rec >= CFG.judge[i][0]) j = i;
   return j;
 }
+function judgeRaw(rec) { return STR.judge[judgeIdx(rec)]; }
+function judgeFor(rec) { return ph(judgeRaw(rec)); }

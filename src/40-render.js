@@ -2,7 +2,7 @@
 const $ = id => document.getElementById(id);
 const cv = $('cv');
 let cx = cv.getContext('2d');   // 静かな背景を 1 枚の画像に描くときだけ、一時的に別の canvas に差し替える（42-venues-art.js）
-const FONT = '"Hiragino Maru Gothic ProN","Yu Gothic UI","Meiryo",sans-serif';
+const FONT = EN ? '"Arial Rounded MT Bold","Trebuchet MS","Segoe UI","Hiragino Maru Gothic ProN","Yu Gothic UI",sans-serif' : '"Hiragino Maru Gothic ProN","Yu Gothic UI","Meiryo",sans-serif';
 let W = 0, H = 0, DPR = 1, U = 1, OX = 0, OY = 0;
 let EX0 = 0, EX1 = 100, EY0 = 0, EY1 = 177.78;   // 画面いっぱいの範囲（遊ぶ場所の単位で）
 let nowT = 0;
@@ -14,7 +14,18 @@ function resize() {
   const sw = Math.min(W, H * 9 / 16);
   U = sw / 100; OX = (W - sw) / 2; OY = (H - sw * 16 / 9) / 2;
   EX0 = -OX / U; EX1 = 100 + OX / U; EY0 = -OY / U; EY1 = 177.78 + OY / U;
+  LANES = lanesFor(EX1 - EX0, LS);
 }
+
+// ---- 横画面：同じ体育館に、ならんだレーン（右左左右の 3 本線のセット）を横にも並べ、分身は奥だけでなく横にも並ぶ ----
+// 縦画面（幅 100）では 1 レーン＝今までどおり。横に広いほどレーンが増える（16:9 で 5 レーン）。本人はまん中のレーン。数え方は 15-venues.js
+let LANES = 1;
+const SLOTS = { n: 0, list: [] };
+function slotOf(k) {   // 分身 k（1 から）が立つ場所 {z 奥行き, lane レーン番号, wx レーンの中でのずれ}
+  if (SLOTS.n !== LANES) { SLOTS.n = LANES; SLOTS.list = buildSlots(LANES, CL.length - 1); }
+  return SLOTS.list[k - 1];
+}
+function crowdZ0() { return LANES === 1 ? 18 : Math.max(11, slotOf(CL.length - 1).z + 2.5); }
 
 // 床の遠近。z は奥行き（0 が本人）
 const YH = 62, Y0 = 140, LS = 26, KS = 1.12;
@@ -142,19 +153,47 @@ function drawLines() {
   const sMax = (EY1 - YH) / (Y0 - YH) + 0.05;
   const glow = (Game.mode === 'play' && Game.stun <= 0) ? Game.nextLines() : [];
   const pulse = 0.5 + 0.5 * Math.sin(nowT * 9);
-  for (let i = 0; i < 3; i++) {
-    const wx = i - 1;
-    if (glow.indexOf(i) >= 0) {
-      cx.fillStyle = 'rgba(255,240,90,' + (0.22 + 0.2 * pulse) + ')';
-      lineQuad(wx, 4.2, 0.02, sMax); cx.fill();
-      cx.fillStyle = 'rgba(255,255,170,' + (0.25 + 0.25 * pulse) + ')';
-      lineQuad(wx, 2.4, 0.02, sMax); cx.fill();
+  const title = App.screen === 'title';
+  for (const lane of laneOrder(LANES)) {
+    // 本人のレーンはいつも。となりのレーンは、そこに分身が出てきたぶんだけ現れる
+    let amt = lane === 0 ? 1 : 0;
+    if (lane !== 0) for (let k = 1; k < CL.length; k++) if (slotOf(k).lane === lane && CL[k].app > amt) amt = CL[k].app;
+    if (amt <= 0.01 || title) continue;
+    cx.save(); cx.globalAlpha = Math.min(1, amt * 1.5) * (lane === 0 ? 1 : 0.8);
+    for (let i = 0; i < 3; i++) {
+      const wx = lane * LANE_W + i - 1, on = lane === 0 && glow.indexOf(i) >= 0;
+      if (on) {
+        cx.fillStyle = 'rgba(255,240,90,' + (0.22 + 0.2 * pulse) + ')';
+        lineQuad(wx, 4.2, 0.02, sMax); cx.fill();
+        cx.fillStyle = 'rgba(255,255,170,' + (0.25 + 0.25 * pulse) + ')';
+        lineQuad(wx, 2.4, 0.02, sMax); cx.fill();
+      }
+      cx.fillStyle = on ? '#fffbe0' : '#fbfbf5';
+      lineQuad(wx, 0.85, 0.02, sMax); cx.fill();
+      cx.fillStyle = 'rgba(0,0,0,.08)';
+      lineQuad(wx, 0.3, 0.02, sMax); cx.fill();
     }
-    cx.fillStyle = glow.indexOf(i) >= 0 ? '#fffbe0' : '#fbfbf5';
-    lineQuad(wx, 0.85, 0.02, sMax); cx.fill();
-    cx.fillStyle = 'rgba(0,0,0,.08)';
-    lineQuad(wx, 0.3, 0.02, sMax); cx.fill();
+    cx.restore();
   }
+}
+
+// ---- タイトルの絵：記録板なし。体育館のまえに、体操服の分身がずらりと並んで、波のように反復横とびをしている ----
+function drawTitleScene() {
+  const t = nowT, wide = EX1 - EX0, mid = (EX0 + EX1) / 2;
+  const g = cx.createLinearGradient(0, EY0, 0, 72);   // 上は少し暗くして、ロゴを読みやすく
+  g.addColorStop(0, 'rgba(14,24,66,.62)'); g.addColorStop(1, 'rgba(14,24,66,0)');
+  cx.fillStyle = g; cx.fillRect(EX0 - 5, EY0 - 5, wide + 10, 72 - EY0 + 5);
+  const rows = [[6, 1.3, 0.2], [3, 0.7, 0.5], [0, 0, 0]];   // [奥行き z, 波のずれ, 列のずらし]
+  rows.forEach(([z, ph0, off], ri) => {
+    const s = sOf(z), y = z === 0 ? Y0 : yOf(s), gap = 19 * s + 1;
+    let n = Math.min(15, Math.floor((wide - 14) / gap) + 1); if (n % 2 === 0) n--;
+    for (let i = 0; i < n; i++) {
+      const ph = t * 2.3 - i * 0.55 + ph0, x = mid + (i - (n - 1) / 2) * gap + off * gap + Math.sin(ph) * 5 * s;
+      if (x < EX0 - 12 || x > EX1 + 12) continue;
+      const c = Math.cos(ph);
+      drawKid(cx, x, y, s * KS, { lean: clamp(c * 0.8, -1, 1), hop: Math.abs(c) * 0.5, ph: t * 9 + i * 1.7, face: 0, alpha: 0.78 + 0.22 * s });
+    }
+  });
 }
 
 // ---- 見ている人たち ----
@@ -223,14 +262,14 @@ function drawBodies() {
   // 分身（奥から手前へ）
   const list = [];
   for (let k = 1; k < CL.length; k++) if (CL[k].app > 0.01) list.push(k);
-  list.sort((a, b) => b - a);   // 大きい k = 奥
+  list.sort((a, b) => slotOf(b).z - slotOf(a).z || b - a);   // 奥（z が大きい）から
   const px = xOf(Game.xv, 1);
   for (const k of list) {
-    const z = 1 + Math.floor((k - 1) / 3), col = (k - 1) % 3 - 1;
+    const sl = slotOf(k), z = sl.z;
     const s = sOf(z), a = CL[k].app, ea = easeOut(Math.min(1, a));
     const d = k * CFG.cloneDelay;
     const o = bodyOpts(nowT - d, k, false, finishing);
-    const slotX = xOf(o.x + col * 0.3, s), slotY = yOf(s);
+    const slotX = xOf(o.x + sl.wx + sl.lane * LANE_W, s), slotY = yOf(s);
     const x = px + (slotX - px) * ea, y = Y0 + (slotY - Y0) * ea;
     const fa = fallAmt(z * 0.02, false);
     drawKid(cx, x, y, s * KS * (0.7 + 0.3 * ea), {
@@ -267,7 +306,7 @@ function drawCrowd() {
   const wide = EX1 - EX0 + 24;
   cx.save(); cx.globalAlpha = 0.9 * Math.min(1, crowdAmt * 8);
   for (let r = rows - 1; r >= 0; r--) {   // 奥の列から
-    const z = 18 + r * 3.2, s = sOf(z), y = yOf(s), sc = s * KS * 1.25;
+    const z = crowdZ0() + r * 3.2, s = sOf(z), y = yOf(s), sc = s * KS * 1.25;
     const step = Math.max(8 * sc, wide / maxPer), n = Math.floor(wide / step);
     const shift = histX(nowT - (48 + r * 6) * CFG.cloneDelay) * LS * s;   // 本人の動きに少し遅れてついていく
     const x0 = EX0 - 12 + (r % 2 ? step * 0.5 : 0) + shift;
@@ -316,7 +355,13 @@ function drawSmoke() {
 }
 
 // ---- 画面上のしるし（記録・時間・記録係）----
-function drawHud() {
+function drawHud() {   // 横画面は記録板を少し大きく（画面が広いぶん、文字が小さく見えないように）
+  cx.save();
+  if (LANES > 1) { cx.translate(50, 0); cx.scale(1.3, 1.3); cx.translate(-50, 0); }
+  drawHudBody();
+  cx.restore();
+}
+function drawHudBody() {
   const play = Game.mode === 'play', lv = Game.lvl;
   // 記録板
   cx.fillStyle = '#0003'; rr(cx, 3, 3.8, 94, 35, 3); cx.fill();
@@ -357,7 +402,8 @@ function drawRival() {
   const passed = rivalPassed, prog = clamp(Game.rec / tg, 0, 1);
   const w = 18, h = 13.2, q = clamp((nowT - rivalPassAt) / 0.6, 0, 1);
   const sc = passed && q < 1 ? 1 + 0.25 * Math.sin(q * Math.PI) : 1;
-  cx.save(); cx.translate(79 + w / 2, 40 + h / 2); cx.scale(sc, sc); cx.translate(-w / 2, -h / 2);
+  const k = LANES > 1 ? 1.5 : 1, rx = LANES > 1 ? EX1 - w * k - 5 : 79, ry = LANES > 1 ? 5 : 40;   // 横画面：画面の右上すみに、少し大きく
+  cx.save(); cx.translate(rx + w * k / 2, ry + h * k / 2); cx.scale(sc * k, sc * k); cx.translate(-w / 2, -h / 2);
   cx.fillStyle = '#0002'; rr(cx, 0, 0.7, w, h, 1.6); cx.fill();
   cx.fillStyle = 'rgba(255,253,242,.94)'; rr(cx, 0, 0, w, h, 1.6); cx.fill();
   cx.save(); rr(cx, 0, 0, w, h, 1.6); cx.clip();
@@ -393,13 +439,15 @@ function render() {
   cx.setTransform(DPR * U, 0, 0, DPR * U, DPR * (OX + shx * U), DPR * (OY + shy * U));
   drawVenue();
   drawLines();
+  if (App.screen === 'title') { drawTitleScene(); } else {
   drawRays();
   drawCrowd();
   drawSpectators();
   drawBodies();
   drawSmoke();
+  }
   cx.setTransform(DPR * U, 0, 0, DPR * U, DPR * OX, DPR * OY);
-  if (App.screen !== 'result') drawHud();   // 記録用紙のあいだは、記録板をひっこめる
+  if (App.screen !== 'result' && App.screen !== 'title') drawHud();   // 記録用紙のあいだは、記録板をひっこめる。タイトルは記録板なしの絵
   if (App.screen === 'play') drawCount();
   if (App.screen === 'play') drawRival();
   drawPopups();
@@ -424,7 +472,7 @@ function updateVisual(dt) {
     if (k < N) c.app = Math.min(1, c.app + dt * 4.5);
     else {
       // 転んだときは、倒れてから消える（手前から順に）。ゆっくり減速したときは、そのままふっと消える
-      const z = 1 + Math.floor((k - 1) / 3);
+      const z = slotOf(k).z || 1;
       const falling = nowT - tripAt < 0.12 + z * 0.02 + 0.1;
       if (!falling) c.app = Math.max(0, c.app - dt * 3.2);
     }

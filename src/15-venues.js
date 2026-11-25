@@ -64,3 +64,26 @@ VENUES.forEach((v, i) => { v.i = i; });
 // エンディングの長さ（秒）。3 つの場面のあとに記録用紙（宇宙記録）が出る。タップでとばせる
 const ENDING_TIMES = { galaxy: 5.2, sheet: 5.2, teacher: 5.6 };
 const endingTotal = () => ENDING_TIMES.galaxy + ENDING_TIMES.sheet + ENDING_TIMES.teacher;
+
+// ===== 横画面：レーンと分身の立つ場所（画面を使わない。描くのは 40-render.js）=====
+// レーン＝右左左右の 3 本線のひとまとまり。縦画面は 1 つ、横に広いほど増える（本人はまん中）。LANE_W は床の線 1 間隔を 1 としたレーンの間隔
+const LANE_W = 2.6;
+// wide＝画面の幅（遊ぶ場所の幅 100 を単位に）、step＝床の線 1 間隔（40-render の LS）。レーンの数は 1・3・5・7
+function lanesFor(wide, step) {
+  const m = Math.floor((wide / 2 - 8) / (LANE_W * step));
+  return (m >= 0 ? Math.min(3, m) : 0) * 2 + 1;
+}
+// 本人のレーンが先頭、そのあと左右へ 1 つずつ（0, -1, 1, -2, 2 …）
+function laneOrder(n) { const o = [0]; for (let j = 1; o.length < n; j++) o.push(-j, j); return o.slice(0, n); }
+// 分身 count 人の立つ場所。1 レーンは今までどおり（奥へ 3 人ずつ）。複数レーンは、1 行目が本人の横（本人のレーンはあけておく）・2 行目から全レーンで、ずらして立つ
+function buildSlots(lanes, count) {
+  const out = [], L = laneOrder(lanes);
+  for (let i = 0; out.length < count; i++) {
+    if (lanes === 1) { out.push({ z: 1 + Math.floor(i / 3), lane: 0, wx: (i % 3 - 1) * 0.3 }); continue; }
+    const first = L.length - 1;
+    if (i < first) { out.push({ z: 0, lane: L[i + 1], wx: 0 }); continue; }
+    const j = i - first, z = 1 + Math.floor(j / lanes), idx = j % lanes;
+    out.push({ z, lane: L[idx], wx: ((z + idx) % 3 - 1) * 0.28 });
+  }
+  return out;
+}

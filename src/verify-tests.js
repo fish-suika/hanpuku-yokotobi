@@ -378,7 +378,7 @@
   const p1save = { v: 1, unlocked: 3, won: [true, true, true, false, false, false, false, false, false], best: [90, 250, 700, 100, 0, 0, 0, 0, 0] };
   const stP1 = fake({ [SAVE_KEY]: JSON.stringify(p1save) });
   const mig2 = Tourney.load(stP1);
-  check('Phase 1 の保存を読むと、進み具合とベストはそのまま、引換券は 0・強化は全部 0', mig2.unlocked === 3 && mig2.won.slice(0, 3).every(Boolean) && mig2.best[1] === 250 && mig2.tickets === 0 && Shop.ids.every(id => mig2.up[id] === 0) && mig2.v === 2 && SAVE_VER === 2);
+  check('Phase 1 の保存を読むと、進み具合とベストはそのまま、引換券は 0・強化は全部 0', mig2.unlocked === 3 && mig2.won.slice(0, 3).every(Boolean) && mig2.best[1] === 250 && mig2.tickets === 0 && Shop.ids.every(id => mig2.up[id] === 0) && mig2.v === SAVE_VER && SAVE_VER === 3 && mig2.endingSeen === false);
   sv = Tourney.newSave(); Tourney.record(sv, 0, 5000); sv.up.shoes = 2; sv.up.cheer = 1;
   const stP2 = fake({}); Tourney.persist(stP2, sv);
   const back2 = Tourney.load(stP2);
@@ -386,7 +386,7 @@
   const weird = Tourney.sanitize({ tickets: -50, up: { shoes: 99, clothes: -3, fall: 'x', recorder: 2.9, cheer: null, book: 1 } });
   check('おかしい保存は直して読む（引換券は 0 以上・強化は 0〜最大）', weird.tickets === 0 && weird.up.shoes === Shop.maxLevel('shoes') && weird.up.clothes === 0 && weird.up.fall === 0 && weird.up.recorder === 2 && weird.up.cheer === 0 && weird.up.book === 1);
   check('引換券が小数・文字でも整数の枚数に直す', Tourney.sanitize({ tickets: 12.8 }).tickets === 12 && Tourney.sanitize({ tickets: 'abc' }).tickets === 0 && Tourney.sanitize({ up: 5 }).up.shoes === 0);
-  check('v1 のベストの引き継ぎは、これまでどおり新しい保存の形で書かれる', JSON.parse(st2.d[SAVE_KEY]).v === 2 && JSON.parse(st2.d[SAVE_KEY]).tickets === 0);
+  check('v1 のベストの引き継ぎは、これまでどおり新しい保存の形で書かれる', JSON.parse(st2.d[SAVE_KEY]).v === SAVE_VER && JSON.parse(st2.d[SAVE_KEY]).tickets === 0);
   Shop.reset();
 
   // ===== ボットでペースを確認：毎秒 4 / 6 / 8 回のボットが、次に勝っていない大会を遊び続け、いちばん安い強化を買いながら宇宙大会まで =====
@@ -455,7 +455,122 @@
       const a = Tourney.record(sv, NV - 1, CFG.targets[NV - 1] + 10), b = Tourney.record(sv, NV - 1, CFG.targets[NV - 1] + 99);
       return a.ending === true && b.ending === false && b.isBest && sv.best[NV - 1] === CFG.targets[NV - 1] + 99 && sv.won.every(Boolean) && sv.won.every((_, i) => Tourney.playable(sv, i));
     })());
-    check('保存：Phase 3 では形を変えない（版 2・項目は v・unlocked・won・best・tickets・up）', SAVE_VER === 2 && JSON.stringify(Object.keys(Tourney.newSave()).sort()) === JSON.stringify(['best', 'tickets', 'unlocked', 'up', 'v', 'won']));
+    check('保存：Phase 4 で endingSeen を足した形（版 3・項目は v・unlocked・won・best・tickets・up・endingSeen）', SAVE_VER === 3 && JSON.stringify(Object.keys(Tourney.newSave()).sort()) === JSON.stringify(['best', 'endingSeen', 'tickets', 'unlocked', 'up', 'v', 'won']));
+  }
+
+
+  // ===== v2 Phase 4：日本語／英語・数字の書式・保存の版 3・エンディングは 1 回だけ =====
+  {
+    const NV = CFG.targets.length;
+    // --- 言語の選び方 ---
+    check('言語：ブラウザが ja で始まれば日本語、それ以外は英語', pickLang('ja', '') === 'ja' && pickLang('ja-JP', '') === 'ja' && pickLang('JA', '') === 'ja'
+      && pickLang('en-US', '') === 'en' && pickLang('fr-FR', '') === 'en' && pickLang('zh-CN', '') === 'en' && pickLang('', '') === 'en' && pickLang(undefined, undefined) === 'en');
+    check('言語：?lang=ja / en は、ブラウザの言語より優先（それ以外の値は無視）', pickLang('en-US', 'ja') === 'ja' && pickLang('ja-JP', 'en') === 'en' && pickLang('en-US', 'xx') === 'en' && pickLang('ja-JP', 'xx') === 'ja');
+    check('言語：検証ページは日本語で固定されている（LANG・STR は日本語）', LANG === 'ja' && STR === STR_JA && STRS.en === STR_EN && STR_EN !== STR_JA);
+
+    // --- 英語の数字 ---
+    const E = v => fmtNum(v, 'en'), J = v => fmtNum(v, 'ja');
+    check('英語の数字：1 万未満はカンマ（1,234）', E(0) === '0' && E(999) === '999' && E(1000) === '1,000' && E(1234) === '1,234' && E(9999) === '9,999', [0, 999, 1234, 9999].map(E).join(' '));
+    check('英語の数字：1 万以上は K / M / B（有効数字 4 桁まで）', E(10000) === '10K' && E(12345) === '12.35K' && E(123456) === '123.5K' && E(1234567) === '1.235M' && E(12345678) === '12.35M' && E(123456789) === '123.5M' && E(1234567890) === '1.235B' && E(100000) === '100K',
+      [10000, 12345, 123456, 1234567, 12345678, 123456789, 1234567890].map(E).join(' '));
+    check('英語の数字：繰り上がり（999.96K → 1M）と余分な 0 を落とす', E(999999) === '1M' && E(999960) === '1M' && E(999900) === '999.9K' && E(1000000) === '1M' && E(2500000) === '2.5M' && E(20000) === '20K' && E(1e9) === '1B' && E(999999999) === '1B');
+    check('英語の数字：壊れた値でも文字列・負の値・小数', E(NaN) === '0' && E(undefined) === '0' && E(-5) === '-5' && E(-12345) === '-12.35K' && E(2.4) === '2' && E('1234') === '1,234');
+    check('英語の数字：想定する最大でも 6 文字以内（ゲームの最大は数千万。9999 億まで余裕）', [9999, 10000, 99999, 123456, 999999, 1234567, 9999999, 99999999, 123456789, 999999999, 1.234e10, 1.234e11, 9.99e11].every(v => E(v).length <= 6),
+      [1.234e11, 9.99e11].map(E).join(' '));
+    check('日本語の数字は今までどおり（lang を渡しても同じ）', J(1234) === '1,234' && J(12346) === '1.235万' && J(123456789) === '1.235億' && fmtNum(12346) === J(12346) && [1, 12346].map(fmtNum).join() === '1,1.235万');
+
+    // --- どの言葉も、日本語と英語の両方がある（形が同じ） ---
+    const shape = (a, b, path, bad) => {
+      if (typeof a !== typeof b) { bad.push(path + ' 型 ' + typeof a + '/' + typeof b); return; }
+      if (Array.isArray(a)) {
+        if (!Array.isArray(b) || a.length !== b.length) { bad.push(path + ' 長さ ' + a.length + '/' + (b && b.length)); return; }
+        a.forEach((x, i) => shape(x, b[i], path + '[' + i + ']', bad));
+      } else if (a && typeof a === 'object') {
+        for (const k of Object.keys(a)) { if (!(k in b)) bad.push(path + '.' + k + ' が英語にない'); else shape(a[k], b[k], path + '.' + k, bad); }
+        for (const k of Object.keys(b)) if (!(k in a)) bad.push(path + '.' + k + ' が日本語にない');
+      }
+    };
+    const bad = []; shape(STR_JA, STR_EN, 'STR', bad);
+    check('言葉の表：日本語と英語で、全部の項目がそろっている（キー・配列の長さ・関数）', bad.length === 0, bad.slice(0, 5).join(' / '));
+    // 関数も同じように呼べて文字列を返す
+    const calls = [];
+    const callAll = (o, path) => { for (const k of Object.keys(o)) { const v = o[k]; if (typeof v === 'function') calls.push([path + '.' + k, v]); else if (v && typeof v === 'object') callAll(v, path + '.' + k); } };
+    callAll(STR_EN, 'STR_EN');
+    const fe = [];
+    for (const [name, f] of calls) {
+      try {
+        let r;
+        if (/shop\.items\.\w+\.v$/.test(name)) { const id = name.split('.')[3]; r = f(Shop.effect(id, 2)); }
+        else if (/share\.text$/.test(name)) r = f('City Meet', '1,234', 99, 'A', '48', true);
+        else if (/(shop|list)\.(price|progress)$/.test(name)) r = f(3, 9);
+        else if (/list\.sub$/.test(name)) r = f('Tanaka', '80');
+        else r = f('1,234', 'x');
+        if (typeof r !== 'string' && typeof r !== 'number') fe.push(name);
+      } catch (err) { fe.push(name + ' ' + err.message); }
+    }
+    check('言葉の表（英語）：関数はどれも文字列を返す', fe.length === 0 && calls.length >= 20, 'calls=' + calls.length + ' ' + fe.slice(0, 3).join(' / '));
+    const strsOf = o => { const out = []; (function w(v) { if (typeof v === 'string') out.push(v); else if (Array.isArray(v)) v.forEach(w); else if (v && typeof v === 'object') Object.keys(v).forEach(k => w(v[k])); })(o); return out; };
+    const en = strsOf(STR_EN);
+    check('英語：空の文節がない（「|」の前後に言葉がある）', en.every(x => x.indexOf('||') < 0 && x[0] !== '|' && x[x.length - 1] !== '|'));
+    check('英語：日本語の文字（ひらがな・カタカナ・漢字）が混ざっていない', en.every(x => !/[\u3040-\u30ff\u4e00-\u9fff]/.test(x)), en.filter(x => /[\u3040-\u30ff\u4e00-\u9fff]/.test(x)).slice(0, 3).join(' / '));
+    check('英語：9 つの大会・9 つの会場・ライバルの言葉がある（勝ち・負けが違う）', STR_EN.tournaments.length === NV && STR_EN.venues.length === NV && STR_EN.tournaments.every(t => t.name && t.rival.name && t.rival.short && t.rival.say && t.rival.win && t.rival.lose && t.rival.win !== t.rival.lose));
+    check('英語：記録係のひとこと 9 会場 × 11 段階が全部あって、1 行に収まる長さ（34 文字まで）', STR_EN.venues.every(v => v.rec.length >= 7 + CFG.bodiesExtra.length && v.rec.concat([v.ready, v.fin, v.over('1,234')]).every(x => x.length > 0 && x.length <= 34)),
+      'max=' + Math.max.apply(null, [].concat(...STR_EN.venues.map(v => v.rec.concat([v.ready, v.fin, v.over('1,234')]).map(x => x.length)))));
+    check('英語：記録係のひとこと・横断幕は、会場ごとに別（同じ文が 2 つない）', (() => { const all = [].concat(...STR_EN.venues.map(v => v.rec)); return new Set(all).size === all.length && new Set(STR_EN.venues.map(v => v.banner)).size === NV; })());
+    check('英語：判定の名前が 8 つ（CFG.judge と同じ数）・長い名前は判子の中で 2 行に分けられる', STR_EN.judge.length === CFG.judge.length && STR_JA.judge.length === CFG.judge.length && STR_EN.judge.slice(6).every(x => x.indexOf('|') > 0) && STR_EN.judge.slice(6).every(x => x.split('|').every(w => w.length <= 7)));
+    check('英語：大会の名前・ライバルの名前が長すぎない（画面の枠に入る目安）', STR_EN.tournaments.every(t => t.name.length <= 20 && t.rival.short.length <= 10 && t.rival.name.split('|').every(w => w.length <= 20)));
+    check('ph()：英語では文節の切れ目が空白になる（phL）', phL('Tap|to Start', 'en') === 'Tap to Start' && phL('去年と|同じ', 'ja') === '去年と同じ' && ph('去年と|同じ') === '去年と同じ');
+    check('英語の判定名（ph したもの）：Off the Charts / Beyond Human', phL(STR_EN.judge[6], 'en') === 'Off the Charts' && phL(STR_EN.judge[7], 'en') === 'Beyond Human');
+    check('英語のタイトル：Clone Side Step', phL(STR_EN.title.name, 'en') === 'Clone Side Step' && STR_EN.title.logo.join(' ') === 'CLONE SIDE STEP');
+
+    // --- 保存 v3 と、エンディングは 1 回だけ ---
+    const st = (init) => { const d = Object.assign({}, init); return { d, getItem: k => (k in d ? d[k] : null), setItem: (k, v) => { d[k] = String(v); } }; };
+    const v2 = { v: 2, unlocked: 5, won: [true, true, true, true, true, false, false, false, false], best: [90, 250, 700, 1500, 3500, 0, 0, 0, 0], tickets: 777, up: { shoes: 2, clothes: 1, fall: 0, recorder: 3, cheer: 0, book: 0 } };
+    const m3 = Tourney.load(st({ [SAVE_KEY]: JSON.stringify(v2) }));
+    check('保存：版 2 の保存を読むと、進み具合・引換券・強化はそのまま、endingSeen は false、版は 3', m3.v === 3 && m3.unlocked === 5 && m3.tickets === 777 && m3.up.shoes === 2 && m3.up.recorder === 3 && m3.best[4] === 3500 && m3.endingSeen === false);
+    const sv3 = Tourney.newSave();
+    check('保存：新しい保存は版 3・endingSeen は false・書いて読み直しても同じ', sv3.v === 3 && sv3.endingSeen === false && (() => { const s0 = st({}); Tourney.persist(s0, sv3); return JSON.stringify(Tourney.load(s0)) === JSON.stringify(sv3); })());
+    check('保存：endingSeen が true なら読み直しても true・true 以外（文字・数・null）は false', Tourney.sanitize({ endingSeen: true }).endingSeen === true && Tourney.sanitize({ endingSeen: 'true' }).endingSeen === false && Tourney.sanitize({ endingSeen: 1 }).endingSeen === false && Tourney.sanitize({ endingSeen: null }).endingSeen === false && Tourney.sanitize(null).endingSeen === false);
+    const all = Tourney.newSave(); for (let i = 0; i < NV; i++) Tourney.record(all, i, CFG.targets[i] + 1);
+    const part = Tourney.newSave(); for (let i = 0; i < NV - 1; i++) Tourney.record(part, i, CFG.targets[i] + 1);
+    check('エンディング：9 大会ぜんぶ勝って、まだ見ていなければ出す。8 つまでなら出さない', Tourney.allWon(all) && Tourney.shouldShowEnding(all) === true && !Tourney.allWon(part) && Tourney.shouldShowEnding(part) === false && Tourney.shouldShowEnding(Tourney.newSave()) === false);
+    check('エンディング：見たと記録すると、もう出ない（保存して読み直しても）', (() => {
+      const a = JSON.parse(JSON.stringify(all)); Tourney.markEndingSeen(a);
+      const s0 = st({}); Tourney.persist(s0, a); const b = Tourney.load(s0);
+      return Tourney.shouldShowEnding(a) === false && Tourney.shouldShowEnding(b) === false && b.endingSeen === true;
+    })());
+    check('エンディング：見る前にページを閉じても（勝った保存だけ残る）、読み直すとまた出る', (() => {
+      const a = Tourney.newSave(); for (let i = 0; i < NV - 1; i++) Tourney.record(a, i, CFG.targets[i] + 1);
+      const r = Tourney.record(a, NV - 1, CFG.targets[NV - 1] + 1);   // 最後の大会に初めて勝った
+      const s0 = st({}); Tourney.persist(s0, a);   // ここでページが閉じた
+      const b = Tourney.load(s0);
+      return r.ending === true && Tourney.shouldShowEnding(b) === true;
+    })());
+    check('エンディング：版 2 で 9 つ全部勝っていた保存は、読み込み後に 1 回だけ出る', (() => {
+      const w = JSON.parse(JSON.stringify(all)); delete w.endingSeen; w.v = 2;
+      const b = Tourney.load(st({ [SAVE_KEY]: JSON.stringify(w) }));
+      const first = Tourney.shouldShowEnding(b); Tourney.markEndingSeen(b);
+      return first === true && Tourney.shouldShowEnding(b) === false;
+    })());
+    check('エンディング：見たあとにベストを伸ばしても、勝ち直しても、もう出ない', (() => {
+      const a = JSON.parse(JSON.stringify(all)); Tourney.markEndingSeen(a);
+      const r = Tourney.record(a, NV - 1, CFG.targets[NV - 1] + 5000);
+      return r.ending === false && Tourney.shouldShowEnding(a) === false && a.endingSeen === true;
+    })());
+
+    // --- 横画面のレーン・分身の並び（描画の関数は 40-render にあるので、ここでは決まりごとだけ）---
+    // --- 横画面：レーンと分身の並び ---
+    const aspect = r => 177.78 * r;   // 画面の幅（遊ぶ場所の幅 100 の単位）。縦 177.78 に合わせたときの横
+    check('横画面：レーンの数は縦画面 1・パソコンの横画面（16:9）5・1000x560 でも 5・4:3 は 3', lanesFor(100, 26) === 1 && lanesFor(aspect(390 / 844), 26) === 1 && lanesFor(aspect(16 / 9), 26) === 5 && lanesFor(aspect(1000 / 560), 26) === 5 && lanesFor(aspect(4 / 3), 26) === 3 && lanesFor(aspect(21 / 9), 26) === 5,
+      [100, aspect(16 / 9), aspect(4 / 3)].map(w => lanesFor(w, 26)).join());
+    check('横画面：レーンはいつも奇数で、広いほど増える（最大 7）・変な値でも壊れない', [50, 100, 150, 200, 250, 300, 400, 500, 1000, NaN, -5].every(w => { const n = lanesFor(w, 26); return n % 2 === 1 && n >= 1 && n <= 7; }) && lanesFor(1000, 26) === 7 && lanesFor(300, 26) >= lanesFor(200, 26));
+    check('横画面：レーンの並びは本人のレーンが先頭（0, -1, 1, -2, 2）', laneOrder(5).join() === '0,-1,1,-2,2' && laneOrder(1).join() === '0' && laneOrder(3).join() === '0,-1,1');
+    const s1 = buildSlots(1, 47), s5 = buildSlots(5, 47), s3 = buildSlots(3, 47);
+    check('分身の立つ場所：縦画面（1 レーン）は今までどおり、奥へ 3 人ずつ（1 行目は z=1）', s1.length === 47 && s1[0].z === 1 && s1[2].z === 1 && s1[3].z === 2 && s1.every(p => p.lane === 0) && s1[0].wx === -0.3 && s1[1].wx === 0 && s1[2].wx === 0.3 && s1[46].z === 16);
+    check('分身の立つ場所：5 レーンは 47 人ぶんあって、同じ場所に 2 人立たない・本人のレーンの z=0 は空いている', s5.length === 47 && new Set(s5.map(p => p.z + ':' + p.lane + ':' + p.wx)).size === 47 && !s5.some(p => p.z === 0 && p.lane === 0) && s5.filter(p => p.z === 0).length === 4);
+    check('分身の立つ場所：5 レーンは 1 人目から横に出る・奥行きは縦画面の半分ほど（47 人で z が 10 まで）', s5[0].z === 0 && s5[0].lane === -1 && s5[1].lane === 1 && s5[46].z <= 10 && s5[46].z < s1[46].z && s3[46].z <= 16 && s3[46].z > s5[46].z);
+    check('分身の立つ場所：横に出たあとも、近い順（z の小さい順）に並ぶ', s5.every((p, i) => i === 0 || p.z >= s5[i - 1].z) && s3.every((p, i) => i === 0 || p.z >= s3[i - 1].z));
+    check('保存：知らない項目は読み書きしても消えない（版 3 でも）', Tourney.sanitize({ foo: 'bar', endingSeen: true }).foo === 'bar');
   }
 
   const s = document.createElement('h2');

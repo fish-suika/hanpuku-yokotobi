@@ -8,7 +8,7 @@ function chunkLines(s, size, maxW) {
   cx.font = 'bold ' + size + 'px ' + FONT;
   const lines = []; let cur = '';
   for (const p of s.split('|')) {
-    if (cur && cx.measureText(cur + p).width > maxW) { lines.push(cur); cur = p; } else cur += p;
+    if (cur && cx.measureText(cur + STRSEP + p).width > maxW) { lines.push(cur); cur = p; } else cur += (cur ? STRSEP : '') + p;
   }
   lines.push(cur);
   return lines;
@@ -53,6 +53,8 @@ function updateEnding(dt) {
     End.cert = true; End.flashAt = nowT;
     $('cRec').textContent = fmt(End.rec); fitRec($('cRec'));
     $('ending').classList.add('cert');
+    Tourney.markEndingSeen(SAVE); Tourney.persist(store, SAVE);   // 最後まで見た（途中でページを閉じたら、次に大会の一覧を開いたときもう一度出る）
+    focusMain();
     Snd.endJingle();
     setTimeout(() => { $('cStamp').classList.add('on'); Snd.stamp(); }, 700);
   }
@@ -87,11 +89,13 @@ function endCaption(s, y, a) {
 
 // ① 分身が整列して、銀河へ散らばっていく
 function sceneGalaxy(t, caps) {
-  const N = 84, q = eIO(clamp((t - 1.8) / 1.6, 0, 1)), ex = Math.max(0, t - 3.6);
+  const wide = EX1 - EX0, C = wide > 110 ? clamp(Math.round((wide - 16) / 7.1), 12, 26) : 12, N = C * 7;   // 横画面は列を増やして横いっぱいに
+  const step = wide > 110 ? (wide - 16) / (C - 1) : 7.1, fx0 = wide > 110 ? EX0 + 8 : 12, radMax = Math.max(86, wide * 0.5);
+  const q = eIO(clamp((t - 1.8) / 1.6, 0, 1)), ex = Math.max(0, t - 3.6);
   for (let i = 0; i < N; i++) {
-    const col = i % 12, row = (i / 12) | 0;
-    const fx = 12 + col * 7.1 + Math.sin(t * 9 + (row % 2) * 3.14) * 1.8 * (1 - q), fy = 82 + row * 11;
-    const ang = i * 0.42 + t * 0.5, rad = (6 + i * 0.95) * (1 + ex * 0.35);
+    const col = i % C, row = (i / C) | 0;
+    const fx = fx0 + col * step + Math.sin(t * 9 + (row % 2) * 3.14) * 1.8 * (1 - q), fy = 82 + row * 11;
+    const ang = i * 0.42 + t * 0.5, rad = (6 + i / N * (radMax - 6)) * (1 + ex * 0.35);
     const sx = 50 + Math.cos(ang) * rad, sy = 112 + Math.sin(ang) * rad * 0.55;
     const x = fx + (sx - fx) * q, y = fy + (sy - fy) * q;
     const a = clamp((t - i * 0.012) / 0.3, 0, 1) * (1 - 0.45 * clamp(ex / 1.6, 0, 1));
@@ -118,7 +122,7 @@ function sceneSheet(t) {
   show(1.3, () => {
     txt(S.rec, 17, 70, 4.6, '#55608a', { align: 'left' });
     const v = fmt(Math.round(End.rec * easeOut(clamp((t - 1.3) / 1.7, 0, 1))));
-    cx.font = '900 15px ' + FONT; const w = cx.measureText(v).width, fs = w > 44 ? 15 * 44 / w : 15;
+    cx.font = '900 15px ' + FONT; const w = cx.measureText(v).width, mx = EN ? 36 : 44, fs = w > mx ? 15 * mx / w : 15;   // 英語は左の「Record」が長いので、数字を少し細く
     txt(v, 70, 70, fs, '#d2382f', { weight: '900', align: 'right' }); txt(S.unit, 83, 72, 4.4, '#55608a', { align: 'right' });
     cx.fillStyle = '#9aa7d0'; cx.fillRect(16, 79, 68, 0.3);
   });
@@ -127,7 +131,7 @@ function sceneSheet(t) {
     const q = clamp((t - 3.3) / 0.28, 0, 1), sc = 2.4 - 1.4 * easeOut(q);
     cx.save(); cx.globalAlpha = q; cx.translate(62, 92); cx.rotate(-0.25); cx.scale(sc, sc);
     cx.strokeStyle = '#d2382f'; cx.lineWidth = 1.2; cx.beginPath(); cx.arc(0, 0, 10.5, 0, 6.283); cx.stroke();
-    drawChunks('宇宙|規模', 0, 0, 5.2, 18, '#d2382f', { weight: '900' });
+    drawChunks(STR.ending.cert.stamp, 0, 0, EN ? 3.8 : 5.2, 18, '#d2382f', { weight: '900' });
     cx.restore();
   }
   // 宇宙人の記録係：腕が 6本。ペン・はんこ・電卓・バインダー…を持って、いそがしい

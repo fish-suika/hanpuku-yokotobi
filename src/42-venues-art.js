@@ -2,11 +2,13 @@
 // 動かない部分は画面の外の canvas に 1 枚描いて使い回す（大きさ・会場が変わったときだけ描き直す）。動く部分（窓のガタガタ・点滅・星のまたたき）だけ毎フレーム描く。
 // 見えるのは主に「記録板の下から床まで」（遊ぶ場所の高さ 38〜62）。ここに会場らしさをまとめる
 function venueIdx() { return App.screen === 'title' ? 0 : clamp(App.idx, 0, VENUES.length - 1); }
-function curVenue() { return VENUES[venueIdx()]; }
+// タイトルは 1 つ目の体育館から横断幕だけ外したもの（ロゴと重ならないように）。キャッシュは別の鍵 ck で持つ
+const TITLE_VENUE = Object.assign({}, VENUES[0], { props: VENUES[0].props.filter(n => n !== 'banner'), ck: 'title' });
+function curVenue() { return App.screen === 'title' ? TITLE_VENUE : VENUES[venueIdx()]; }
 
 const VCache = { cv: null, key: '' };
 function venueLayer(V) {
-  const key = V.i + '|' + W + 'x' + H + '|' + DPR;
+  const key = (V.ck || V.i) + '|' + W + 'x' + H + '|' + DPR;
   if (VCache.key === key) return VCache.cv;
   const w = EX1 - EX0 + 10, h = EY1 - EY0 + 10;
   const pw = Math.max(1, Math.round(w * U * DPR)), phh = Math.max(1, Math.round(h * U * DPR));
@@ -204,12 +206,12 @@ const PROP = {
       }
     },
   },
-  banner: {   // 横断幕
+  banner: {   // 横断幕。アリーナは審査員の頭にかからないよう、少し上で低め
     draw(V) {
-      const S = STR.venues[V.i], hall = V.kind === 'hall', x = hall ? 32 : 22, w = hall ? 36 : 56, y = 40.5;
-      cx.fillStyle = V.banner[0]; rr(cx, x, y, w, 9, 1); cx.fill();
-      cx.fillStyle = V.banner[1]; cx.fillRect(x, y, w, 0.8); cx.fillRect(x, y + 8.2, w, 0.8);
-      fitTxt(S.banner, 50, y + 4.7, 6.2, w - 6, '#fff', { stroke: 'rgba(0,0,0,.45)', sw: 1.1 });
+      const S = STR.venues[V.i], hall = V.kind === 'hall', arena = V.kind === 'arena', x = hall ? 32 : 22, w = hall ? 36 : 56, y = arena ? 38.2 : 40.5, bh = arena ? 7.8 : 9;
+      cx.fillStyle = V.banner[0]; rr(cx, x, y, w, bh, 1); cx.fill();
+      cx.fillStyle = V.banner[1]; cx.fillRect(x, y, w, 0.8); cx.fillRect(x, y + bh - 0.8, w, 0.8);
+      fitTxt(S.banner, 50, y + bh / 2 + 0.2, arena ? 5.2 : 6.2, w - 6, '#fff', { stroke: 'rgba(0,0,0,.45)', sw: 1.1 });
     },
   },
   curtain: {   // 舞台の幕と舞台

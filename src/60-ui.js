@@ -2,7 +2,7 @@
 const fmt = fmtNum;   // 大きな数字の表示は fmtNum（12-strings.js）1 か所
 const esc = s => s.replace(/[&<>"]/g, c => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;' }[c]));
 // 「|」で区切った言葉を、文節ごとに途中で改行しない塊にして HTML にする
-const phHtml = s => s.split('|').map(p => '<span class="nb">' + esc(p) + '</span>').join('');
+const phHtml = s => s.split('|').map(p => '<span class="nb">' + esc(p) + '</span>').join(STRSEP);   // 英語は塊のあいだに空白（折り返せる場所）
 
 // 保存（localStorage が使えないとき＝data: URL やプライベートモードでも止まらない）
 const store = {
@@ -21,8 +21,39 @@ let crowdT = 0;
 // 文字を画面に入れる（data-s＝そのまま、data-p＝「|」で文節に分ける）
 function strAt(path) { return path.split('.').reduce((o, k) => o[k], STR); }
 function applyStrings() {
+  document.documentElement.lang = LANG;
+  document.title = ph(STR.title.name);
   for (const el of document.querySelectorAll('[data-s]')) el.textContent = strAt(el.dataset.s);
   for (const el of document.querySelectorAll('[data-p]')) el.innerHTML = phHtml(strAt(el.dataset.p));
+  $('logo1').textContent = STR.title.logo[0]; $('logo2').textContent = STR.title.logo[1];
+}
+
+// 横画面か（CSS の @media と同じ条件）
+const landQ = window.matchMedia ? window.matchMedia('(min-aspect-ratio: 5/4)') : null;
+const isLand = () => !!(landQ && landQ.matches);
+
+// いま見えている画面の、まず選ばれるボタン（キーボードの Enter / Space で押せる）
+function focusMain() {
+  const s = App.screen;
+  let el = null;
+  if (s === 'list') el = $('listBody').querySelector('.tn.next') || $('listBody').querySelector('.tn:not(.locked)');
+  else if (s === 'shop') el = $('shopBody').querySelector('.it.ok .buy') || ($('shopGo').style.display === 'none' ? $('shopBack') : $('shopGo'));
+  else if (s === 'result') el = $('retry');
+  else if (s === 'ending' && End.cert) el = $('endBtn');
+  if (el) { try { el.focus({ preventScroll: true }); } catch (_) {} }
+  else if (document.activeElement && document.activeElement.blur) document.activeElement.blur();
+}
+// 一覧と購買部：矢印キーでボタンからボタンへ
+function arrowFocus(e) {
+  const root = App.screen === 'list' ? $('listBody') : App.screen === 'shop' ? $('shop') : null;
+  if (!root) return false;
+  const all = [...root.querySelectorAll('button:not(:disabled)')].filter(b => b.offsetParent !== null);
+  if (!all.length) return false;
+  const i = all.indexOf(document.activeElement);
+  const k = e.key, step = k === 'ArrowLeft' || k === 'ArrowUp' ? -1 : 1;
+  const n = i < 0 ? (step > 0 ? 0 : all.length - 1) : (i + step + all.length) % all.length;
+  all[n].focus({ preventScroll: true }); all[n].scrollIntoView({ block: 'nearest' });
+  return true;
 }
 
 function setScreen(s) {
@@ -52,6 +83,7 @@ function bindUI() {
   window.addEventListener('keydown', e => {
     if (e.repeat) return;
     const k = e.key;
+    if ((App.screen === 'list' || App.screen === 'shop') && /^Arrow(Left|Right|Up|Down)$/.test(k)) { if (arrowFocus(e)) { e.preventDefault(); return; } }
     if (k === 'ArrowLeft' || k === 'a' || k === 'A') { e.preventDefault(); tap(-1); }
     else if (k === 'ArrowRight' || k === 'd' || k === 'D') { e.preventDefault(); tap(1); }
     else if (k === ' ' || k === 'Enter') {
@@ -65,10 +97,11 @@ function bindUI() {
     }
   });
   window.addEventListener('resize', resize);
+  if (landQ && landQ.addEventListener) landQ.addEventListener('change', () => { if (App.screen === 'result') fitRec($('rRec')); });
   window.addEventListener('contextmenu', e => e.preventDefault());
   $('retry').addEventListener('click', () => { Snd.init(); retry(); });
   $('toList').addEventListener('click', () => { Snd.init(); if (App.pendingEnding) showEnding(); else openList(); });
-  $('share').addEventListener('click', share);
+  bindShare();
   $('listBack').addEventListener('click', () => { resetRun(); setScreen('title'); });
   $('toShop').addEventListener('click', () => { Snd.init(); openShop('list'); });
   $('rShop').addEventListener('click', () => { Snd.init(); openShop('result'); });
@@ -79,8 +112,7 @@ function bindUI() {
     if (b) { Snd.init(); buyItem(b.closest('.it').dataset.id); }
   });
   $('inBack').addEventListener('click', () => openList());
-  $('endBtn').addEventListener('click', () => { Snd.init(); End.on = false; openList(); });
-  $('endShare').addEventListener('click', shareEnding);
+  $('endBtn').addEventListener('click', () => { Snd.init(); finishEnding(); });
   $('ending').addEventListener('click', e => { if (!End.cert && !e.target.closest('button')) { Snd.init(); skipEnding(); } });
   $('listBody').addEventListener('click', e => {
     const b = e.target.closest('.tn');
@@ -104,8 +136,17 @@ function openList() {
   End.on = false;
   Snd.setVenue(0);
   App.pendingEnding = false;
+  // 9 大会ぜんぶ勝っているのに、エンディングをまだ最後まで見ていない（ページを閉じて見損ねた）なら、ここで 1 回だけ出す
+  if (Tourney.shouldShowEnding(SAVE)) { showEnding(); return; }
   renderList();
   setScreen('list');
+  focusMain();
+}
+// エンディングを見終わった：見たと保存して、大会の一覧へ
+function finishEnding() {
+  Tourney.markEndingSeen(SAVE); Tourney.persist(store, SAVE);
+  End.on = false;
+  openList();
 }
 
 function renderList() {
@@ -114,8 +155,8 @@ function renderList() {
   for (let i = 0; i < n; i++) {
     const st = Tourney.status(SAVE, i), T = STR.tournaments[i], R = T.rival;
     const locked = st === 'locked';
-    const sub = locked ? L.hidden : L.vs + ' ' + R.short + '　' + fmt(CFG.targets[i]) + L.unit;
-    const best = SAVE.best[i] > 0 ? L.best + ' ' + fmt(SAVE.best[i]) : (locked ? '' : L.noBest);
+    const sub = locked ? L.hidden : L.sub(R.short, fmt(CFG.targets[i]));
+    const best = SAVE.best[i] > 0 ? L.bestOf(fmt(SAVE.best[i])) : (locked ? '' : L.noBest);
     const tag = st === 'won' ? L.tagWon : st === 'next' ? L.tagNext : L.tagLocked;
     html += '<button class="tn ' + st + '" data-i="' + i + '"' + (locked ? ' disabled' : '') + '>'
       + '<span class="no">' + (i + 1) + '</span>'
@@ -139,6 +180,7 @@ function openShop(from) {
   renderShop();
   $('shopGo').style.display = from === 'result' && !App.pendingEnding ? '' : 'none';
   setScreen('shop');
+  focusMain();
 }
 
 function renderShop() {
@@ -178,9 +220,9 @@ function openIntro(i) {
   const T = STR.tournaments[i], I = STR.intro;
   $('inName').textContent = ph(T.name);
   $('inRival').innerHTML = phHtml(T.rival.name);
-  $('inSay').innerHTML = '「' + phHtml(T.rival.say) + '」';
+  $('inSay').innerHTML = STR.sheet.rivalSay(phHtml(T.rival.say));
   $('inRec').innerHTML = esc(fmt(CFG.targets[i])) + '<small>' + esc(I.unit) + '</small>';
-  $('inBest').textContent = SAVE.best[i] > 0 ? I.best + ' ' + fmt(SAVE.best[i]) + ' ' + I.unit : '';
+  $('inBest').textContent = SAVE.best[i] > 0 ? I.bestOf(fmt(SAVE.best[i])) : '';
   setScreen('intro');
   App.introAt = nowT;
 }
@@ -198,16 +240,21 @@ function showEnding() {
   App.pendingEnding = false;
   setScreen('ending');
   startEnding(SAVE.best[Tourney.count() - 1]);
+  if (document.activeElement && document.activeElement.blur) document.activeElement.blur();
 }
 
 // ---- 結果 ----
 function resultInfo() {
-  return { rec: Game.rec, steps: Game.steps, maxN: Game.maxN, trips: Game.trips, judge: judgeFor(Game.rec) };
+  return { rec: Game.rec, steps: Game.steps, maxN: Game.maxN, trips: Game.trips, judge: judgeFor(Game.rec), judgeRaw: judgeRaw(Game.rec) };
 }
 
 // 長い数字は小さく（枠からはみ出さないように）
 // 記録の大きな数字：長いときは文字を小さくして、判子や単位とぶつからないようにする
-function fitRec(el) { el.parentNode.style.fontSize = el.textContent.length > 5 ? '9.5cqw' : el.textContent.length > 4 ? '11cqw' : ''; }
+function fitRec(el) {
+  const L = el.textContent.length, base = isLand() ? (el.id === 'cRec' ? 10 : 11.5) : 12;
+  const f = L > 5 ? base * 0.8 : L > 4 ? base * 0.92 : 0;
+  el.parentNode.style.fontSize = f ? 'calc(' + f.toFixed(2) + ' * var(--q))' : '';
+}
 function fitNum(el) { el.className = el.textContent.length > 7 ? 'l3' : el.textContent.length > 5 ? 'l2' : ''; }
 
 function showResult() {
@@ -215,7 +262,7 @@ function showResult() {
   const r = resultInfo(), i = App.idx, S = STR.sheet, T = STR.tournaments[i];
   const info = Tourney.record(SAVE, i, r.rec);
   Tourney.persist(store, SAVE);
-  App.res = info; App.pendingEnding = info.ending;
+  App.res = info; App.pendingEnding = info.ending && Tourney.shouldShowEnding(SAVE);
   setScreen('result');
   $('rName').textContent = T.name;
   $('rSteps').textContent = fmt(r.steps);
@@ -226,7 +273,7 @@ function showResult() {
   $('rTk').textContent = S.ticketGain(fmt(info.gain));
   $('rShop').classList.toggle('hot', anyBuyable());
   const st = $('stamp');
-  st.textContent = r.judge;
+  st.innerHTML = '<span>' + phHtml(r.judgeRaw) + '</span>';   // 中身は 1 つの塊（判子は flex なので、塊が横にならばないように）
   st.className = r.judge.length > 1 ? 'long' : '';
   $('rJudge').innerHTML = r.rec >= 1000 ? phHtml(S.judgeAll) : r.maxN >= 2 ? phHtml(S.judgeClone) : '';
   const best = SAVE.best[i];
@@ -248,7 +295,7 @@ function showResult() {
   $('toList').textContent = info.ending ? S.cont : S.toList;
   const el = $('result');
   el.classList.add('show', 'wait');   // 指が離れる前にボタンを押してしまわないように、少しの間は触れない
-  setTimeout(() => el.classList.remove('wait'), 700);
+  setTimeout(() => { el.classList.remove('wait'); if (App.screen === 'result') focusMain(); }, 700);
   rollT = 0; stampDone = false; vsT = -1;
 }
 
@@ -326,7 +373,7 @@ function crowdTalk(dt) {
   crowdT -= dt;
   if (crowdT > 0) return;
   crowdT = 0.9 - Game.lvl * 0.09;
-  const cand = SP.filter(p => p.app > 0.7 && p.x > 2 && p.x < 98);
+  const cand = SP.filter(p => p.app > 0.7 && p.x > EX0 + 2 && p.x < EX1 - 2);
   if (!cand.length) return;
   const p = cand[Math.floor(Math.random() * cand.length)];
   addPopup(STR.pop.crowd[Math.floor(Math.random() * STR.pop.crowd.length)], p.x, p.y - 22, 3.8, '#2b2b3a', 0.9, 5, '#fff');
@@ -347,74 +394,3 @@ function frame(ts) {
   requestAnimationFrame(frame);
 }
 
-// ===== 共有（記録用紙のカード）=====
-function shareText() {
-  const r = resultInfo(), win = !!(App.res && App.res.win);
-  return STR.share.text(ph(STR.tournaments[App.idx].name), fmt(r.rec), r.steps, r.judge, r.maxN, win);
-}
-function shareUrl() {
-  const web = /^https?:/.test(location.protocol) && !/^(localhost|127\.0\.0\.1)/.test(location.host);
-  return web ? location.origin + location.pathname : CFG.shareUrl;
-}
-function makeShareImage() {
-  return new Promise(resolve => {
-    const Wd = 1080, Ht = 1350, r = resultInfo(), K = STR.share.card;
-    const cc = document.createElement('canvas');
-    cc.width = Wd; cc.height = Ht;
-    const c = cc.getContext('2d');
-    c.fillStyle = '#e8d6a8'; c.fillRect(0, 0, Wd, Ht);
-    c.fillStyle = '#c58f45'; c.fillRect(0, 900, Wd, 450);
-    c.fillStyle = '#fffdf2'; c.strokeStyle = '#2c4aa0'; c.lineWidth = 10;
-    rr(c, 90, 90, Wd - 180, Ht - 330, 22); c.fill(); c.stroke();
-    c.textAlign = 'center'; c.textBaseline = 'alphabetic';
-    c.fillStyle = '#2c4aa0'; c.font = 'bold 66px ' + FONT; c.fillText(K.head, Wd / 2, 210);
-    c.fillRect(150, 240, Wd - 300, 6);
-    c.fillStyle = '#55608a'; c.font = '48px ' + FONT; c.textAlign = 'left'; c.fillText(K.kind, 160, 330);
-    c.textAlign = 'right'; c.fillStyle = '#2b2b3a'; c.font = 'bold 54px ' + FONT; c.fillText(K.kindVal, Wd - 160, 330);
-    c.textAlign = 'left'; c.fillStyle = '#55608a'; c.font = 'bold 52px ' + FONT; c.fillText(K.rec, 160, 520);
-    const recS = fmt(r.rec); let fs = 200;
-    c.font = '900 ' + fs + 'px ' + FONT;
-    const mw = c.measureText(recS).width;
-    if (mw > 560) { fs = Math.floor(fs * 560 / mw); c.font = '900 ' + fs + 'px ' + FONT; }   // 長い数字は、左の「記録」にぶつからない幅に縮める
-    c.textAlign = 'right'; c.fillStyle = '#d2382f'; c.fillText(recS, Wd - 260, 560);
-    c.fillStyle = '#55608a'; c.font = 'bold 58px ' + FONT; c.fillText(K.unit, Wd - 160, 560);
-    // 判定の判子
-    c.save(); c.translate(Wd - 230, 360); c.rotate(-0.25);
-    c.strokeStyle = '#d2382f'; c.fillStyle = '#d2382f'; c.lineWidth = 12;
-    c.beginPath(); c.arc(0, 0, 112, 0, 6.283); c.stroke();
-    c.textAlign = 'center'; c.font = '900 ' + (r.judge.length > 1 ? 40 : 110) + 'px ' + FONT;
-    if (r.judge.length > 3) { c.fillText(r.judge.slice(0, 3), 0, -6); c.fillText(r.judge.slice(3), 0, 40); }
-    else c.fillText(r.judge, 0, r.judge.length > 1 ? 14 : 38);
-    c.restore();
-    const rows = [[K.steps, fmt(r.steps) + K.times], [K.maxN, fmt(r.maxN) + K.people], [K.trips, fmt(r.trips) + K.times]];
-    rows.forEach(([a, b], i) => {
-      const y = 700 + i * 110;
-      c.strokeStyle = '#9aa7d0'; c.lineWidth = 3; c.setLineDash([12, 10]); c.beginPath(); c.moveTo(150, y + 28); c.lineTo(Wd - 150, y + 28); c.stroke(); c.setLineDash([]);
-      c.textAlign = 'left'; c.fillStyle = '#55608a'; c.font = '50px ' + FONT; c.fillText(a, 160, y);
-      c.textAlign = 'right'; c.fillStyle = '#2b2b3a'; c.font = 'bold 56px ' + FONT; c.fillText(b, Wd - 160, y);
-    });
-    c.textAlign = 'center'; c.fillStyle = '#5a3d1e'; c.font = '40px ' + FONT;
-    c.fillText(shareUrl(), Wd / 2, Ht - 80);
-    cc.toBlob(resolve, 'image/png');
-  });
-}
-function shareEnding() {
-  const text = STR.ending.shareText(fmt(SAVE.best[Tourney.count() - 1])), url = shareUrl();
-  try { if (navigator.share) { navigator.share({ text, url }).catch(() => {}); return; } } catch (_) {}
-  window.open('https://twitter.com/intent/tweet?text=' + encodeURIComponent(text) + '&url=' + encodeURIComponent(url), '_blank', 'noopener');
-}
-async function share() {
-  const text = shareText(), url = shareUrl();
-  try {
-    if (navigator.canShare && navigator.share) {
-      const blob = await makeShareImage();
-      const file = new File([blob], 'hanpuku-yokotobi.png', { type: 'image/png' });
-      if (navigator.canShare({ files: [file] })) await navigator.share({ text, url, files: [file] });
-      else await navigator.share({ text, url });
-      return;
-    }
-  } catch (err) {
-    if (err && err.name === 'AbortError') return;
-  }
-  window.open('https://twitter.com/intent/tweet?text=' + encodeURIComponent(text) + '&url=' + encodeURIComponent(url), '_blank', 'noopener');
-}
