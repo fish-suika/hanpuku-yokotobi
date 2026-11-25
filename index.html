@@ -31,22 +31,76 @@ body{display:flex;align-items:center;justify-content:center}
   padding:2cqw 8cqw;box-shadow:0 1.2cqw 0 #a82350;animation:blink 1.1s ease-in-out infinite}
 @keyframes blink{50%{transform:scale(1.07)}}
 
+/* 大会の一覧・測定前（ライバルの紹介）・エンディング */
+.scr{position:absolute;inset:0;z-index:25;display:none;flex-direction:column;pointer-events:auto;
+  background:#f1e6c2;box-shadow:0 0 0 100vmax #f1e6c2;padding:5cqw 5cqw 4.5cqw;gap:2cqw}
+.scr.on{display:flex;animation:fade .22s ease-out}
+@keyframes fade{from{opacity:0}to{opacity:1}}
+#list .hd{display:flex;justify-content:space-between;align-items:baseline;font-size:6.2cqw;font-weight:900;color:#2c4aa0;
+  border-bottom:.6cqw solid #2c4aa0;padding-bottom:1.4cqw;letter-spacing:.5cqw;white-space:nowrap}
+#list .hd small{font-size:3.8cqw;color:#55608a;letter-spacing:0;font-weight:bold}
+#listBody{flex:1;min-height:0;display:flex;flex-direction:column;gap:1.8cqw;overflow-y:auto;touch-action:pan-y;padding:1cqw 1.4cqw 1.4cqw}
+.tn{flex:1 1 0;min-height:12.5cqw;max-height:17cqw;display:grid;grid-template-columns:8.4cqw minmax(0,1fr) auto;align-items:center;column-gap:2.6cqw;
+  border:.5cqw solid #2c4aa0;border-radius:2cqw;background:#fffdf2;padding:0 2.8cqw 0 2.4cqw;font:inherit;color:#2b2b3a;text-align:left;
+  cursor:pointer;box-shadow:0 .8cqw 0 #1c3170;touch-action:manipulation}
+.tn:active:not(:disabled){transform:translateY(.6cqw);box-shadow:0 .2cqw 0 #1c3170}
+.tn .no{width:8.4cqw;height:8.4cqw;border-radius:50%;background:#2c4aa0;color:#fff;font-weight:900;font-size:4.6cqw;display:flex;align-items:center;justify-content:center}
+.tn .mid{display:flex;flex-direction:column;gap:.5cqw;min-width:0}
+.tn .nm{font-size:4.7cqw;font-weight:bold;white-space:nowrap}
+.tn .sb{font-size:3.3cqw;color:#55608a;white-space:nowrap}
+.tn .rt{display:flex;flex-direction:column;align-items:flex-end;gap:.7cqw}
+.tn .tag{font-size:3.3cqw;font-weight:900;border:.45cqw solid;border-radius:1.4cqw;padding:0 1.6cqw;white-space:nowrap;line-height:1.5}
+.tn .bs{font-size:3.2cqw;color:#55608a;white-space:nowrap}
+.tn.won .tag{color:#d2382f;border-color:#d2382f;transform:rotate(-5deg)}
+.tn.next{border-color:#e0356f;box-shadow:0 .8cqw 0 #a82350;animation:nextp 1.2s ease-in-out infinite}
+.tn.next .tag{background:#e0356f;border-color:#e0356f;color:#fff}
+.tn.next .no{background:#e0356f}
+@keyframes nextp{50%{transform:scale(1.025)}}
+.tn.locked{background:#e6dfc6;border-color:#a6a18a;color:#8b8672;box-shadow:none;cursor:default}
+.tn.locked .no{background:#a6a18a}
+.tn.locked .sb,.tn.locked .bs{color:#9b9680}
+.tn.locked .tag{color:#9b9680;border-color:#b3ae98}
+#list .back,#intro .back{align-self:center;height:9cqw;padding:0 7cqw;font-size:3.8cqw;background:transparent;color:#2c4aa0;
+  border:.5cqw solid #2c4aa0;border-radius:3cqw;box-shadow:0 .6cqw 0 #2c4aa066;white-space:nowrap;pointer-events:auto}
+
+#intro .back{background:#fffdf2e8}
+#intro{position:absolute;left:6cqw;right:6cqw;top:51cqw;z-index:25;display:none;flex-direction:column;align-items:center;gap:3cqw;text-align:center}
+#intro.on{display:flex;animation:pop .3s cubic-bezier(.3,1.5,.5,1)}
+#inName{font-size:5cqw;font-weight:bold;color:#fff;background:#d2382f;border-radius:5cqw;padding:.8cqw 5cqw;letter-spacing:.5cqw;box-shadow:0 .8cqw 0 #8f221c;white-space:nowrap}
+#inCard{width:100%;background:#fffdf2;border:.7cqw solid #2c4aa0;border-radius:1.6cqw;box-shadow:0 2cqw 0 #1c3170,0 3cqw 6cqw #0006;
+  padding:4cqw 4cqw 4.4cqw;display:flex;flex-direction:column;align-items:center;gap:1.4cqw}
+#inCard .lb{font-size:3.6cqw;color:#55608a;font-weight:bold;letter-spacing:.4cqw}
+#inRival{font-size:8cqw;font-weight:900;color:#2b2b3a;line-height:1.15}
+#inSay{font-size:4.2cqw;color:#2b2b3a;line-height:1.5;margin-bottom:1cqw}
+#inCard .rule{width:100%;border-top:.3cqw dashed #9aa7d0;margin:.6cqw 0 .2cqw}
+#inRec{font-size:15cqw;font-weight:900;line-height:1;color:#d2382f;font-variant-numeric:tabular-nums;white-space:nowrap}
+#inRec small{font-size:5cqw;color:#55608a;font-weight:bold;margin-left:.8cqw}
+#inBest{font-size:3.6cqw;color:#55608a;min-height:4.6cqw}
+#intro .go{font-size:6cqw;font-weight:bold;color:#fff;background:#e0356f;border-radius:6cqw;padding:2cqw 8cqw;box-shadow:0 1.2cqw 0 #a82350;
+  white-space:nowrap;animation:blink 1.1s ease-in-out infinite}
+
+#ending{align-items:center;justify-content:center;text-align:center;gap:4cqw;background:#1c2160;box-shadow:0 0 0 100vmax #1c2160}
+#ending .big{font-size:12cqw;font-weight:900;line-height:1.15;color:#fff;-webkit-text-stroke:1.2cqw #213a86;paint-order:stroke fill;text-shadow:0 1.2cqw 0 #213a86}
+#ending .txt{font-size:5.4cqw;font-weight:bold;color:#fff}
+#ending .bst{font-size:4.2cqw;color:#cfd6ff;min-height:5.4cqw}
+#endBtn{height:14cqw;padding:0 9cqw;font-size:5.4cqw;white-space:nowrap;margin-top:3cqw}
+
 /* 結果：体力測定の記録用紙 */
-#result{position:absolute;left:6cqw;right:6cqw;top:40cqw;z-index:30;padding:5cqw 5.5cqw 5cqw;
+#result{position:absolute;left:6cqw;right:6cqw;top:21cqw;z-index:30;padding:4cqw 5.5cqw 4.2cqw;
   background:#fffdf2;border:.7cqw solid #2c4aa0;border-radius:1.6cqw;
   box-shadow:0 2cqw 0 #1c3170,0 3cqw 6cqw #0006;
-  color:#2b2b3a;display:none;flex-direction:column;align-items:stretch;gap:2cqw;text-align:center;pointer-events:auto}
+  color:#2b2b3a;display:none;flex-direction:column;align-items:stretch;gap:1.6cqw;text-align:center;pointer-events:auto}
 #result.show{display:flex;animation:pop .3s cubic-bezier(.3,1.5,.5,1)}
 #result.wait{pointer-events:none}
 @keyframes pop{from{transform:scale(.7) rotate(-2deg);opacity:0}to{transform:none;opacity:1}}
-#result .hd{font-size:5.4cqw;font-weight:bold;color:#2c4aa0;border-bottom:.5cqw solid #2c4aa0;padding-bottom:1.6cqw;letter-spacing:.5cqw}
-#result .ln{display:flex;justify-content:space-between;align-items:baseline;font-size:4.4cqw;
-  border-bottom:.3cqw dashed #9aa7d0;padding-bottom:1cqw}
+#result .hd{font-size:5.2cqw;font-weight:bold;color:#2c4aa0;border-bottom:.5cqw solid #2c4aa0;padding-bottom:1.2cqw;letter-spacing:.5cqw;white-space:nowrap}
+#result .ln{display:flex;justify-content:space-between;align-items:baseline;font-size:4.2cqw;
+  border-bottom:.3cqw dashed #9aa7d0;padding-bottom:.8cqw;white-space:nowrap}
 #result .ln span:first-child{color:#55608a}
-#result .ln b{font-size:4.8cqw}
-#result .big{position:relative;display:flex;justify-content:space-between;align-items:center;margin:1cqw 0 .6cqw}
+#result .ln b{font-size:4.6cqw}
+#result .big{position:relative;display:flex;justify-content:space-between;align-items:center;margin:.6cqw 0 1.6cqw}
 #result .big .lb{font-size:4.8cqw;color:#55608a;font-weight:bold}
-#result .big .num{font-size:13cqw;font-weight:900;line-height:1;color:#d2382f;font-variant-numeric:tabular-nums}
+#result .big .num{font-size:12cqw;font-weight:900;line-height:1;color:#d2382f;font-variant-numeric:tabular-nums}
 #result .big .num small{font-size:5cqw;color:#55608a;font-weight:bold;margin-left:.8cqw}
 #stamp{position:absolute;left:11.5cqw;top:-2.5cqw;width:19cqw;height:19cqw;border:.9cqw solid #d2382f;border-radius:50%;
   color:#d2382f;font-weight:900;display:flex;align-items:center;justify-content:center;text-align:center;line-height:1.1;
@@ -54,43 +108,99 @@ body{display:flex;align-items:center;justify-content:center}
 #stamp.long{font-size:4.2cqw}
 #stamp.on{animation:stamp .28s cubic-bezier(.4,1.6,.6,1) forwards}
 @keyframes stamp{to{transform:rotate(-14deg) scale(1);opacity:1}}
-#rJudge{font-size:4.2cqw;color:#55608a;min-height:5.4cqw}
-#rBest{font-size:3.8cqw;color:#55608a;min-height:5cqw}
-.row{display:flex;gap:3cqw;align-items:center;width:100%;margin-top:1cqw}
+#rJudge{font-size:3.8cqw;color:#55608a;min-height:4.8cqw}
+#rBest{font-size:3.6cqw;color:#55608a;min-height:4.6cqw}
+
+/* ライバルとの比べ。勝ち負けの判子が真ん中に押される */
+#vs{display:grid;grid-template-columns:minmax(0,1fr) 19cqw minmax(0,1fr);align-items:center;background:#f1f4fc;border:.4cqw solid #9aa7d0;border-radius:1.6cqw;padding:2cqw 1.6cqw}
+#vs .col{display:flex;flex-direction:column;gap:.4cqw;min-width:0}
+#vs .col span{font-size:3.4cqw;color:#55608a;font-weight:bold;white-space:nowrap}
+#vs .col b{font-size:7cqw;font-weight:900;line-height:1.1;white-space:nowrap;font-variant-numeric:tabular-nums}
+#vs .col b.l2{font-size:5.2cqw}
+#vs .col b.l3{font-size:4.2cqw}
+#vs .col.you b{color:#d2382f}
+#vs .mid{position:relative;height:15cqw;display:flex;align-items:center;justify-content:center}
+#vs .mid .v{font-size:4cqw;font-weight:900;color:#9aa7d0}
+#vsStamp{position:absolute;left:50%;top:50%;margin:-7.5cqw 0 0 -8.5cqw;width:17cqw;height:15cqw;border:.8cqw solid #d2382f;border-radius:2cqw;
+  color:#d2382f;font-weight:900;display:flex;align-items:center;justify-content:center;text-align:center;line-height:1.05;white-space:nowrap;
+  transform:rotate(-10deg) scale(2.4);opacity:0;background:#fffdf2d0;font-size:5cqw}
+#vs.lose #vsStamp{color:#4a5a9a;border-color:#4a5a9a}
+#vsStamp.on{animation:vstamp .26s cubic-bezier(.4,1.6,.6,1) forwards}
+@keyframes vstamp{to{transform:rotate(-10deg) scale(1);opacity:1}}
+#vsNote{font-size:3.9cqw;font-weight:bold;color:#2c4aa0;min-height:5cqw}
+
+.row{display:flex;gap:3cqw;align-items:center;width:100%;margin-top:.6cqw}
 .btn{border:0;border-radius:3.6cqw;font:inherit;font-weight:bold;color:#fff;cursor:pointer;
   background:linear-gradient(#ff6b9a,#e0356f);box-shadow:0 1.2cqw 0 #a82350;touch-action:manipulation}
 .btn:active{transform:translateY(.8cqw);box-shadow:0 .4cqw 0 #a82350}
-#retry{flex:1;height:14cqw;font-size:5.8cqw}
-#share{width:25cqw;height:10cqw;font-size:3.4cqw;background:transparent;color:#2c4aa0;
+#retry{flex:1;height:13cqw;font-size:5.8cqw;white-space:nowrap}
+#toList,#share{height:10cqw;font-size:3.6cqw;background:transparent;color:#2c4aa0;white-space:nowrap;
   border:.6cqw solid #2c4aa0;border-radius:3cqw;box-shadow:0 .6cqw 0 #2c4aa066}
-#share:active{transform:translateY(.5cqw)}
+#toList{flex:1}
+#share{width:27cqw}
+#toList:active,#share:active{transform:translateY(.5cqw)}
 </style>
 </head>
 <body>
 <canvas id="cv"></canvas>
 <div id="stage">
   <div id="title">
-    <div class="t2"><span class="nb">分身</span><span class="nb">反復横とび</span></div>
-    <div class="t3"><span class="nb">20秒で</span><span class="nb">何人 分身できる？</span></div>
-    <div class="t4">タップで スタート</div>
+    <div class="t2" data-p="title.name"></div>
+    <div class="t3" data-p="title.catch"></div>
+    <div class="t4" data-s="title.tap"></div>
+  </div>
+  <div id="list" class="scr">
+    <div class="hd"><span data-s="list.head"></span><small id="listProg"></small></div>
+    <div id="listBody"></div>
+    <button id="listBack" class="btn back" data-s="list.back"></button>
+  </div>
+  <div id="intro">
+    <div id="inName"></div>
+    <div id="inCard">
+      <div class="lb" data-s="intro.rival"></div>
+      <div id="inRival"></div>
+      <div id="inSay"></div>
+      <div class="rule"></div>
+      <div class="lb" data-s="intro.rec"></div>
+      <div id="inRec"></div>
+      <div id="inBest"></div>
+    </div>
+    <div class="go" data-s="intro.start"></div>
+    <button id="inBack" class="btn back" data-s="intro.back"></button>
   </div>
   <div id="result">
-    <div class="hd">体力測定 記録用紙</div>
-    <div class="ln"><span>種目</span><b>反復横とび</b></div>
+    <div class="hd" data-s="sheet.head"></div>
+    <div class="ln"><span data-s="sheet.kind"></span><b id="rName"></b></div>
     <div class="big">
-      <span class="lb">記録</span>
-      <span class="num"><span id="rRec">0</span><small>回</small></span>
+      <span class="lb" data-s="sheet.rec"></span>
+      <span class="num"><span id="rRec">0</span><small data-s="sheet.unit"></small></span>
       <div id="stamp"></div>
     </div>
     <div id="rJudge"></div>
-    <div class="ln"><span>本当の回数</span><b><span id="rSteps">0</span> 回</b></div>
-    <div class="ln"><span>最高の分身</span><b><span id="rMaxN">0</span> 人</b></div>
-    <div class="ln"><span>転んだ回数</span><b><span id="rTrips">0</span> 回</b></div>
+    <div id="vs" class="lose">
+      <div class="col"><span id="vsRLb"></span><b id="vsRRec">0</b></div>
+      <div class="mid"><span class="v" data-s="sheet.vs"></span><div id="vsStamp"></div></div>
+      <div class="col you"><span data-s="sheet.you"></span><b id="vsYou">0</b></div>
+    </div>
+    <div id="vsNote"></div>
+    <div class="ln"><span data-s="sheet.steps"></span><b><span id="rSteps">0</span><span data-s="sheet.times"></span></b></div>
+    <div class="ln"><span data-s="sheet.maxN"></span><b><span id="rMaxN">0</span><span data-s="sheet.people"></span></b></div>
+    <div class="ln"><span data-s="sheet.trips"></span><b><span id="rTrips">0</span><span data-s="sheet.times"></span></b></div>
     <div id="rBest"></div>
     <div class="row">
-      <button id="retry" class="btn">もう一回</button>
-      <button id="share" class="btn">Xで シェア</button>
+      <button id="retry" class="btn" data-s="sheet.retry"></button>
     </div>
+    <div class="row">
+      <button id="toList" class="btn"></button>
+      <button id="share" class="btn" data-s="sheet.share"></button>
+    </div>
+  </div>
+  <div id="ending" class="scr">
+    <div class="big" data-p="ending.head"></div>
+    <div class="txt" data-p="ending.body"></div>
+    <div class="bst" id="endBest"></div>
+    <div class="txt" data-s="ending.thanks"></div>
+    <button id="endBtn" class="btn"></button>
   </div>
 </div>
 <script>
@@ -115,9 +225,81 @@ const CFG = {
   // 判定（記録の下限）
   judge: [[0, 'E'], [40, 'D'], [80, 'C'], [150, 'B'], [400, 'A'], [1000, 'S'], [3000, '測定不能'], [7000, '人類の範囲外']],   // 分身が早く出るようにしたので記録の桁が上がった（元は 130/200/400/1000/3000）
 
+  // v2 大会：ライバルの記録（これを超えると勝ち）。数字は仮。Phase 2 でボットを使って調整する
+  targets: [80, 200, 600, 2000, 6000, 20000, 100000, 500000, 3000000],
+
   cloneDelay: 0.022,     // 分身1体あたりの遅れ（秒）
   shareUrl: 'https://fish-suika.github.io/hanpuku-yokotobi/',
 };
+// ===== 画面に出す言葉（ここに集める。Phase 4 で英語を足す）=====
+// 「|」は文節の切れ目。画面では文節ごとに改行しない塊（.nb）になる。ph() で「|」を取れば普通の文字列
+const STR = {
+  title: { name: '分身|反復横とび', catch: '20秒で|何人 分身できる？', tap: 'タップで スタート' },
+
+  list: {
+    head: '大会の一覧', back: 'タイトルへ',
+    progress: (n, m) => n + ' / ' + m,
+    vs: 'VS', unit: '回', best: 'ベスト', noBest: 'ベスト ---',
+    tagWon: '勝ち', tagNext: '挑戦！', tagLocked: 'ロック', hidden: '？？？',
+  },
+
+  intro: { rival: 'ライバル', rec: 'ライバルの記録', unit: '回', best: 'ベスト', start: 'タップで スタート', back: 'もどる' },
+
+  // 大会 9 つ。順番が進む順番（CFG.targets と同じ並び）
+  tournaments: [
+    { name: 'クラスの体力測定', rival: { name: '前の席の|田中', short: '田中', say: '去年と|同じ記録を|目指します。' } },
+    { name: '学年の体力測定', rival: { name: '学年1位の|鈴木', short: '鈴木', say: '毎朝|牛乳を|飲んでいます。' } },
+    { name: '校内大会', rival: { name: '体育委員長の|佐藤', short: '佐藤', say: '全校生徒が|見ていますが|気にしません。' } },
+    { name: '市大会', rival: { name: '市の代表の|高橋', short: '高橋', say: '言い訳は|すでに|用意してあります。' } },
+    { name: '県大会', rival: { name: '県王者の|伊藤', short: '伊藤', say: '優勝賞品の|お米を|待っています。' } },
+    { name: '全国大会', rival: { name: '全国2連覇の|渡辺', short: '渡辺', say: 'テレビに|映るので|髪を 整えました。' } },
+    { name: '世界大会', rival: { name: '世界王者の|ジャン', short: 'ジャン', say: '言葉は|通じませんが|記録は 通じます。' } },
+    { name: '月面大会', rival: { name: '宇宙飛行士の|山本', short: '山本', say: '重力が 小さいので|だいぶ|有利です。' } },
+    { name: '宇宙大会', rival: { name: '宇宙人の|ポポ', short: 'ポポ', say: '記録係は|腕が 6本|あります。' } },
+  ],
+
+  // 記録用紙
+  sheet: {
+    head: '体力測定 記録用紙', kind: '大会', rec: '記録', unit: '回',
+    steps: '本当の回数', maxN: '最高の分身', trips: '転んだ回数', times: ' 回', people: ' 人',
+    judgeAll: '記録係は|ぜんいん 数えました', judgeClone: '分身も|ぜんいん 数えられました',
+    bestNew: 'ベスト こうしん！', best: n => 'ベスト ' + n + ' 回',
+    rival: s => 'ライバル ' + s, you: 'あなた', vs: 'VS', win: '勝ち！', lose: '負け…',
+    noteLose: n => 'あと ' + n + ' 回で|勝ち！',
+    noteUnlock: s => '「' + s + '」が|ひらきました！',
+    noteReplay: 'ライバルに|また 勝ちました。',
+    noteEnd: '全大会|せいは！',
+    retry: 'もう一回', toList: '大会の一覧', cont: 'つづける', share: 'Xで シェア',
+  },
+
+  // 宇宙大会に勝ったあと（Phase 3 で作り直す）
+  ending: {
+    head: '全大会|せいは！', body: '宇宙大会に|勝ちました。', thanks: 'おめでとう！',
+    best: n => '宇宙大会 ベスト ' + n + ' 回', list: '大会の一覧へ',
+  },
+
+  // 測定中の画面（記録板・ふきだし・文字の演出）
+  hud: {
+    banner: '体力測定', rec: '記録', real: n => 'ほんとうは ' + n + ' 回', left: 'のこり',
+    bubble: ['いーち、にー…', 'は、はやっ！', 'えっ…？ にー、よん…', 'ひとが ふえてる…', 'ゆ、ゆかが…！', 'でんたく でんたく…！', 'そ、測定不能…！'],
+    bFinish: 'そこまで！ きろくします…', bOver: n => '…' + n + ' 回です。', bReady: 'よーい…',
+    ready: 'よーい…', vs: 'VS', passed: '超えた！',
+  },
+  pop: {
+    start: 'スタート！', stumble: 'もつれた！', out: 'はみだした！', down: '勢い ダウン', end: 'そこまで！', pant: 'ゼーゼー',
+    rival: 'ライバルを 超えた！',
+    lv: ['', 'ぶんしん！', '4にん！', '8にん！！', '16にん！！', '32にん！！！', '測定不能！！！'],
+    crowd: ['わー！', 'すげー！', 'はやっ！', 'なにあれ！', 'ぶんしん！？', 'えええ！', '2人いる！', '見えない！'],
+  },
+
+  // 共有（文面と画像カード）
+  share: {
+    text: (t, rec, steps, judge, maxN, win) =>
+      '分身反復横とび「' + t + '」で 記録 ' + rec + ' 回（本当は ' + steps + ' 回）、判定「' + judge + '」！' + (win ? ' ライバルに勝ち！' : '') + ' 分身 ' + maxN + ' 人 #分身反復横とび',
+    card: { head: '体力測定 記録用紙', kind: '種目', kindVal: '反復横とび', rec: '記録', unit: '回', steps: '本当の回数', maxN: '最高の分身', trips: '転んだ回数', times: ' 回', people: ' 人' },
+  },
+};
+const ph = s => s.replace(/\|/g, '');   // 「|」を取った普通の文字列
 // ===== ゲームのロジック（画面を使わない）=====
 const clamp = (v, a, b) => Math.max(a, Math.min(b, v));
 function mulberry32(a) {
@@ -262,6 +444,87 @@ function judgeFor(rec) {
   for (const [min, name] of CFG.judge) if (rec >= min) j = name;
   return j;
 }
+// ===== 大会のくり返し（画面を使わない）=====
+// 保存の形：{ v, unlocked（遊べる一番先の大会 0始まり）, won[大会ごとの勝ち], best[大会ごとのベスト] }
+// 強化（Phase 2）はここに項目を足す。知らない項目は読み書きしても消さない
+const SAVE_KEY = 'hanpuku-yokotobi-save';
+const V1_BEST_KEY = 'hanpuku-yokotobi-best';   // v1 のベスト（引き継ぎ用に読むだけ）
+const SAVE_VER = 1;
+
+const Tourney = {
+  count() { return CFG.targets.length; },
+  target(i) { return CFG.targets[i]; },
+  // ライバルに勝つ：記録が目標を「超える」こと（同じ数は負け）。目標は使うたびに CFG から読む
+  beats(rec, i) { return rec > CFG.targets[i]; },
+
+  newSave() {
+    const n = this.count();
+    return { v: SAVE_VER, unlocked: 0, won: new Array(n).fill(false), best: new Array(n).fill(0) };
+  },
+
+  // どんな値が来ても、使える形に直す（壊れた保存・古い保存・手で書き換えた保存）
+  sanitize(o) {
+    const n = this.count(), s = this.newSave();
+    if (!o || typeof o !== 'object') return s;
+    const out = Object.assign({}, o);   // 知らない項目は残す
+    const u = Math.floor(Number(o.unlocked));
+    out.unlocked = Number.isFinite(u) ? clamp(u, 0, n - 1) : 0;
+    out.won = s.won.map((_, i) => Array.isArray(o.won) && o.won[i] === true);
+    out.best = s.best.map((_, i) => {
+      const b = Array.isArray(o.best) ? Math.floor(Number(o.best[i])) : 0;
+      return Number.isFinite(b) && b > 0 ? b : 0;
+    });
+    // つじつま：先へ進めているなら手前は勝っている／勝った大会の次は開いている
+    for (let i = 0; i < out.unlocked; i++) out.won[i] = true;
+    for (let i = 0; i < n; i++) if (out.won[i]) out.unlocked = Math.max(out.unlocked, Math.min(i + 1, n - 1));
+    for (let i = 0; i < out.unlocked; i++) out.won[i] = true;
+    out.v = SAVE_VER;
+    return out;
+  },
+
+  // 'won' 勝った ／ 'next' 挑戦できる（まだ勝っていない） ／ 'locked' まだ
+  status(save, i) {
+    if (save.won[i]) return 'won';
+    return i <= save.unlocked ? 'next' : 'locked';
+  },
+  playable(save, i) { return i >= 0 && i < this.count() && i <= save.unlocked; },
+  focusIndex(save) { return save.unlocked; },
+  wonCount(save) { return save.won.filter(Boolean).length; },
+
+  // 1回の結果を保存の形に反映する。勝てば次の大会が開く。遊べない大会は何も変えない
+  record(save, i, rec) {
+    const none = { win: false, isBest: false, prevBest: save.best[i] || 0, firstWin: false, unlockedNext: false, ending: false };
+    if (!this.playable(save, i)) return none;
+    const prevBest = save.best[i] || 0;
+    const isBest = rec > prevBest;
+    if (isBest) save.best[i] = rec;
+    const win = this.beats(rec, i);
+    let firstWin = false, unlockedNext = false;
+    if (win) {
+      firstWin = !save.won[i];
+      save.won[i] = true;
+      if (i + 1 < this.count() && save.unlocked < i + 1) { save.unlocked = i + 1; unlockedNext = true; }
+    }
+    return { win, isBest, prevBest, firstWin, unlockedNext, ending: firstWin && i === this.count() - 1 };
+  },
+
+  // 保存の読み込み。v2 の保存がなければ v1 のベストを最初の大会のベストとして引き継ぐ。storage は getItem/setItem を持つもの
+  load(st) {
+    let raw = null;
+    try { raw = st.getItem(SAVE_KEY); } catch (_) {}
+    if (raw) {
+      try { return this.sanitize(JSON.parse(raw)); } catch (_) { return this.newSave(); }
+    }
+    const s = this.newSave();
+    let v1 = 0;
+    try { v1 = parseInt(st.getItem(V1_BEST_KEY), 10) || 0; } catch (_) {}
+    if (v1 > 0) { s.best[0] = v1; this.persist(st, s); }
+    return s;
+  },
+  persist(st, save) {
+    try { st.setItem(SAVE_KEY, JSON.stringify(save)); return true; } catch (_) { return false; }
+  },
+};
 // ===== 描画（Canvas 2D。単位は「遊ぶ場所の幅 = 100」）=====
 const $ = id => document.getElementById(id);
 const cv = $('cv'), cx = cv.getContext('2d');
@@ -289,6 +552,7 @@ const easeOut = p => 1 - (1 - p) * (1 - p);
 // ---- 演出の状態 ----
 const popups = [], smoke = [], hist = [];
 let hudPop = 0, flash = 0, shakeT = 0, tripAt = -99, lvlShown = 0, bubbleT = 0;
+let rivalPassed = false, rivalPassAt = -99;   // 測定中にライバルの記録を超えたか
 const CL = [];   // 分身 k=1..31 の見た目の状態
 for (let k = 0; k < 48; k++) CL.push({ app: 0 });
 
@@ -413,7 +677,7 @@ function drawGym() {
   // 横断幕「体力測定」と舞台
   cx.fillStyle = '#d2382f'; rr(cx, 22, 40.5, 56, 9, 1); cx.fill();
   cx.fillStyle = '#f6c84c'; cx.fillRect(22, 40.5, 56, 0.8); cx.fillRect(22, 48.7, 56, 0.8);
-  txt('体力測定', 50, 45.2, 6.2, '#fff', { stroke: '#8f221c', sw: 1.1 });
+  txt(STR.hud.banner, 50, 45.2, 6.2, '#fff', { stroke: '#8f221c', sw: 1.1 });
   cx.fillStyle = '#9a1f2a'; cx.fillRect(34, 50, 32, 7);   // 舞台の幕
   const fl = Math.sin(nowT * (lv >= 6 ? 14 : 2)) * (lv >= 4 ? 0.7 : 0.1);
   for (let i = 0; i < 8; i++) { cx.fillStyle = i % 2 ? '#b02a35' : '#8a1a24'; cx.fillRect(34 + i * 4 + fl * (i % 3 - 1), 50, 4, 7); }
@@ -612,7 +876,6 @@ function recorderFace(x, y, r) {
   }
 }
 
-const BUBBLE = ['いーち、にー…', 'は、はやっ！', 'えっ…？ にー、よん…', 'ひとが ふえてる…', 'ゆ、ゆかが…！', 'でんたく でんたく…！', 'そ、測定不能…！'];
 function drawHud() {
   const play = Game.mode === 'play', lv = Game.lvl;
   // 記録板
@@ -620,26 +883,52 @@ function drawHud() {
   cx.fillStyle = '#fffdf2'; rr(cx, 3, 2.4, 94, 35, 3); cx.fill();
   cx.strokeStyle = '#2c4aa0'; cx.lineWidth = 0.9; rr(cx, 3, 2.4, 94, 35, 3); cx.stroke();
   recorderFace(15, 13.5, 6.3);
-  txt('記録', 52, 8.6, 3.4, '#55608a');
+  txt(STR.hud.rec, 52, 8.6, 3.4, '#55608a');
   const pop = 1 + 0.16 * hudPop;
   cx.save(); cx.translate(52, 19.8); cx.scale(pop, pop);
   txt(String(Game.rec), 0, 0, Game.rec >= 10000 ? 9.5 : 12, '#d2382f');
   cx.restore();
-  txt('ほんとうは ' + Game.steps + ' 回', 52, 27.6, 2.6, '#55608a');
+  txt(STR.hud.real(Game.steps), 52, 27.6, 2.6, '#55608a');
   // 残り時間
   const left = Game.mode === 'title' || Game.mode === 'ready' ? CFG.duration : clamp(CFG.duration - Game.t, 0, CFG.duration);
-  txt('のこり', 85, 8.6, 3.4, '#55608a');
+  txt(STR.hud.left, 85, 8.6, 3.4, '#55608a');
   txt(String(Math.ceil(left - 1e-9)), 85, 19.8, 12, left <= 5 && play ? '#e03030' : '#2c4aa0');
   // 時間の帯
   cx.fillStyle = '#dde3f3'; rr(cx, 6, 34.7, 88, 1.5, 0.75); cx.fill();
   cx.fillStyle = left <= 5 ? '#e03030' : '#2c9a6a'; rr(cx, 6, 34.7, Math.max(1.5, 88 * left / CFG.duration), 1.5, 0.75); cx.fill();
   // 記録係のひとこと
-  let b = BUBBLE[lv];
-  if (Game.mode === 'finish') b = 'そこまで！ きろくします…';
-  else if (Game.mode === 'over') b = '…' + Game.rec + ' 回です。';
-  else if (Game.mode === 'title') b = 'よーい…';
-  else if (Game.mode === 'ready') b = 'よーい…';
+  let b = STR.hud.bubble[lv];
+  if (Game.mode === 'finish') b = STR.hud.bFinish;
+  else if (Game.mode === 'over') b = STR.hud.bOver(Game.rec);
+  else if (Game.mode === 'title') b = STR.hud.bReady;
+  else if (Game.mode === 'ready') b = STR.hud.bReady;
   txt(b, 52, 31.8, 2.8, '#2b2b3a', { align: 'center' });
+}
+
+// 文字が枠に入りきらないときは、その幅に縮める
+function fitTxt(s, x, y, size, maxW, fill) {
+  cx.font = 'bold ' + size + 'px ' + FONT;
+  const w = cx.measureText(s).width;
+  txt(s, x, y, w > maxW ? size * maxW / w : size, fill);
+}
+// ライバルの札：記録板の下、右の端。記録に合わせて下から色が満ち、超えると金色になる
+function drawRival() {
+  const i = App.idx, R = STR.tournaments[i].rival, tg = CFG.targets[i];
+  const passed = rivalPassed, prog = clamp(Game.rec / tg, 0, 1);
+  const w = 18, h = 13.2, q = clamp((nowT - rivalPassAt) / 0.6, 0, 1);
+  const sc = passed && q < 1 ? 1 + 0.25 * Math.sin(q * Math.PI) : 1;
+  cx.save(); cx.translate(79 + w / 2, 40 + h / 2); cx.scale(sc, sc); cx.translate(-w / 2, -h / 2);
+  cx.fillStyle = '#0002'; rr(cx, 0, 0.7, w, h, 1.6); cx.fill();
+  cx.fillStyle = 'rgba(255,253,242,.94)'; rr(cx, 0, 0, w, h, 1.6); cx.fill();
+  cx.save(); rr(cx, 0, 0, w, h, 1.6); cx.clip();
+  cx.fillStyle = passed ? 'rgba(246,200,76,.85)' : 'rgba(150,175,235,.45)';
+  cx.fillRect(0, h * (1 - prog), w, h * prog);
+  cx.restore();
+  cx.strokeStyle = passed ? '#c98a10' : '#2c4aa0'; cx.lineWidth = 0.5; rr(cx, 0, 0, w, h, 1.6); cx.stroke();
+  txt(passed ? STR.hud.passed : STR.hud.vs, w / 2, 2.4, 2.1, passed ? '#8a5a00' : '#55608a');
+  fitTxt(R.short, w / 2, 5.9, 2.9, w - 2, '#2b2b3a');
+  fitTxt(fmt(tg), w / 2, 10, 3.8, w - 2, passed ? '#8a5a00' : '#d2382f');
+  cx.restore();
 }
 
 function drawPopups() {
@@ -668,11 +957,12 @@ function render() {
   drawBodies();
   drawSmoke();
   cx.setTransform(DPR * U, 0, 0, DPR * U, DPR * OX, DPR * OY);
-  drawHud();
+  if (App.screen !== 'result') drawHud();   // 記録用紙のあいだは、記録板をひっこめる
+  if (App.screen === 'play') drawRival();
   drawPopups();
   if (Game.mode === 'ready') {
     const q = Game.readyT / CFG.readySecs;
-    txt('よーい…', 50, 100, 16 + 2 * Math.sin(q * 6), '#fff', { stroke: '#213a86', sw: 3 });
+    txt(STR.hud.ready, 50, 100, 16 + 2 * Math.sin(q * 6), '#fff', { stroke: '#213a86', sw: 3 });
   }
   if (flash > 0) {
     cx.fillStyle = 'rgba(255,255,255,' + flash * 0.9 + ')';
@@ -814,6 +1104,25 @@ const Snd = (() => {
       noise(t, 0.5, { f: 1200, f2: 600, q: 1.2, gain: 0.12, env: [[0, 0], [0.3, 1], [1, 0]] });
       noise(t + 0.6, 0.5, { f: 1200, f2: 600, q: 1.2, gain: 0.1, env: [[0, 0], [0.3, 1], [1, 0]] });
     },
+    // ライバルの記録を超えた：四角い音のピロリン（段階アップの三角波と区別がつくように）
+    rival() {
+      if (!ac) return; const t = now();
+      tone(1175, t, 0.12, { type: 'square', gain: 0.07 });
+      tone(1568, t + 0.09, 0.14, { type: 'square', gain: 0.07 });
+      tone(2093, t + 0.18, 0.3, { type: 'square', gain: 0.08 });
+      tone(3136, t + 0.18, 0.4, { type: 'sine', gain: 0.07 });
+    },
+    // 勝ち負けの判子のあと
+    win() {
+      if (!ac) return; const t = now();
+      [523.3, 659.3, 784, 1046.5].forEach((f, i) => tone(f, t + i * 0.08, 0.3, { type: 'triangle', gain: 0.13 }));
+      this.cheer(5, true);
+    },
+    lose() {
+      if (!ac) return; const t = now();
+      tone(392, t, 0.18, { type: 'triangle', gain: 0.14 });
+      tone(311, t + 0.16, 0.4, { type: 'triangle', gain: 0.14, f2: 262 });
+    },
     // 記録用紙にポン
     stamp() {
       if (!ac) return; const t = now();
@@ -822,22 +1131,46 @@ const Snd = (() => {
     },
   };
 })();
-// ===== 操作・ループ・結果・共有 =====
-const BEST_KEY = 'hanpuku-yokotobi-best';
-function loadBest() { try { return parseInt(localStorage.getItem(BEST_KEY), 10) || 0; } catch (_) { return 0; } }
-function saveBest(v) { try { localStorage.setItem(BEST_KEY, String(v)); } catch (_) {} }
+// ===== 画面の流れ・操作・ループ・結果・共有 =====
 const fmt = n => n.toLocaleString('ja-JP');
+const esc = s => s.replace(/[&<>"]/g, c => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;' }[c]));
+// 「|」で区切った言葉を、文節ごとに途中で改行しない塊にして HTML にする
+const phHtml = s => s.split('|').map(p => '<span class="nb">' + esc(p) + '</span>').join('');
 
-let shownResult = false, rollT = 1, stampDone = true, last = 0, murLvl = -1;
-const LV_TEXT = ['', 'ぶんしん！', '4にん！', '8にん！！', '16にん！！', '32にん！！！', '測定不能！！！'];
-const LV_COLOR = ['', '#2c4aa0', '#1f8f6a', '#e08a1a', '#e0502a', '#d2382f', '#b01a8a'];
-const CROWD = ['わー！', 'すげー！', 'はやっ！', 'なにあれ！', 'ぶんしん！？', 'えええ！', '2人いる！', '見えない！'];
+// 保存（localStorage が使えないとき＝data: URL やプライベートモードでも止まらない）
+const store = {
+  getItem(k) { try { return localStorage.getItem(k); } catch (_) { return null; } },
+  setItem(k, v) { try { localStorage.setItem(k, v); } catch (_) {} },
+};
+let SAVE = Tourney.load(store);
+
+// 画面：title → list（大会の一覧）→ intro（ライバルの紹介）→ play（測定）→ result（記録用紙）→ list …。ending は宇宙大会に初めて勝ったあと
+const App = { screen: 'title', idx: 0, introAt: 0, res: null, pendingEnding: false };
+
+let shownResult = false, rollT = 1, stampDone = true, vsT = -1, last = 0, murLvl = -1;
 let crowdT = 0;
+
+// 文字を画面に入れる（data-s＝そのまま、data-p＝「|」で文節に分ける）
+function strAt(path) { return path.split('.').reduce((o, k) => o[k], STR); }
+function applyStrings() {
+  for (const el of document.querySelectorAll('[data-s]')) el.textContent = strAt(el.dataset.s);
+  for (const el of document.querySelectorAll('[data-p]')) el.innerHTML = phHtml(strAt(el.dataset.p));
+}
+
+function setScreen(s) {
+  App.screen = s;
+  $('title').classList.toggle('hide', s !== 'title');
+  $('list').classList.toggle('on', s === 'list');
+  $('intro').classList.toggle('on', s === 'intro');
+  $('ending').classList.toggle('on', s === 'ending');
+  if (s !== 'result') $('result').classList.remove('show', 'wait');
+}
 
 function tap(side) {
   Snd.init();
-  if (Game.mode === 'title') { Game.begin(); return; }
-  Game.input(side);
+  if (App.screen === 'title') { openList(); return; }
+  if (App.screen === 'intro') { if (nowT - App.introAt > 0.3) startRun(); return; }
+  if (App.screen === 'play') Game.input(side);
 }
 
 function bindUI() {
@@ -852,41 +1185,111 @@ function bindUI() {
     if (k === 'ArrowLeft' || k === 'a' || k === 'A') { e.preventDefault(); tap(-1); }
     else if (k === 'ArrowRight' || k === 'd' || k === 'D') { e.preventDefault(); tap(1); }
     else if (k === ' ' || k === 'Enter') {
-      e.preventDefault();
-      if (Game.mode === 'title') { Snd.init(); Game.begin(); }
-      else if (Game.mode === 'over' && !$('result').classList.contains('wait')) { Snd.init(); retry(); }
+      if (e.target && e.target.tagName === 'BUTTON') return;   // ボタンの上では、そのボタン自身の操作にまかせる
+      e.preventDefault(); Snd.init();
+      if (App.screen === 'title') openList();
+      else if (App.screen === 'list') openIntro(Tourney.focusIndex(SAVE));
+      else if (App.screen === 'intro') { if (nowT - App.introAt > 0.3) startRun(); }
+      else if (App.screen === 'result' && !$('result').classList.contains('wait')) retry();
+      else if (App.screen === 'ending') openList();
     }
   });
   window.addEventListener('resize', resize);
   window.addEventListener('contextmenu', e => e.preventDefault());
   $('retry').addEventListener('click', () => { Snd.init(); retry(); });
+  $('toList').addEventListener('click', () => { Snd.init(); if (App.pendingEnding) showEnding(); else openList(); });
   $('share').addEventListener('click', share);
+  $('listBack').addEventListener('click', () => { resetRun(); setScreen('title'); });
+  $('inBack').addEventListener('click', () => openList());
+  $('endBtn').addEventListener('click', () => openList());
+  $('listBody').addEventListener('click', e => {
+    const b = e.target.closest('.tn');
+    if (b && !b.disabled) { Snd.init(); openIntro(+b.dataset.i); }
+  });
 }
 
-function retry() {
+// ---- 画面を開く ----
+function resetRun() {
   Game.reset();
-  shownResult = false; stampDone = true; rollT = 1;
+  shownResult = false; stampDone = true; rollT = 1; vsT = -1;
   popups.length = 0; smoke.length = 0; hist.length = 0;
   for (const c of CL) c.app = 0;
-  lvlShown = 0; murLvl = -1; tripAt = -99;
+  lvlShown = 0; murLvl = -1; tripAt = -99; rivalPassed = false; rivalPassAt = -99;
   Snd.murmur(0);
-  $('result').classList.remove('show', 'wait');
-  $('stamp').classList.remove('on');
-  $('title').classList.remove('hide');
-  Game.begin();   // 「もう一回」はそのまま「よーい」から
+  $('stamp').classList.remove('on'); $('vsStamp').classList.remove('on');
 }
 
-// 結果の数字
+function openList() {
+  resetRun();
+  App.pendingEnding = false;
+  renderList();
+  setScreen('list');
+}
+
+function renderList() {
+  const n = Tourney.count(), L = STR.list;
+  let html = '';
+  for (let i = 0; i < n; i++) {
+    const st = Tourney.status(SAVE, i), T = STR.tournaments[i], R = T.rival;
+    const locked = st === 'locked';
+    const sub = locked ? L.hidden : L.vs + ' ' + R.short + '　' + fmt(CFG.targets[i]) + L.unit;
+    const best = SAVE.best[i] > 0 ? L.best + ' ' + fmt(SAVE.best[i]) : (locked ? '' : L.noBest);
+    const tag = st === 'won' ? L.tagWon : st === 'next' ? L.tagNext : L.tagLocked;
+    html += '<button class="tn ' + st + '" data-i="' + i + '"' + (locked ? ' disabled' : '') + '>'
+      + '<span class="no">' + (i + 1) + '</span>'
+      + '<span class="mid"><span class="nm">' + esc(T.name) + '</span><span class="sb">' + esc(sub) + '</span></span>'
+      + '<span class="rt"><span class="tag">' + esc(tag) + '</span><span class="bs">' + esc(best) + '</span></span>'
+      + '</button>';
+  }
+  $('listBody').innerHTML = html;
+  $('listProg').textContent = L.progress(Tourney.wonCount(SAVE), n);
+}
+
+function openIntro(i) {
+  if (!Tourney.playable(SAVE, i)) return;
+  resetRun();
+  App.idx = i;
+  const T = STR.tournaments[i], I = STR.intro;
+  $('inName').textContent = ph(T.name);
+  $('inRival').innerHTML = phHtml(T.rival.name);
+  $('inSay').innerHTML = '「' + phHtml(T.rival.say) + '」';
+  $('inRec').innerHTML = esc(fmt(CFG.targets[i])) + '<small>' + esc(I.unit) + '</small>';
+  $('inBest').textContent = SAVE.best[i] > 0 ? I.best + ' ' + fmt(SAVE.best[i]) + ' ' + I.unit : '';
+  setScreen('intro');
+  App.introAt = nowT;
+}
+
+// 測定をはじめる（「よーい」から）。結果からの「もう一回」もここ＝1タップ
+function startRun() {
+  resetRun();
+  setScreen('play');
+  Game.begin();
+}
+function retry() { startRun(); }
+
+function showEnding() {
+  App.pendingEnding = false;
+  $('endBest').textContent = STR.ending.best(fmt(SAVE.best[Tourney.count() - 1]));
+  $('endBtn').textContent = STR.ending.list;
+  setScreen('ending');
+}
+
+// ---- 結果 ----
 function resultInfo() {
   return { rec: Game.rec, steps: Game.steps, maxN: Game.maxN, trips: Game.trips, judge: judgeFor(Game.rec) };
 }
 
+// 長い数字は小さく（枠からはみ出さないように）
+function fitNum(el) { el.className = el.textContent.length > 9 ? 'l3' : el.textContent.length > 6 ? 'l2' : ''; }
+
 function showResult() {
   shownResult = true;
-  const r = resultInfo();
-  const best = loadBest();
-  const isBest = r.rec > best;
-  if (isBest) saveBest(r.rec);
+  const r = resultInfo(), i = App.idx, S = STR.sheet, T = STR.tournaments[i];
+  const info = Tourney.record(SAVE, i, r.rec);
+  Tourney.persist(store, SAVE);
+  App.res = info; App.pendingEnding = info.ending;
+  setScreen('result');
+  $('rName').textContent = T.name;
   $('rSteps').textContent = fmt(r.steps);
   $('rMaxN').textContent = fmt(r.maxN);
   $('rTrips').textContent = fmt(r.trips);
@@ -894,33 +1297,65 @@ function showResult() {
   const st = $('stamp');
   st.textContent = r.judge;
   st.className = r.judge.length > 1 ? 'long' : '';
-  $('rJudge').textContent = r.rec >= 1000 ? '記録係は ぜんいん 数えました' : r.maxN >= 2 ? '分身も ぜんいん 数えられました' : '';
-  $('rBest').textContent = isBest && best > 0 ? 'ベスト こうしん！' : best > 0 ? 'ベスト ' + fmt(Math.max(best, r.rec)) + ' 回' : '';
+  $('rJudge').innerHTML = r.rec >= 1000 ? phHtml(S.judgeAll) : r.maxN >= 2 ? phHtml(S.judgeClone) : '';
+  const best = SAVE.best[i];
+  $('rBest').textContent = info.isBest && info.prevBest > 0 ? S.bestNew : best > 0 ? S.best(fmt(best)) : '';
+  // ライバルとの比べ
+  const tg = CFG.targets[i];
+  $('vs').className = info.win ? 'win' : 'lose';
+  $('vsRLb').textContent = S.rival(T.rival.short);
+  $('vsRRec').textContent = fmt(tg); fitNum($('vsRRec'));
+  $('vsYou').textContent = '0';
+  $('vsStamp').textContent = info.win ? S.win : S.lose;
+  let note = '';
+  if (info.ending) note = S.noteEnd;
+  else if (info.unlockedNext) note = S.noteUnlock(STR.tournaments[i + 1].name);
+  else if (info.win) note = S.noteReplay;
+  else note = S.noteLose(fmt(tg - r.rec + 1));
+  $('vsNote').innerHTML = phHtml(note);
+  $('toList').textContent = info.ending ? S.cont : S.toList;
   const el = $('result');
   el.classList.add('show', 'wait');   // 指が離れる前にボタンを押してしまわないように、少しの間は触れない
   setTimeout(() => el.classList.remove('wait'), 700);
-  rollT = 0; stampDone = false;
+  rollT = 0; stampDone = false; vsT = -1;
 }
 
 function updateResult(dt) {
   if (rollT < 1) {
     rollT = Math.min(1, rollT + dt / 0.9);
-    $('rRec').textContent = fmt(Math.round(Game.rec * easeOut(rollT)));
+    const v = fmt(Math.round(Game.rec * easeOut(rollT)));
+    $('rRec').textContent = v;
+    $('vsYou').textContent = v; fitNum($('vsYou'));
   } else if (!stampDone) {
     stampDone = true;
     $('stamp').classList.add('on');
     Snd.stamp();
+    vsT = 0.45;
+  } else if (vsT > 0) {
+    vsT -= dt;
+    if (vsT <= 0) {
+      $('vsStamp').classList.add('on');
+      if (App.res && App.res.win) Snd.win(); else Snd.lose();
+    }
   }
+}
+
+// ライバルの記録を超えた瞬間：音と文字と札のふくらみ
+function checkRival() {
+  if (App.screen !== 'play' || rivalPassed || Game.mode !== 'play') return;
+  if (!Tourney.beats(Game.rec, App.idx)) return;
+  rivalPassed = true; rivalPassAt = nowT;
+  Snd.rival();
+  flash = Math.max(flash, 0.14);
+  addPopup(STR.pop.rival, 50, 76, 8.5, '#e0356f', 1.3, 10, '#fff');
 }
 
 // ゲームの出来事を、見た目と音の反応にする
 function reactToEvents() {
   for (const e of Game.events) {
-    if (e.type === 'ready') {
-      $('title').classList.add('hide');
-    } else if (e.type === 'start') {
+    if (e.type === 'start') {
       Snd.whistleStart();
-      addPopup('スタート！', 50, 100, 17, '#e0356f', 0.9, 14, '#fff');
+      addPopup(STR.pop.start, 50, 100, 17, '#e0356f', 0.9, 14, '#fff');
     } else if (e.type === 'step') {
       Snd.squeak();
       hudPop = 1;
@@ -928,22 +1363,23 @@ function reactToEvents() {
     } else if (e.type === 'trip') {
       Snd.trip();
       tripAt = nowT; shakeT = 0.12;
-      addPopup(e.from === 1 ? 'もつれた！' : 'はみだした！', xOf(Game.xv, 1), 100, 8, '#d2382f', 0.8, 10, '#fff');
-      if (e.was - e.lvl > 0) addPopup('勢い ダウン', 50, 118, 6, '#2c4aa0', 0.8, 6, '#fff');
+      addPopup(e.from === 1 ? STR.pop.stumble : STR.pop.out, xOf(Game.xv, 1), 100, 8, '#d2382f', 0.8, 10, '#fff');
+      if (e.was - e.lvl > 0) addPopup(STR.pop.down, 50, 118, 6, '#2c4aa0', 0.8, 6, '#fff');
     } else if (e.type === 'lvl') {
       if (e.up) {
         Snd.levelUp(e.lvl);
+        const LV_COLOR = ['', '#2c4aa0', '#1f8f6a', '#e08a1a', '#e0502a', '#d2382f', '#b01a8a'];
         flash = 0.12 + 0.05 * e.lvl; shakeT = 0.1;
-        addPopup(LV_TEXT[e.lvl], 50, 84, 12 + e.lvl * 0.6, LV_COLOR[e.lvl], 1.1, 10, '#fff');
+        addPopup(STR.pop.lv[e.lvl], 50, 84, 12 + e.lvl * 0.6, LV_COLOR[e.lvl], 1.1, 10, '#fff');
         puffSmoke(e.lvl >= 4 ? 8 : 0);
       }
     } else if (e.type === 'end') {
       Snd.whistleEnd();
       lvlShown = Game.lvl;
-      addPopup('そこまで！', 50, 90, 18, '#2c4aa0', 1.4, 8, '#fff');
+      addPopup(STR.pop.end, 50, 90, 18, '#2c4aa0', 1.4, 8, '#fff');
       setTimeout(() => Snd.pant(), 500);
       setTimeout(() => Snd.pant(), 1400);
-      for (let i = 0; i < 5; i++) addPopup('ゼーゼー', 22 + i * 14, 112 + (i % 2) * 14, 5, '#55608a', 1.8, 6, '#fff');
+      for (let i = 0; i < 5; i++) addPopup(STR.pop.pant, 22 + i * 14, 112 + (i % 2) * 14, 5, '#55608a', 1.8, 6, '#fff');
     }
   }
   Game.events.length = 0;
@@ -961,7 +1397,7 @@ function crowdTalk(dt) {
   const cand = SP.filter(p => p.app > 0.7 && p.x > 2 && p.x < 98);
   if (!cand.length) return;
   const p = cand[Math.floor(Math.random() * cand.length)];
-  addPopup(CROWD[Math.floor(Math.random() * CROWD.length)], p.x, p.y - 22, 3.8, '#2b2b3a', 0.9, 5, '#fff');
+  addPopup(STR.pop.crowd[Math.floor(Math.random() * STR.pop.crowd.length)], p.x, p.y - 22, 3.8, '#2b2b3a', 0.9, 5, '#fff');
 }
 
 function frame(ts) {
@@ -969,7 +1405,8 @@ function frame(ts) {
   last = ts; nowT += dt;
   Game.step(dt);
   reactToEvents();
-  if (Game.mode === 'over' && !shownResult) showResult();
+  checkRival();
+  if (Game.mode === 'over' && !shownResult && App.screen === 'play') showResult();
   if (shownResult) updateResult(dt);
   crowdTalk(dt);
   updateVisual(dt);
@@ -979,8 +1416,8 @@ function frame(ts) {
 
 // ===== 共有（記録用紙のカード）=====
 function shareText() {
-  const r = resultInfo();
-  return '分身反復横とびで 記録 ' + fmt(r.rec) + ' 回（本当は ' + r.steps + ' 回）、判定「' + r.judge + '」！ 分身 ' + r.maxN + ' 人 #分身反復横とび';
+  const r = resultInfo(), win = !!(App.res && App.res.win);
+  return STR.share.text(ph(STR.tournaments[App.idx].name), fmt(r.rec), r.steps, r.judge, r.maxN, win);
 }
 function shareUrl() {
   const web = /^https?:/.test(location.protocol) && !/^(localhost|127\.0\.0\.1)/.test(location.host);
@@ -988,7 +1425,7 @@ function shareUrl() {
 }
 function makeShareImage() {
   return new Promise(resolve => {
-    const Wd = 1080, Ht = 1350, r = resultInfo();
+    const Wd = 1080, Ht = 1350, r = resultInfo(), K = STR.share.card;
     const cc = document.createElement('canvas');
     cc.width = Wd; cc.height = Ht;
     const c = cc.getContext('2d');
@@ -997,13 +1434,13 @@ function makeShareImage() {
     c.fillStyle = '#fffdf2'; c.strokeStyle = '#2c4aa0'; c.lineWidth = 10;
     rr(c, 90, 90, Wd - 180, Ht - 330, 22); c.fill(); c.stroke();
     c.textAlign = 'center'; c.textBaseline = 'alphabetic';
-    c.fillStyle = '#2c4aa0'; c.font = 'bold 66px ' + FONT; c.fillText('体力測定 記録用紙', Wd / 2, 210);
+    c.fillStyle = '#2c4aa0'; c.font = 'bold 66px ' + FONT; c.fillText(K.head, Wd / 2, 210);
     c.fillRect(150, 240, Wd - 300, 6);
-    c.fillStyle = '#55608a'; c.font = '48px ' + FONT; c.textAlign = 'left'; c.fillText('種目', 160, 330);
-    c.textAlign = 'right'; c.fillStyle = '#2b2b3a'; c.font = 'bold 54px ' + FONT; c.fillText('反復横とび', Wd - 160, 330);
-    c.textAlign = 'left'; c.fillStyle = '#55608a'; c.font = 'bold 52px ' + FONT; c.fillText('記録', 160, 520);
+    c.fillStyle = '#55608a'; c.font = '48px ' + FONT; c.textAlign = 'left'; c.fillText(K.kind, 160, 330);
+    c.textAlign = 'right'; c.fillStyle = '#2b2b3a'; c.font = 'bold 54px ' + FONT; c.fillText(K.kindVal, Wd - 160, 330);
+    c.textAlign = 'left'; c.fillStyle = '#55608a'; c.font = 'bold 52px ' + FONT; c.fillText(K.rec, 160, 520);
     c.textAlign = 'right'; c.fillStyle = '#d2382f'; c.font = '900 200px ' + FONT; c.fillText(fmt(r.rec), Wd - 260, 560);
-    c.fillStyle = '#55608a'; c.font = 'bold 58px ' + FONT; c.fillText('回', Wd - 160, 560);
+    c.fillStyle = '#55608a'; c.font = 'bold 58px ' + FONT; c.fillText(K.unit, Wd - 160, 560);
     // 判定の判子
     c.save(); c.translate(Wd - 230, 360); c.rotate(-0.25);
     c.strokeStyle = '#d2382f'; c.fillStyle = '#d2382f'; c.lineWidth = 12;
@@ -1012,7 +1449,7 @@ function makeShareImage() {
     if (r.judge.length > 3) { c.fillText(r.judge.slice(0, 3), 0, -6); c.fillText(r.judge.slice(3), 0, 40); }
     else c.fillText(r.judge, 0, r.judge.length > 1 ? 14 : 38);
     c.restore();
-    const rows = [['本当の回数', fmt(r.steps) + ' 回'], ['最高の分身', fmt(r.maxN) + ' 人'], ['転んだ回数', fmt(r.trips) + ' 回']];
+    const rows = [[K.steps, fmt(r.steps) + K.times], [K.maxN, fmt(r.maxN) + K.people], [K.trips, fmt(r.trips) + K.times]];
     rows.forEach(([a, b], i) => {
       const y = 700 + i * 110;
       c.strokeStyle = '#9aa7d0'; c.lineWidth = 3; c.setLineDash([12, 10]); c.beginPath(); c.moveTo(150, y + 28); c.lineTo(Wd - 150, y + 28); c.stroke(); c.setLineDash([]);
@@ -1039,6 +1476,7 @@ async function share() {
   }
   window.open('https://twitter.com/intent/tweet?text=' + encodeURIComponent(text) + '&url=' + encodeURIComponent(url), '_blank', 'noopener');
 }
+applyStrings();
 Game.reset();
 resize();
 bindUI();

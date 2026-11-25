@@ -103,6 +103,25 @@ const Snd = (() => {
       noise(t, 0.5, { f: 1200, f2: 600, q: 1.2, gain: 0.12, env: [[0, 0], [0.3, 1], [1, 0]] });
       noise(t + 0.6, 0.5, { f: 1200, f2: 600, q: 1.2, gain: 0.1, env: [[0, 0], [0.3, 1], [1, 0]] });
     },
+    // ライバルの記録を超えた：四角い音のピロリン（段階アップの三角波と区別がつくように）
+    rival() {
+      if (!ac) return; const t = now();
+      tone(1175, t, 0.12, { type: 'square', gain: 0.07 });
+      tone(1568, t + 0.09, 0.14, { type: 'square', gain: 0.07 });
+      tone(2093, t + 0.18, 0.3, { type: 'square', gain: 0.08 });
+      tone(3136, t + 0.18, 0.4, { type: 'sine', gain: 0.07 });
+    },
+    // 勝ち負けの判子のあと
+    win() {
+      if (!ac) return; const t = now();
+      [523.3, 659.3, 784, 1046.5].forEach((f, i) => tone(f, t + i * 0.08, 0.3, { type: 'triangle', gain: 0.13 }));
+      this.cheer(5, true);
+    },
+    lose() {
+      if (!ac) return; const t = now();
+      tone(392, t, 0.18, { type: 'triangle', gain: 0.14 });
+      tone(311, t + 0.16, 0.4, { type: 'triangle', gain: 0.14, f2: 262 });
+    },
     // 記録用紙にポン
     stamp() {
       if (!ac) return; const t = now();

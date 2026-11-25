@@ -25,6 +25,7 @@ const easeOut = p => 1 - (1 - p) * (1 - p);
 // ---- 演出の状態 ----
 const popups = [], smoke = [], hist = [];
 let hudPop = 0, flash = 0, shakeT = 0, tripAt = -99, lvlShown = 0, bubbleT = 0;
+let rivalPassed = false, rivalPassAt = -99;   // 測定中にライバルの記録を超えたか
 const CL = [];   // 分身 k=1..31 の見た目の状態
 for (let k = 0; k < 48; k++) CL.push({ app: 0 });
 
@@ -149,7 +150,7 @@ function drawGym() {
   // 横断幕「体力測定」と舞台
   cx.fillStyle = '#d2382f'; rr(cx, 22, 40.5, 56, 9, 1); cx.fill();
   cx.fillStyle = '#f6c84c'; cx.fillRect(22, 40.5, 56, 0.8); cx.fillRect(22, 48.7, 56, 0.8);
-  txt('体力測定', 50, 45.2, 6.2, '#fff', { stroke: '#8f221c', sw: 1.1 });
+  txt(STR.hud.banner, 50, 45.2, 6.2, '#fff', { stroke: '#8f221c', sw: 1.1 });
   cx.fillStyle = '#9a1f2a'; cx.fillRect(34, 50, 32, 7);   // 舞台の幕
   const fl = Math.sin(nowT * (lv >= 6 ? 14 : 2)) * (lv >= 4 ? 0.7 : 0.1);
   for (let i = 0; i < 8; i++) { cx.fillStyle = i % 2 ? '#b02a35' : '#8a1a24'; cx.fillRect(34 + i * 4 + fl * (i % 3 - 1), 50, 4, 7); }
@@ -348,7 +349,6 @@ function recorderFace(x, y, r) {
   }
 }
 
-const BUBBLE = ['いーち、にー…', 'は、はやっ！', 'えっ…？ にー、よん…', 'ひとが ふえてる…', 'ゆ、ゆかが…！', 'でんたく でんたく…！', 'そ、測定不能…！'];
 function drawHud() {
   const play = Game.mode === 'play', lv = Game.lvl;
   // 記録板
@@ -356,26 +356,52 @@ function drawHud() {
   cx.fillStyle = '#fffdf2'; rr(cx, 3, 2.4, 94, 35, 3); cx.fill();
   cx.strokeStyle = '#2c4aa0'; cx.lineWidth = 0.9; rr(cx, 3, 2.4, 94, 35, 3); cx.stroke();
   recorderFace(15, 13.5, 6.3);
-  txt('記録', 52, 8.6, 3.4, '#55608a');
+  txt(STR.hud.rec, 52, 8.6, 3.4, '#55608a');
   const pop = 1 + 0.16 * hudPop;
   cx.save(); cx.translate(52, 19.8); cx.scale(pop, pop);
   txt(String(Game.rec), 0, 0, Game.rec >= 10000 ? 9.5 : 12, '#d2382f');
   cx.restore();
-  txt('ほんとうは ' + Game.steps + ' 回', 52, 27.6, 2.6, '#55608a');
+  txt(STR.hud.real(Game.steps), 52, 27.6, 2.6, '#55608a');
   // 残り時間
   const left = Game.mode === 'title' || Game.mode === 'ready' ? CFG.duration : clamp(CFG.duration - Game.t, 0, CFG.duration);
-  txt('のこり', 85, 8.6, 3.4, '#55608a');
+  txt(STR.hud.left, 85, 8.6, 3.4, '#55608a');
   txt(String(Math.ceil(left - 1e-9)), 85, 19.8, 12, left <= 5 && play ? '#e03030' : '#2c4aa0');
   // 時間の帯
   cx.fillStyle = '#dde3f3'; rr(cx, 6, 34.7, 88, 1.5, 0.75); cx.fill();
   cx.fillStyle = left <= 5 ? '#e03030' : '#2c9a6a'; rr(cx, 6, 34.7, Math.max(1.5, 88 * left / CFG.duration), 1.5, 0.75); cx.fill();
   // 記録係のひとこと
-  let b = BUBBLE[lv];
-  if (Game.mode === 'finish') b = 'そこまで！ きろくします…';
-  else if (Game.mode === 'over') b = '…' + Game.rec + ' 回です。';
-  else if (Game.mode === 'title') b = 'よーい…';
-  else if (Game.mode === 'ready') b = 'よーい…';
+  let b = STR.hud.bubble[lv];
+  if (Game.mode === 'finish') b = STR.hud.bFinish;
+  else if (Game.mode === 'over') b = STR.hud.bOver(Game.rec);
+  else if (Game.mode === 'title') b = STR.hud.bReady;
+  else if (Game.mode === 'ready') b = STR.hud.bReady;
   txt(b, 52, 31.8, 2.8, '#2b2b3a', { align: 'center' });
+}
+
+// 文字が枠に入りきらないときは、その幅に縮める
+function fitTxt(s, x, y, size, maxW, fill) {
+  cx.font = 'bold ' + size + 'px ' + FONT;
+  const w = cx.measureText(s).width;
+  txt(s, x, y, w > maxW ? size * maxW / w : size, fill);
+}
+// ライバルの札：記録板の下、右の端。記録に合わせて下から色が満ち、超えると金色になる
+function drawRival() {
+  const i = App.idx, R = STR.tournaments[i].rival, tg = CFG.targets[i];
+  const passed = rivalPassed, prog = clamp(Game.rec / tg, 0, 1);
+  const w = 18, h = 13.2, q = clamp((nowT - rivalPassAt) / 0.6, 0, 1);
+  const sc = passed && q < 1 ? 1 + 0.25 * Math.sin(q * Math.PI) : 1;
+  cx.save(); cx.translate(79 + w / 2, 40 + h / 2); cx.scale(sc, sc); cx.translate(-w / 2, -h / 2);
+  cx.fillStyle = '#0002'; rr(cx, 0, 0.7, w, h, 1.6); cx.fill();
+  cx.fillStyle = 'rgba(255,253,242,.94)'; rr(cx, 0, 0, w, h, 1.6); cx.fill();
+  cx.save(); rr(cx, 0, 0, w, h, 1.6); cx.clip();
+  cx.fillStyle = passed ? 'rgba(246,200,76,.85)' : 'rgba(150,175,235,.45)';
+  cx.fillRect(0, h * (1 - prog), w, h * prog);
+  cx.restore();
+  cx.strokeStyle = passed ? '#c98a10' : '#2c4aa0'; cx.lineWidth = 0.5; rr(cx, 0, 0, w, h, 1.6); cx.stroke();
+  txt(passed ? STR.hud.passed : STR.hud.vs, w / 2, 2.4, 2.1, passed ? '#8a5a00' : '#55608a');
+  fitTxt(R.short, w / 2, 5.9, 2.9, w - 2, '#2b2b3a');
+  fitTxt(fmt(tg), w / 2, 10, 3.8, w - 2, passed ? '#8a5a00' : '#d2382f');
+  cx.restore();
 }
 
 function drawPopups() {
@@ -404,11 +430,12 @@ function render() {
   drawBodies();
   drawSmoke();
   cx.setTransform(DPR * U, 0, 0, DPR * U, DPR * OX, DPR * OY);
-  drawHud();
+  if (App.screen !== 'result') drawHud();   // 記録用紙のあいだは、記録板をひっこめる
+  if (App.screen === 'play') drawRival();
   drawPopups();
   if (Game.mode === 'ready') {
     const q = Game.readyT / CFG.readySecs;
-    txt('よーい…', 50, 100, 16 + 2 * Math.sin(q * 6), '#fff', { stroke: '#213a86', sw: 3 });
+    txt(STR.hud.ready, 50, 100, 16 + 2 * Math.sin(q * 6), '#fff', { stroke: '#213a86', sw: 3 });
   }
   if (flash > 0) {
     cx.fillStyle = 'rgba(255,255,255,' + flash * 0.9 + ')';

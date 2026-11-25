@@ -31,22 +31,76 @@ body{display:flex;align-items:center;justify-content:center}
   padding:2cqw 8cqw;box-shadow:0 1.2cqw 0 #a82350;animation:blink 1.1s ease-in-out infinite}
 @keyframes blink{50%{transform:scale(1.07)}}
 
+/* 大会の一覧・測定前（ライバルの紹介）・エンディング */
+.scr{position:absolute;inset:0;z-index:25;display:none;flex-direction:column;pointer-events:auto;
+  background:#f1e6c2;box-shadow:0 0 0 100vmax #f1e6c2;padding:5cqw 5cqw 4.5cqw;gap:2cqw}
+.scr.on{display:flex;animation:fade .22s ease-out}
+@keyframes fade{from{opacity:0}to{opacity:1}}
+#list .hd{display:flex;justify-content:space-between;align-items:baseline;font-size:6.2cqw;font-weight:900;color:#2c4aa0;
+  border-bottom:.6cqw solid #2c4aa0;padding-bottom:1.4cqw;letter-spacing:.5cqw;white-space:nowrap}
+#list .hd small{font-size:3.8cqw;color:#55608a;letter-spacing:0;font-weight:bold}
+#listBody{flex:1;min-height:0;display:flex;flex-direction:column;gap:1.8cqw;overflow-y:auto;touch-action:pan-y;padding:1cqw 1.4cqw 1.4cqw}
+.tn{flex:1 1 0;min-height:12.5cqw;max-height:17cqw;display:grid;grid-template-columns:8.4cqw minmax(0,1fr) auto;align-items:center;column-gap:2.6cqw;
+  border:.5cqw solid #2c4aa0;border-radius:2cqw;background:#fffdf2;padding:0 2.8cqw 0 2.4cqw;font:inherit;color:#2b2b3a;text-align:left;
+  cursor:pointer;box-shadow:0 .8cqw 0 #1c3170;touch-action:manipulation}
+.tn:active:not(:disabled){transform:translateY(.6cqw);box-shadow:0 .2cqw 0 #1c3170}
+.tn .no{width:8.4cqw;height:8.4cqw;border-radius:50%;background:#2c4aa0;color:#fff;font-weight:900;font-size:4.6cqw;display:flex;align-items:center;justify-content:center}
+.tn .mid{display:flex;flex-direction:column;gap:.5cqw;min-width:0}
+.tn .nm{font-size:4.7cqw;font-weight:bold;white-space:nowrap}
+.tn .sb{font-size:3.3cqw;color:#55608a;white-space:nowrap}
+.tn .rt{display:flex;flex-direction:column;align-items:flex-end;gap:.7cqw}
+.tn .tag{font-size:3.3cqw;font-weight:900;border:.45cqw solid;border-radius:1.4cqw;padding:0 1.6cqw;white-space:nowrap;line-height:1.5}
+.tn .bs{font-size:3.2cqw;color:#55608a;white-space:nowrap}
+.tn.won .tag{color:#d2382f;border-color:#d2382f;transform:rotate(-5deg)}
+.tn.next{border-color:#e0356f;box-shadow:0 .8cqw 0 #a82350;animation:nextp 1.2s ease-in-out infinite}
+.tn.next .tag{background:#e0356f;border-color:#e0356f;color:#fff}
+.tn.next .no{background:#e0356f}
+@keyframes nextp{50%{transform:scale(1.025)}}
+.tn.locked{background:#e6dfc6;border-color:#a6a18a;color:#8b8672;box-shadow:none;cursor:default}
+.tn.locked .no{background:#a6a18a}
+.tn.locked .sb,.tn.locked .bs{color:#9b9680}
+.tn.locked .tag{color:#9b9680;border-color:#b3ae98}
+#list .back,#intro .back{align-self:center;height:9cqw;padding:0 7cqw;font-size:3.8cqw;background:transparent;color:#2c4aa0;
+  border:.5cqw solid #2c4aa0;border-radius:3cqw;box-shadow:0 .6cqw 0 #2c4aa066;white-space:nowrap;pointer-events:auto}
+
+#intro .back{background:#fffdf2e8}
+#intro{position:absolute;left:6cqw;right:6cqw;top:51cqw;z-index:25;display:none;flex-direction:column;align-items:center;gap:3cqw;text-align:center}
+#intro.on{display:flex;animation:pop .3s cubic-bezier(.3,1.5,.5,1)}
+#inName{font-size:5cqw;font-weight:bold;color:#fff;background:#d2382f;border-radius:5cqw;padding:.8cqw 5cqw;letter-spacing:.5cqw;box-shadow:0 .8cqw 0 #8f221c;white-space:nowrap}
+#inCard{width:100%;background:#fffdf2;border:.7cqw solid #2c4aa0;border-radius:1.6cqw;box-shadow:0 2cqw 0 #1c3170,0 3cqw 6cqw #0006;
+  padding:4cqw 4cqw 4.4cqw;display:flex;flex-direction:column;align-items:center;gap:1.4cqw}
+#inCard .lb{font-size:3.6cqw;color:#55608a;font-weight:bold;letter-spacing:.4cqw}
+#inRival{font-size:8cqw;font-weight:900;color:#2b2b3a;line-height:1.15}
+#inSay{font-size:4.2cqw;color:#2b2b3a;line-height:1.5;margin-bottom:1cqw}
+#inCard .rule{width:100%;border-top:.3cqw dashed #9aa7d0;margin:.6cqw 0 .2cqw}
+#inRec{font-size:15cqw;font-weight:900;line-height:1;color:#d2382f;font-variant-numeric:tabular-nums;white-space:nowrap}
+#inRec small{font-size:5cqw;color:#55608a;font-weight:bold;margin-left:.8cqw}
+#inBest{font-size:3.6cqw;color:#55608a;min-height:4.6cqw}
+#intro .go{font-size:6cqw;font-weight:bold;color:#fff;background:#e0356f;border-radius:6cqw;padding:2cqw 8cqw;box-shadow:0 1.2cqw 0 #a82350;
+  white-space:nowrap;animation:blink 1.1s ease-in-out infinite}
+
+#ending{align-items:center;justify-content:center;text-align:center;gap:4cqw;background:#1c2160;box-shadow:0 0 0 100vmax #1c2160}
+#ending .big{font-size:12cqw;font-weight:900;line-height:1.15;color:#fff;-webkit-text-stroke:1.2cqw #213a86;paint-order:stroke fill;text-shadow:0 1.2cqw 0 #213a86}
+#ending .txt{font-size:5.4cqw;font-weight:bold;color:#fff}
+#ending .bst{font-size:4.2cqw;color:#cfd6ff;min-height:5.4cqw}
+#endBtn{height:14cqw;padding:0 9cqw;font-size:5.4cqw;white-space:nowrap;margin-top:3cqw}
+
 /* 結果：体力測定の記録用紙 */
-#result{position:absolute;left:6cqw;right:6cqw;top:40cqw;z-index:30;padding:5cqw 5.5cqw 5cqw;
+#result{position:absolute;left:6cqw;right:6cqw;top:21cqw;z-index:30;padding:4cqw 5.5cqw 4.2cqw;
   background:#fffdf2;border:.7cqw solid #2c4aa0;border-radius:1.6cqw;
   box-shadow:0 2cqw 0 #1c3170,0 3cqw 6cqw #0006;
-  color:#2b2b3a;display:none;flex-direction:column;align-items:stretch;gap:2cqw;text-align:center;pointer-events:auto}
+  color:#2b2b3a;display:none;flex-direction:column;align-items:stretch;gap:1.6cqw;text-align:center;pointer-events:auto}
 #result.show{display:flex;animation:pop .3s cubic-bezier(.3,1.5,.5,1)}
 #result.wait{pointer-events:none}
 @keyframes pop{from{transform:scale(.7) rotate(-2deg);opacity:0}to{transform:none;opacity:1}}
-#result .hd{font-size:5.4cqw;font-weight:bold;color:#2c4aa0;border-bottom:.5cqw solid #2c4aa0;padding-bottom:1.6cqw;letter-spacing:.5cqw}
-#result .ln{display:flex;justify-content:space-between;align-items:baseline;font-size:4.4cqw;
-  border-bottom:.3cqw dashed #9aa7d0;padding-bottom:1cqw}
+#result .hd{font-size:5.2cqw;font-weight:bold;color:#2c4aa0;border-bottom:.5cqw solid #2c4aa0;padding-bottom:1.2cqw;letter-spacing:.5cqw;white-space:nowrap}
+#result .ln{display:flex;justify-content:space-between;align-items:baseline;font-size:4.2cqw;
+  border-bottom:.3cqw dashed #9aa7d0;padding-bottom:.8cqw;white-space:nowrap}
 #result .ln span:first-child{color:#55608a}
-#result .ln b{font-size:4.8cqw}
-#result .big{position:relative;display:flex;justify-content:space-between;align-items:center;margin:1cqw 0 .6cqw}
+#result .ln b{font-size:4.6cqw}
+#result .big{position:relative;display:flex;justify-content:space-between;align-items:center;margin:.6cqw 0 1.6cqw}
 #result .big .lb{font-size:4.8cqw;color:#55608a;font-weight:bold}
-#result .big .num{font-size:13cqw;font-weight:900;line-height:1;color:#d2382f;font-variant-numeric:tabular-nums}
+#result .big .num{font-size:12cqw;font-weight:900;line-height:1;color:#d2382f;font-variant-numeric:tabular-nums}
 #result .big .num small{font-size:5cqw;color:#55608a;font-weight:bold;margin-left:.8cqw}
 #stamp{position:absolute;left:11.5cqw;top:-2.5cqw;width:19cqw;height:19cqw;border:.9cqw solid #d2382f;border-radius:50%;
   color:#d2382f;font-weight:900;display:flex;align-items:center;justify-content:center;text-align:center;line-height:1.1;
@@ -54,43 +108,99 @@ body{display:flex;align-items:center;justify-content:center}
 #stamp.long{font-size:4.2cqw}
 #stamp.on{animation:stamp .28s cubic-bezier(.4,1.6,.6,1) forwards}
 @keyframes stamp{to{transform:rotate(-14deg) scale(1);opacity:1}}
-#rJudge{font-size:4.2cqw;color:#55608a;min-height:5.4cqw}
-#rBest{font-size:3.8cqw;color:#55608a;min-height:5cqw}
-.row{display:flex;gap:3cqw;align-items:center;width:100%;margin-top:1cqw}
+#rJudge{font-size:3.8cqw;color:#55608a;min-height:4.8cqw}
+#rBest{font-size:3.6cqw;color:#55608a;min-height:4.6cqw}
+
+/* ライバルとの比べ。勝ち負けの判子が真ん中に押される */
+#vs{display:grid;grid-template-columns:minmax(0,1fr) 19cqw minmax(0,1fr);align-items:center;background:#f1f4fc;border:.4cqw solid #9aa7d0;border-radius:1.6cqw;padding:2cqw 1.6cqw}
+#vs .col{display:flex;flex-direction:column;gap:.4cqw;min-width:0}
+#vs .col span{font-size:3.4cqw;color:#55608a;font-weight:bold;white-space:nowrap}
+#vs .col b{font-size:7cqw;font-weight:900;line-height:1.1;white-space:nowrap;font-variant-numeric:tabular-nums}
+#vs .col b.l2{font-size:5.2cqw}
+#vs .col b.l3{font-size:4.2cqw}
+#vs .col.you b{color:#d2382f}
+#vs .mid{position:relative;height:15cqw;display:flex;align-items:center;justify-content:center}
+#vs .mid .v{font-size:4cqw;font-weight:900;color:#9aa7d0}
+#vsStamp{position:absolute;left:50%;top:50%;margin:-7.5cqw 0 0 -8.5cqw;width:17cqw;height:15cqw;border:.8cqw solid #d2382f;border-radius:2cqw;
+  color:#d2382f;font-weight:900;display:flex;align-items:center;justify-content:center;text-align:center;line-height:1.05;white-space:nowrap;
+  transform:rotate(-10deg) scale(2.4);opacity:0;background:#fffdf2d0;font-size:5cqw}
+#vs.lose #vsStamp{color:#4a5a9a;border-color:#4a5a9a}
+#vsStamp.on{animation:vstamp .26s cubic-bezier(.4,1.6,.6,1) forwards}
+@keyframes vstamp{to{transform:rotate(-10deg) scale(1);opacity:1}}
+#vsNote{font-size:3.9cqw;font-weight:bold;color:#2c4aa0;min-height:5cqw}
+
+.row{display:flex;gap:3cqw;align-items:center;width:100%;margin-top:.6cqw}
 .btn{border:0;border-radius:3.6cqw;font:inherit;font-weight:bold;color:#fff;cursor:pointer;
   background:linear-gradient(#ff6b9a,#e0356f);box-shadow:0 1.2cqw 0 #a82350;touch-action:manipulation}
 .btn:active{transform:translateY(.8cqw);box-shadow:0 .4cqw 0 #a82350}
-#retry{flex:1;height:14cqw;font-size:5.8cqw}
-#share{width:25cqw;height:10cqw;font-size:3.4cqw;background:transparent;color:#2c4aa0;
+#retry{flex:1;height:13cqw;font-size:5.8cqw;white-space:nowrap}
+#toList,#share{height:10cqw;font-size:3.6cqw;background:transparent;color:#2c4aa0;white-space:nowrap;
   border:.6cqw solid #2c4aa0;border-radius:3cqw;box-shadow:0 .6cqw 0 #2c4aa066}
-#share:active{transform:translateY(.5cqw)}
+#toList{flex:1}
+#share{width:27cqw}
+#toList:active,#share:active{transform:translateY(.5cqw)}
 </style>
 </head>
 <body>
 <canvas id="cv"></canvas>
 <div id="stage">
   <div id="title">
-    <div class="t2"><span class="nb">分身</span><span class="nb">反復横とび</span></div>
-    <div class="t3"><span class="nb">20秒で</span><span class="nb">何人 分身できる？</span></div>
-    <div class="t4">タップで スタート</div>
+    <div class="t2" data-p="title.name"></div>
+    <div class="t3" data-p="title.catch"></div>
+    <div class="t4" data-s="title.tap"></div>
+  </div>
+  <div id="list" class="scr">
+    <div class="hd"><span data-s="list.head"></span><small id="listProg"></small></div>
+    <div id="listBody"></div>
+    <button id="listBack" class="btn back" data-s="list.back"></button>
+  </div>
+  <div id="intro">
+    <div id="inName"></div>
+    <div id="inCard">
+      <div class="lb" data-s="intro.rival"></div>
+      <div id="inRival"></div>
+      <div id="inSay"></div>
+      <div class="rule"></div>
+      <div class="lb" data-s="intro.rec"></div>
+      <div id="inRec"></div>
+      <div id="inBest"></div>
+    </div>
+    <div class="go" data-s="intro.start"></div>
+    <button id="inBack" class="btn back" data-s="intro.back"></button>
   </div>
   <div id="result">
-    <div class="hd">体力測定 記録用紙</div>
-    <div class="ln"><span>種目</span><b>反復横とび</b></div>
+    <div class="hd" data-s="sheet.head"></div>
+    <div class="ln"><span data-s="sheet.kind"></span><b id="rName"></b></div>
     <div class="big">
-      <span class="lb">記録</span>
-      <span class="num"><span id="rRec">0</span><small>回</small></span>
+      <span class="lb" data-s="sheet.rec"></span>
+      <span class="num"><span id="rRec">0</span><small data-s="sheet.unit"></small></span>
       <div id="stamp"></div>
     </div>
     <div id="rJudge"></div>
-    <div class="ln"><span>本当の回数</span><b><span id="rSteps">0</span> 回</b></div>
-    <div class="ln"><span>最高の分身</span><b><span id="rMaxN">0</span> 人</b></div>
-    <div class="ln"><span>転んだ回数</span><b><span id="rTrips">0</span> 回</b></div>
+    <div id="vs" class="lose">
+      <div class="col"><span id="vsRLb"></span><b id="vsRRec">0</b></div>
+      <div class="mid"><span class="v" data-s="sheet.vs"></span><div id="vsStamp"></div></div>
+      <div class="col you"><span data-s="sheet.you"></span><b id="vsYou">0</b></div>
+    </div>
+    <div id="vsNote"></div>
+    <div class="ln"><span data-s="sheet.steps"></span><b><span id="rSteps">0</span><span data-s="sheet.times"></span></b></div>
+    <div class="ln"><span data-s="sheet.maxN"></span><b><span id="rMaxN">0</span><span data-s="sheet.people"></span></b></div>
+    <div class="ln"><span data-s="sheet.trips"></span><b><span id="rTrips">0</span><span data-s="sheet.times"></span></b></div>
     <div id="rBest"></div>
     <div class="row">
-      <button id="retry" class="btn">もう一回</button>
-      <button id="share" class="btn">Xで シェア</button>
+      <button id="retry" class="btn" data-s="sheet.retry"></button>
     </div>
+    <div class="row">
+      <button id="toList" class="btn"></button>
+      <button id="share" class="btn" data-s="sheet.share"></button>
+    </div>
+  </div>
+  <div id="ending" class="scr">
+    <div class="big" data-p="ending.head"></div>
+    <div class="txt" data-p="ending.body"></div>
+    <div class="bst" id="endBest"></div>
+    <div class="txt" data-s="ending.thanks"></div>
+    <button id="endBtn" class="btn"></button>
   </div>
 </div>
 <script>

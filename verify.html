@@ -24,9 +24,81 @@ const CFG = {
   // 判定（記録の下限）
   judge: [[0, 'E'], [40, 'D'], [80, 'C'], [150, 'B'], [400, 'A'], [1000, 'S'], [3000, '測定不能'], [7000, '人類の範囲外']],   // 分身が早く出るようにしたので記録の桁が上がった（元は 130/200/400/1000/3000）
 
+  // v2 大会：ライバルの記録（これを超えると勝ち）。数字は仮。Phase 2 でボットを使って調整する
+  targets: [80, 200, 600, 2000, 6000, 20000, 100000, 500000, 3000000],
+
   cloneDelay: 0.022,     // 分身1体あたりの遅れ（秒）
   shareUrl: 'https://fish-suika.github.io/hanpuku-yokotobi/',
 };
+// ===== 画面に出す言葉（ここに集める。Phase 4 で英語を足す）=====
+// 「|」は文節の切れ目。画面では文節ごとに改行しない塊（.nb）になる。ph() で「|」を取れば普通の文字列
+const STR = {
+  title: { name: '分身|反復横とび', catch: '20秒で|何人 分身できる？', tap: 'タップで スタート' },
+
+  list: {
+    head: '大会の一覧', back: 'タイトルへ',
+    progress: (n, m) => n + ' / ' + m,
+    vs: 'VS', unit: '回', best: 'ベスト', noBest: 'ベスト ---',
+    tagWon: '勝ち', tagNext: '挑戦！', tagLocked: 'ロック', hidden: '？？？',
+  },
+
+  intro: { rival: 'ライバル', rec: 'ライバルの記録', unit: '回', best: 'ベスト', start: 'タップで スタート', back: 'もどる' },
+
+  // 大会 9 つ。順番が進む順番（CFG.targets と同じ並び）
+  tournaments: [
+    { name: 'クラスの体力測定', rival: { name: '前の席の|田中', short: '田中', say: '去年と|同じ記録を|目指します。' } },
+    { name: '学年の体力測定', rival: { name: '学年1位の|鈴木', short: '鈴木', say: '毎朝|牛乳を|飲んでいます。' } },
+    { name: '校内大会', rival: { name: '体育委員長の|佐藤', short: '佐藤', say: '全校生徒が|見ていますが|気にしません。' } },
+    { name: '市大会', rival: { name: '市の代表の|高橋', short: '高橋', say: '言い訳は|すでに|用意してあります。' } },
+    { name: '県大会', rival: { name: '県王者の|伊藤', short: '伊藤', say: '優勝賞品の|お米を|待っています。' } },
+    { name: '全国大会', rival: { name: '全国2連覇の|渡辺', short: '渡辺', say: 'テレビに|映るので|髪を 整えました。' } },
+    { name: '世界大会', rival: { name: '世界王者の|ジャン', short: 'ジャン', say: '言葉は|通じませんが|記録は 通じます。' } },
+    { name: '月面大会', rival: { name: '宇宙飛行士の|山本', short: '山本', say: '重力が 小さいので|だいぶ|有利です。' } },
+    { name: '宇宙大会', rival: { name: '宇宙人の|ポポ', short: 'ポポ', say: '記録係は|腕が 6本|あります。' } },
+  ],
+
+  // 記録用紙
+  sheet: {
+    head: '体力測定 記録用紙', kind: '大会', rec: '記録', unit: '回',
+    steps: '本当の回数', maxN: '最高の分身', trips: '転んだ回数', times: ' 回', people: ' 人',
+    judgeAll: '記録係は|ぜんいん 数えました', judgeClone: '分身も|ぜんいん 数えられました',
+    bestNew: 'ベスト こうしん！', best: n => 'ベスト ' + n + ' 回',
+    rival: s => 'ライバル ' + s, you: 'あなた', vs: 'VS', win: '勝ち！', lose: '負け…',
+    noteLose: n => 'あと ' + n + ' 回で|勝ち！',
+    noteUnlock: s => '「' + s + '」が|ひらきました！',
+    noteReplay: 'ライバルに|また 勝ちました。',
+    noteEnd: '全大会|せいは！',
+    retry: 'もう一回', toList: '大会の一覧', cont: 'つづける', share: 'Xで シェア',
+  },
+
+  // 宇宙大会に勝ったあと（Phase 3 で作り直す）
+  ending: {
+    head: '全大会|せいは！', body: '宇宙大会に|勝ちました。', thanks: 'おめでとう！',
+    best: n => '宇宙大会 ベスト ' + n + ' 回', list: '大会の一覧へ',
+  },
+
+  // 測定中の画面（記録板・ふきだし・文字の演出）
+  hud: {
+    banner: '体力測定', rec: '記録', real: n => 'ほんとうは ' + n + ' 回', left: 'のこり',
+    bubble: ['いーち、にー…', 'は、はやっ！', 'えっ…？ にー、よん…', 'ひとが ふえてる…', 'ゆ、ゆかが…！', 'でんたく でんたく…！', 'そ、測定不能…！'],
+    bFinish: 'そこまで！ きろくします…', bOver: n => '…' + n + ' 回です。', bReady: 'よーい…',
+    ready: 'よーい…', vs: 'VS', passed: '超えた！',
+  },
+  pop: {
+    start: 'スタート！', stumble: 'もつれた！', out: 'はみだした！', down: '勢い ダウン', end: 'そこまで！', pant: 'ゼーゼー',
+    rival: 'ライバルを 超えた！',
+    lv: ['', 'ぶんしん！', '4にん！', '8にん！！', '16にん！！', '32にん！！！', '測定不能！！！'],
+    crowd: ['わー！', 'すげー！', 'はやっ！', 'なにあれ！', 'ぶんしん！？', 'えええ！', '2人いる！', '見えない！'],
+  },
+
+  // 共有（文面と画像カード）
+  share: {
+    text: (t, rec, steps, judge, maxN, win) =>
+      '分身反復横とび「' + t + '」で 記録 ' + rec + ' 回（本当は ' + steps + ' 回）、判定「' + judge + '」！' + (win ? ' ライバルに勝ち！' : '') + ' 分身 ' + maxN + ' 人 #分身反復横とび',
+    card: { head: '体力測定 記録用紙', kind: '種目', kindVal: '反復横とび', rec: '記録', unit: '回', steps: '本当の回数', maxN: '最高の分身', trips: '転んだ回数', times: ' 回', people: ' 人' },
+  },
+};
+const ph = s => s.replace(/\|/g, '');   // 「|」を取った普通の文字列
 // ===== ゲームのロジック（画面を使わない）=====
 const clamp = (v, a, b) => Math.max(a, Math.min(b, v));
 function mulberry32(a) {
@@ -171,6 +243,87 @@ function judgeFor(rec) {
   for (const [min, name] of CFG.judge) if (rec >= min) j = name;
   return j;
 }
+// ===== 大会のくり返し（画面を使わない）=====
+// 保存の形：{ v, unlocked（遊べる一番先の大会 0始まり）, won[大会ごとの勝ち], best[大会ごとのベスト] }
+// 強化（Phase 2）はここに項目を足す。知らない項目は読み書きしても消さない
+const SAVE_KEY = 'hanpuku-yokotobi-save';
+const V1_BEST_KEY = 'hanpuku-yokotobi-best';   // v1 のベスト（引き継ぎ用に読むだけ）
+const SAVE_VER = 1;
+
+const Tourney = {
+  count() { return CFG.targets.length; },
+  target(i) { return CFG.targets[i]; },
+  // ライバルに勝つ：記録が目標を「超える」こと（同じ数は負け）。目標は使うたびに CFG から読む
+  beats(rec, i) { return rec > CFG.targets[i]; },
+
+  newSave() {
+    const n = this.count();
+    return { v: SAVE_VER, unlocked: 0, won: new Array(n).fill(false), best: new Array(n).fill(0) };
+  },
+
+  // どんな値が来ても、使える形に直す（壊れた保存・古い保存・手で書き換えた保存）
+  sanitize(o) {
+    const n = this.count(), s = this.newSave();
+    if (!o || typeof o !== 'object') return s;
+    const out = Object.assign({}, o);   // 知らない項目は残す
+    const u = Math.floor(Number(o.unlocked));
+    out.unlocked = Number.isFinite(u) ? clamp(u, 0, n - 1) : 0;
+    out.won = s.won.map((_, i) => Array.isArray(o.won) && o.won[i] === true);
+    out.best = s.best.map((_, i) => {
+      const b = Array.isArray(o.best) ? Math.floor(Number(o.best[i])) : 0;
+      return Number.isFinite(b) && b > 0 ? b : 0;
+    });
+    // つじつま：先へ進めているなら手前は勝っている／勝った大会の次は開いている
+    for (let i = 0; i < out.unlocked; i++) out.won[i] = true;
+    for (let i = 0; i < n; i++) if (out.won[i]) out.unlocked = Math.max(out.unlocked, Math.min(i + 1, n - 1));
+    for (let i = 0; i < out.unlocked; i++) out.won[i] = true;
+    out.v = SAVE_VER;
+    return out;
+  },
+
+  // 'won' 勝った ／ 'next' 挑戦できる（まだ勝っていない） ／ 'locked' まだ
+  status(save, i) {
+    if (save.won[i]) return 'won';
+    return i <= save.unlocked ? 'next' : 'locked';
+  },
+  playable(save, i) { return i >= 0 && i < this.count() && i <= save.unlocked; },
+  focusIndex(save) { return save.unlocked; },
+  wonCount(save) { return save.won.filter(Boolean).length; },
+
+  // 1回の結果を保存の形に反映する。勝てば次の大会が開く。遊べない大会は何も変えない
+  record(save, i, rec) {
+    const none = { win: false, isBest: false, prevBest: save.best[i] || 0, firstWin: false, unlockedNext: false, ending: false };
+    if (!this.playable(save, i)) return none;
+    const prevBest = save.best[i] || 0;
+    const isBest = rec > prevBest;
+    if (isBest) save.best[i] = rec;
+    const win = this.beats(rec, i);
+    let firstWin = false, unlockedNext = false;
+    if (win) {
+      firstWin = !save.won[i];
+      save.won[i] = true;
+      if (i + 1 < this.count() && save.unlocked < i + 1) { save.unlocked = i + 1; unlockedNext = true; }
+    }
+    return { win, isBest, prevBest, firstWin, unlockedNext, ending: firstWin && i === this.count() - 1 };
+  },
+
+  // 保存の読み込み。v2 の保存がなければ v1 のベストを最初の大会のベストとして引き継ぐ。storage は getItem/setItem を持つもの
+  load(st) {
+    let raw = null;
+    try { raw = st.getItem(SAVE_KEY); } catch (_) {}
+    if (raw) {
+      try { return this.sanitize(JSON.parse(raw)); } catch (_) { return this.newSave(); }
+    }
+    const s = this.newSave();
+    let v1 = 0;
+    try { v1 = parseInt(st.getItem(V1_BEST_KEY), 10) || 0; } catch (_) {}
+    if (v1 > 0) { s.best[0] = v1; this.persist(st, s); }
+    return s;
+  },
+  persist(st, save) {
+    try { st.setItem(SAVE_KEY, JSON.stringify(save)); return true; } catch (_) { return false; }
+  },
+};
 // ===== 自動テスト =====
 (function () {
   const out = document.getElementById('out');
@@ -322,6 +475,127 @@ function judgeFor(rec) {
   check('最高速のボットは最上位の判定に届く', judgeFor(b11.rec) === '人類の範囲外', 'rec=' + b11.rec);
   check('のんびり（毎秒2回）は低い判定', judgeFor(b2.rec) === 'D' || judgeFor(b2.rec) === 'C' || judgeFor(b2.rec) === 'E', 'rec=' + b2.rec + ' ' + judgeFor(b2.rec));
   check('ふつう（毎秒5回）は A（S には届かない）、毎秒3回は C', judgeFor(b5.rec) === 'A' && judgeFor(b3.rec) === 'C', 'rec=' + b5.rec + ' ' + judgeFor(b5.rec));
+
+  // ===== v2：大会のくり返し =====
+  const fake = (init, throws) => {
+    const d = Object.assign({}, init);
+    return {
+      d,
+      getItem: k => { if (throws) throw new Error('storage'); return k in d ? d[k] : null; },
+      setItem: (k, v) => { if (throws) throw new Error('storage'); d[k] = String(v); },
+    };
+  };
+  const N = Tourney.count();
+  const winRec = i => CFG.targets[i] + 1;
+
+  check('大会は 9 つ・ライバルの目標の記録は設定どおり', N === 9 && CFG.targets.join() === '80,200,600,2000,6000,20000,100000,500000,3000000', CFG.targets.join());
+  check('目標の記録は、大会が進むほど大きくなる', CFG.targets.every((t, i) => i === 0 || t > CFG.targets[i - 1]));
+  check('大会の名前・ライバル・一言が 9 つぶん揃っている（言葉の表）',
+    STR.tournaments.length === N && STR.tournaments.every(t => t.name && t.rival.name && t.rival.short && t.rival.say));
+  check('大会の順番は クラス→学年→校内→市→県→全国→世界→月面→宇宙',
+    STR.tournaments.map(t => t.name).join() === 'クラスの体力測定,学年の体力測定,校内大会,市大会,県大会,全国大会,世界大会,月面大会,宇宙大会');
+  check('ph() は文節の切れ目「|」を取る', ph('去年と|同じ記録を|目指します。') === '去年と同じ記録を目指します。');
+
+  // はじめの状態
+  let sv = Tourney.newSave();
+  check('はじめは、最初の大会だけ遊べて、あとはロック', Tourney.status(sv, 0) === 'next' && [1, 2, 3, 4, 5, 6, 7, 8].every(i => Tourney.status(sv, i) === 'locked') && Tourney.playable(sv, 0) && !Tourney.playable(sv, 1));
+  check('はじめのベストは全部 0', sv.best.length === N && sv.best.every(b => b === 0));
+
+  // 勝つと次が開く／負けても開かない
+  let r = Tourney.record(sv, 0, winRec(0));
+  check('ライバルを超えると勝ち、次の大会が開く', r.win && r.unlockedNext && r.firstWin && sv.unlocked === 1 && Tourney.status(sv, 0) === 'won' && Tourney.status(sv, 1) === 'next' && Tourney.status(sv, 2) === 'locked');
+  sv = Tourney.newSave();
+  r = Tourney.record(sv, 0, CFG.targets[0]);
+  check('ライバルと同じ記録は負け（超えていないので次は開かない）', !r.win && !r.unlockedNext && sv.unlocked === 0 && Tourney.status(sv, 0) === 'next');
+  r = Tourney.record(sv, 0, CFG.targets[0] - 1);
+  check('負けても次は開かない（ベストは残る）', !r.win && sv.unlocked === 0 && sv.best[0] === CFG.targets[0]);
+  check('Tourney.beats は 超えたときだけ true', Tourney.beats(81, 0) && !Tourney.beats(80, 0) && !Tourney.beats(0, 0));
+
+  // ベスト
+  sv = Tourney.newSave();
+  r = Tourney.record(sv, 0, 50);
+  check('1回目の記録がベストになる', r.isBest && r.prevBest === 0 && sv.best[0] === 50);
+  r = Tourney.record(sv, 0, 30);
+  check('低い記録ではベストは下がらない', !r.isBest && sv.best[0] === 50);
+  r = Tourney.record(sv, 0, 70);
+  check('高い記録でベストが上がる（前のベストも返る）', r.isBest && r.prevBest === 50 && sv.best[0] === 70);
+  Tourney.record(sv, 0, winRec(0));
+  Tourney.record(sv, 1, 120);
+  check('ベストは大会ごとに別', sv.best[1] === 120 && sv.best[0] === winRec(0) && sv.best[2] === 0);
+
+  // 遊べない大会
+  sv = Tourney.newSave();
+  const snap0 = JSON.stringify(sv);
+  r = Tourney.record(sv, 3, 99999999);
+  check('まだ開いていない大会の結果は、何も変えない', !r.win && JSON.stringify(sv) === snap0);
+
+  // 勝った大会のやり直し
+  sv = Tourney.newSave();
+  Tourney.record(sv, 0, winRec(0));
+  Tourney.record(sv, 1, winRec(1));
+  check('勝った大会にはいつでも戻れる', Tourney.playable(sv, 0) && Tourney.playable(sv, 1) && Tourney.playable(sv, 2) && !Tourney.playable(sv, 3));
+  r = Tourney.record(sv, 0, 10);
+  check('勝った大会で負けても、勝ちと進み具合は消えない', !r.win && sv.won[0] && sv.unlocked === 2 && Tourney.status(sv, 0) === 'won');
+  r = Tourney.record(sv, 0, winRec(0) + 5);
+  check('勝った大会でもう一度勝っても、新しく開くものはない', r.win && !r.firstWin && !r.unlockedNext && sv.unlocked === 2 && r.isBest);
+
+  // 全部勝つ
+  sv = Tourney.newSave();
+  let endings = 0, unlockCnt = 0;
+  for (let i = 0; i < N; i++) { const q = Tourney.record(sv, i, winRec(i)); if (q.ending) endings++; if (q.unlockedNext) unlockCnt++; }
+  check('順に全部勝つと、全部「勝ち」になり最後の大会まで開く', sv.won.every(Boolean) && sv.unlocked === N - 1 && unlockCnt === N - 1 && Tourney.wonCount(sv) === N);
+  check('エンディングは 宇宙大会に初めて勝ったときだけ', endings === 1 && !Tourney.record(sv, N - 1, winRec(N - 1)).ending);
+  sv = Tourney.newSave();
+  for (let i = 0; i < N - 1; i++) Tourney.record(sv, i, winRec(i));
+  check('宇宙大会に着くまでにエンディングは出ない', Tourney.record(sv, N - 1, 5).ending === false && Tourney.status(sv, N - 1) === 'next');
+
+  // 目標は使うたびに CFG から読む（Phase 2 の強化で変えられる）
+  const t0 = CFG.targets[0];
+  CFG.targets[0] = 10;
+  const cfgOk = Tourney.beats(11, 0) && !Tourney.beats(10, 0);
+  CFG.targets[0] = t0;
+  check('ライバルの記録は CFG から読む（焼き込まない）', cfgOk && !Tourney.beats(11, 0));
+
+  // 保存
+  sv = Tourney.newSave();
+  Tourney.record(sv, 0, winRec(0) + 7); Tourney.record(sv, 1, 150);
+  const st1 = fake({});
+  check('保存できる', Tourney.persist(st1, sv) === true && SAVE_KEY in st1.d);
+  const back = Tourney.load(st1);
+  check('保存して読み直すと同じ（進み具合・勝ち・ベスト）', JSON.stringify(back) === JSON.stringify(sv) && back.best[0] === winRec(0) + 7 && back.unlocked === 1 && back.won[0] === true);
+  check('保存には版の番号が入る', JSON.parse(st1.d[SAVE_KEY]).v === SAVE_VER && SAVE_KEY === 'hanpuku-yokotobi-save');
+
+  // v1 のベストの引き継ぎ
+  const st2 = fake({ [V1_BEST_KEY]: '1234' });
+  const mig = Tourney.load(st2);
+  check('v2 の保存がなく v1 のベストがあれば、最初の大会のベストに引き継ぐ', mig.best[0] === 1234 && mig.best.slice(1).every(b => b === 0) && mig.unlocked === 0);
+  check('引き継いだ結果は v2 の保存に書かれる（v1 の値は消さない）', JSON.parse(st2.d[SAVE_KEY]).best[0] === 1234 && st2.d[V1_BEST_KEY] === '1234');
+  st2.d[V1_BEST_KEY] = '9999';
+  check('2回目以降は v2 の保存を使い、v1 の値は見ない', Tourney.load(st2).best[0] === 1234);
+  const st3 = fake({ [V1_BEST_KEY]: '777', [SAVE_KEY]: JSON.stringify(Object.assign(Tourney.newSave(), { best: [5, 0, 0, 0, 0, 0, 0, 0, 0] })) });
+  check('v2 の保存があれば v1 のベストは引き継がない', Tourney.load(st3).best[0] === 5);
+  check('v1 の値が数字でなければ無視する', Tourney.load(fake({ [V1_BEST_KEY]: 'abc' })).best[0] === 0 && Tourney.load(fake({ [V1_BEST_KEY]: '-5' })).best[0] === 0);
+
+  // 壊れた保存・使えない保存
+  check('保存が空なら、はじめの状態', JSON.stringify(Tourney.load(fake({}))) === JSON.stringify(Tourney.newSave()));
+  check('保存が壊れていても（JSONでない）はじめの状態で動く', JSON.stringify(Tourney.load(fake({ [SAVE_KEY]: '{oops' }))) === JSON.stringify(Tourney.newSave()));
+  const thr = fake({}, true);
+  let threw = false, lt;
+  try { lt = Tourney.load(thr); Tourney.persist(thr, lt); } catch (_) { threw = true; }
+  check('localStorage が使えなくても（読み書きで例外）止まらない', !threw && lt.unlocked === 0 && Tourney.persist(thr, lt) === false);
+  const odd = Tourney.sanitize({ v: 99, unlocked: 99, won: [true, 'x', null], best: [-5, 'abc', 12.9, 1e3], extra: 'keep' });
+  check('値がおかしい保存は直して読む（進み具合は範囲内・ベストは0以上の整数）',
+    odd.unlocked === N - 1 && odd.won.length === N && odd.best.length === N && odd.best[0] === 0 && odd.best[1] === 0 && odd.best[2] === 12 && odd.best[3] === 1000 && odd.v === SAVE_VER);
+  check('進み具合に合わせて、手前の大会は「勝ち」として読む', Tourney.sanitize({ unlocked: 3 }).won.slice(0, 3).every(Boolean) && !Tourney.sanitize({ unlocked: 3 }).won[3]);
+  check('勝ちがあるなら、その次の大会は開いている', Tourney.sanitize({ won: [false, false, true] }).unlocked === 3);
+  check('知らない項目は残す（Phase 2 の強化を足しても消えない）', odd.extra === 'keep');
+
+  // ボットで目安：強化なしの Phase 1 で、どこまで勝てるか
+  const rec6 = median([1, 2, 3, 4, 5].map(sd => run({ rate: 6, err: 0.02, seed: sd }).rec));
+  const rec9 = median([1, 2, 3, 4, 5].map(sd => run({ rate: 9, err: 0.05, seed: sd }).rec));
+  const beaten = rec => CFG.targets.filter(t => rec > t).length;
+  check('毎秒6回のボットは、少なくとも最初の大会に勝てる（遊び始めで詰まらない）', beaten(rec6) >= 1, 'rec=' + rec6 + ' 勝てる大会=' + beaten(rec6));
+  check('強化なしでは、後ろの大会は勝てない（毎秒9回でも全国大会以降は届かない）', beaten(rec9) < 6 && beaten(b11.rec) < 6, 'rec9=' + rec9 + ' 勝てる大会=' + beaten(rec9) + ' ／ 最高速 rec=' + b11.rec);
 
   const s = document.createElement('h2');
   s.textContent = fail === 0 ? '全部 OK' : 'NG が ' + fail + ' 件';

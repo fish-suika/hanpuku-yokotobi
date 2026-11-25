@@ -1,3 +1,4 @@
+applyStrings();
 Game.reset();
 resize();
 bindUI();

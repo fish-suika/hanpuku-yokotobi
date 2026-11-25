@@ -1,19 +1,43 @@
-// ===== 操作・ループ・結果・共有 =====
-const BEST_KEY = 'hanpuku-yokotobi-best';
-function loadBest() { try { return parseInt(localStorage.getItem(BEST_KEY), 10) || 0; } catch (_) { return 0; } }
-function saveBest(v) { try { localStorage.setItem(BEST_KEY, String(v)); } catch (_) {} }
+// ===== 画面の流れ・操作・ループ・結果・共有 =====
 const fmt = n => n.toLocaleString('ja-JP');
+const esc = s => s.replace(/[&<>"]/g, c => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;' }[c]));
+// 「|」で区切った言葉を、文節ごとに途中で改行しない塊にして HTML にする
+const phHtml = s => s.split('|').map(p => '<span class="nb">' + esc(p) + '</span>').join('');
 
-let shownResult = false, rollT = 1, stampDone = true, last = 0, murLvl = -1;
-const LV_TEXT = ['', 'ぶんしん！', '4にん！', '8にん！！', '16にん！！', '32にん！！！', '測定不能！！！'];
-const LV_COLOR = ['', '#2c4aa0', '#1f8f6a', '#e08a1a', '#e0502a', '#d2382f', '#b01a8a'];
-const CROWD = ['わー！', 'すげー！', 'はやっ！', 'なにあれ！', 'ぶんしん！？', 'えええ！', '2人いる！', '見えない！'];
+// 保存（localStorage が使えないとき＝data: URL やプライベートモードでも止まらない）
+const store = {
+  getItem(k) { try { return localStorage.getItem(k); } catch (_) { return null; } },
+  setItem(k, v) { try { localStorage.setItem(k, v); } catch (_) {} },
+};
+let SAVE = Tourney.load(store);
+
+// 画面：title → list（大会の一覧）→ intro（ライバルの紹介）→ play（測定）→ result（記録用紙）→ list …。ending は宇宙大会に初めて勝ったあと
+const App = { screen: 'title', idx: 0, introAt: 0, res: null, pendingEnding: false };
+
+let shownResult = false, rollT = 1, stampDone = true, vsT = -1, last = 0, murLvl = -1;
 let crowdT = 0;
+
+// 文字を画面に入れる（data-s＝そのまま、data-p＝「|」で文節に分ける）
+function strAt(path) { return path.split('.').reduce((o, k) => o[k], STR); }
+function applyStrings() {
+  for (const el of document.querySelectorAll('[data-s]')) el.textContent = strAt(el.dataset.s);
+  for (const el of document.querySelectorAll('[data-p]')) el.innerHTML = phHtml(strAt(el.dataset.p));
+}
+
+function setScreen(s) {
+  App.screen = s;
+  $('title').classList.toggle('hide', s !== 'title');
+  $('list').classList.toggle('on', s === 'list');
+  $('intro').classList.toggle('on', s === 'intro');
+  $('ending').classList.toggle('on', s === 'ending');
+  if (s !== 'result') $('result').classList.remove('show', 'wait');
+}
 
 function tap(side) {
   Snd.init();
-  if (Game.mode === 'title') { Game.begin(); return; }
-  Game.input(side);
+  if (App.screen === 'title') { openList(); return; }
+  if (App.screen === 'intro') { if (nowT - App.introAt > 0.3) startRun(); return; }
+  if (App.screen === 'play') Game.input(side);
 }
 
 function bindUI() {
@@ -28,41 +52,111 @@ function bindUI() {
     if (k === 'ArrowLeft' || k === 'a' || k === 'A') { e.preventDefault(); tap(-1); }
     else if (k === 'ArrowRight' || k === 'd' || k === 'D') { e.preventDefault(); tap(1); }
     else if (k === ' ' || k === 'Enter') {
-      e.preventDefault();
-      if (Game.mode === 'title') { Snd.init(); Game.begin(); }
-      else if (Game.mode === 'over' && !$('result').classList.contains('wait')) { Snd.init(); retry(); }
+      if (e.target && e.target.tagName === 'BUTTON') return;   // ボタンの上では、そのボタン自身の操作にまかせる
+      e.preventDefault(); Snd.init();
+      if (App.screen === 'title') openList();
+      else if (App.screen === 'list') openIntro(Tourney.focusIndex(SAVE));
+      else if (App.screen === 'intro') { if (nowT - App.introAt > 0.3) startRun(); }
+      else if (App.screen === 'result' && !$('result').classList.contains('wait')) retry();
+      else if (App.screen === 'ending') openList();
     }
   });
   window.addEventListener('resize', resize);
   window.addEventListener('contextmenu', e => e.preventDefault());
   $('retry').addEventListener('click', () => { Snd.init(); retry(); });
+  $('toList').addEventListener('click', () => { Snd.init(); if (App.pendingEnding) showEnding(); else openList(); });
   $('share').addEventListener('click', share);
+  $('listBack').addEventListener('click', () => { resetRun(); setScreen('title'); });
+  $('inBack').addEventListener('click', () => openList());
+  $('endBtn').addEventListener('click', () => openList());
+  $('listBody').addEventListener('click', e => {
+    const b = e.target.closest('.tn');
+    if (b && !b.disabled) { Snd.init(); openIntro(+b.dataset.i); }
+  });
 }
 
-function retry() {
+// ---- 画面を開く ----
+function resetRun() {
   Game.reset();
-  shownResult = false; stampDone = true; rollT = 1;
+  shownResult = false; stampDone = true; rollT = 1; vsT = -1;
   popups.length = 0; smoke.length = 0; hist.length = 0;
   for (const c of CL) c.app = 0;
-  lvlShown = 0; murLvl = -1; tripAt = -99;
+  lvlShown = 0; murLvl = -1; tripAt = -99; rivalPassed = false; rivalPassAt = -99;
   Snd.murmur(0);
-  $('result').classList.remove('show', 'wait');
-  $('stamp').classList.remove('on');
-  $('title').classList.remove('hide');
-  Game.begin();   // 「もう一回」はそのまま「よーい」から
+  $('stamp').classList.remove('on'); $('vsStamp').classList.remove('on');
 }
 
-// 結果の数字
+function openList() {
+  resetRun();
+  App.pendingEnding = false;
+  renderList();
+  setScreen('list');
+}
+
+function renderList() {
+  const n = Tourney.count(), L = STR.list;
+  let html = '';
+  for (let i = 0; i < n; i++) {
+    const st = Tourney.status(SAVE, i), T = STR.tournaments[i], R = T.rival;
+    const locked = st === 'locked';
+    const sub = locked ? L.hidden : L.vs + ' ' + R.short + '　' + fmt(CFG.targets[i]) + L.unit;
+    const best = SAVE.best[i] > 0 ? L.best + ' ' + fmt(SAVE.best[i]) : (locked ? '' : L.noBest);
+    const tag = st === 'won' ? L.tagWon : st === 'next' ? L.tagNext : L.tagLocked;
+    html += '<button class="tn ' + st + '" data-i="' + i + '"' + (locked ? ' disabled' : '') + '>'
+      + '<span class="no">' + (i + 1) + '</span>'
+      + '<span class="mid"><span class="nm">' + esc(T.name) + '</span><span class="sb">' + esc(sub) + '</span></span>'
+      + '<span class="rt"><span class="tag">' + esc(tag) + '</span><span class="bs">' + esc(best) + '</span></span>'
+      + '</button>';
+  }
+  $('listBody').innerHTML = html;
+  $('listProg').textContent = L.progress(Tourney.wonCount(SAVE), n);
+}
+
+function openIntro(i) {
+  if (!Tourney.playable(SAVE, i)) return;
+  resetRun();
+  App.idx = i;
+  const T = STR.tournaments[i], I = STR.intro;
+  $('inName').textContent = ph(T.name);
+  $('inRival').innerHTML = phHtml(T.rival.name);
+  $('inSay').innerHTML = '「' + phHtml(T.rival.say) + '」';
+  $('inRec').innerHTML = esc(fmt(CFG.targets[i])) + '<small>' + esc(I.unit) + '</small>';
+  $('inBest').textContent = SAVE.best[i] > 0 ? I.best + ' ' + fmt(SAVE.best[i]) + ' ' + I.unit : '';
+  setScreen('intro');
+  App.introAt = nowT;
+}
+
+// 測定をはじめる（「よーい」から）。結果からの「もう一回」もここ＝1タップ
+function startRun() {
+  resetRun();
+  setScreen('play');
+  Game.begin();
+}
+function retry() { startRun(); }
+
+function showEnding() {
+  App.pendingEnding = false;
+  $('endBest').textContent = STR.ending.best(fmt(SAVE.best[Tourney.count() - 1]));
+  $('endBtn').textContent = STR.ending.list;
+  setScreen('ending');
+}
+
+// ---- 結果 ----
 function resultInfo() {
   return { rec: Game.rec, steps: Game.steps, maxN: Game.maxN, trips: Game.trips, judge: judgeFor(Game.rec) };
 }
 
+// 長い数字は小さく（枠からはみ出さないように）
+function fitNum(el) { el.className = el.textContent.length > 9 ? 'l3' : el.textContent.length > 6 ? 'l2' : ''; }
+
 function showResult() {
   shownResult = true;
-  const r = resultInfo();
-  const best = loadBest();
-  const isBest = r.rec > best;
-  if (isBest) saveBest(r.rec);
+  const r = resultInfo(), i = App.idx, S = STR.sheet, T = STR.tournaments[i];
+  const info = Tourney.record(SAVE, i, r.rec);
+  Tourney.persist(store, SAVE);
+  App.res = info; App.pendingEnding = info.ending;
+  setScreen('result');
+  $('rName').textContent = T.name;
   $('rSteps').textContent = fmt(r.steps);
   $('rMaxN').textContent = fmt(r.maxN);
   $('rTrips').textContent = fmt(r.trips);
@@ -70,33 +164,65 @@ function showResult() {
   const st = $('stamp');
   st.textContent = r.judge;
   st.className = r.judge.length > 1 ? 'long' : '';
-  $('rJudge').textContent = r.rec >= 1000 ? '記録係は ぜんいん 数えました' : r.maxN >= 2 ? '分身も ぜんいん 数えられました' : '';
-  $('rBest').textContent = isBest && best > 0 ? 'ベスト こうしん！' : best > 0 ? 'ベスト ' + fmt(Math.max(best, r.rec)) + ' 回' : '';
+  $('rJudge').innerHTML = r.rec >= 1000 ? phHtml(S.judgeAll) : r.maxN >= 2 ? phHtml(S.judgeClone) : '';
+  const best = SAVE.best[i];
+  $('rBest').textContent = info.isBest && info.prevBest > 0 ? S.bestNew : best > 0 ? S.best(fmt(best)) : '';
+  // ライバルとの比べ
+  const tg = CFG.targets[i];
+  $('vs').className = info.win ? 'win' : 'lose';
+  $('vsRLb').textContent = S.rival(T.rival.short);
+  $('vsRRec').textContent = fmt(tg); fitNum($('vsRRec'));
+  $('vsYou').textContent = '0';
+  $('vsStamp').textContent = info.win ? S.win : S.lose;
+  let note = '';
+  if (info.ending) note = S.noteEnd;
+  else if (info.unlockedNext) note = S.noteUnlock(STR.tournaments[i + 1].name);
+  else if (info.win) note = S.noteReplay;
+  else note = S.noteLose(fmt(tg - r.rec + 1));
+  $('vsNote').innerHTML = phHtml(note);
+  $('toList').textContent = info.ending ? S.cont : S.toList;
   const el = $('result');
   el.classList.add('show', 'wait');   // 指が離れる前にボタンを押してしまわないように、少しの間は触れない
   setTimeout(() => el.classList.remove('wait'), 700);
-  rollT = 0; stampDone = false;
+  rollT = 0; stampDone = false; vsT = -1;
 }
 
 function updateResult(dt) {
   if (rollT < 1) {
     rollT = Math.min(1, rollT + dt / 0.9);
-    $('rRec').textContent = fmt(Math.round(Game.rec * easeOut(rollT)));
+    const v = fmt(Math.round(Game.rec * easeOut(rollT)));
+    $('rRec').textContent = v;
+    $('vsYou').textContent = v; fitNum($('vsYou'));
   } else if (!stampDone) {
     stampDone = true;
     $('stamp').classList.add('on');
     Snd.stamp();
+    vsT = 0.45;
+  } else if (vsT > 0) {
+    vsT -= dt;
+    if (vsT <= 0) {
+      $('vsStamp').classList.add('on');
+      if (App.res && App.res.win) Snd.win(); else Snd.lose();
+    }
   }
+}
+
+// ライバルの記録を超えた瞬間：音と文字と札のふくらみ
+function checkRival() {
+  if (App.screen !== 'play' || rivalPassed || Game.mode !== 'play') return;
+  if (!Tourney.beats(Game.rec, App.idx)) return;
+  rivalPassed = true; rivalPassAt = nowT;
+  Snd.rival();
+  flash = Math.max(flash, 0.14);
+  addPopup(STR.pop.rival, 50, 76, 8.5, '#e0356f', 1.3, 10, '#fff');
 }
 
 // ゲームの出来事を、見た目と音の反応にする
 function reactToEvents() {
   for (const e of Game.events) {
-    if (e.type === 'ready') {
-      $('title').classList.add('hide');
-    } else if (e.type === 'start') {
+    if (e.type === 'start') {
       Snd.whistleStart();
-      addPopup('スタート！', 50, 100, 17, '#e0356f', 0.9, 14, '#fff');
+      addPopup(STR.pop.start, 50, 100, 17, '#e0356f', 0.9, 14, '#fff');
     } else if (e.type === 'step') {
       Snd.squeak();
       hudPop = 1;
@@ -104,22 +230,23 @@ function reactToEvents() {
     } else if (e.type === 'trip') {
       Snd.trip();
       tripAt = nowT; shakeT = 0.12;
-      addPopup(e.from === 1 ? 'もつれた！' : 'はみだした！', xOf(Game.xv, 1), 100, 8, '#d2382f', 0.8, 10, '#fff');
-      if (e.was - e.lvl > 0) addPopup('勢い ダウン', 50, 118, 6, '#2c4aa0', 0.8, 6, '#fff');
+      addPopup(e.from === 1 ? STR.pop.stumble : STR.pop.out, xOf(Game.xv, 1), 100, 8, '#d2382f', 0.8, 10, '#fff');
+      if (e.was - e.lvl > 0) addPopup(STR.pop.down, 50, 118, 6, '#2c4aa0', 0.8, 6, '#fff');
     } else if (e.type === 'lvl') {
       if (e.up) {
         Snd.levelUp(e.lvl);
+        const LV_COLOR = ['', '#2c4aa0', '#1f8f6a', '#e08a1a', '#e0502a', '#d2382f', '#b01a8a'];
         flash = 0.12 + 0.05 * e.lvl; shakeT = 0.1;
-        addPopup(LV_TEXT[e.lvl], 50, 84, 12 + e.lvl * 0.6, LV_COLOR[e.lvl], 1.1, 10, '#fff');
+        addPopup(STR.pop.lv[e.lvl], 50, 84, 12 + e.lvl * 0.6, LV_COLOR[e.lvl], 1.1, 10, '#fff');
         puffSmoke(e.lvl >= 4 ? 8 : 0);
       }
     } else if (e.type === 'end') {
       Snd.whistleEnd();
       lvlShown = Game.lvl;
-      addPopup('そこまで！', 50, 90, 18, '#2c4aa0', 1.4, 8, '#fff');
+      addPopup(STR.pop.end, 50, 90, 18, '#2c4aa0', 1.4, 8, '#fff');
       setTimeout(() => Snd.pant(), 500);
       setTimeout(() => Snd.pant(), 1400);
-      for (let i = 0; i < 5; i++) addPopup('ゼーゼー', 22 + i * 14, 112 + (i % 2) * 14, 5, '#55608a', 1.8, 6, '#fff');
+      for (let i = 0; i < 5; i++) addPopup(STR.pop.pant, 22 + i * 14, 112 + (i % 2) * 14, 5, '#55608a', 1.8, 6, '#fff');
     }
   }
   Game.events.length = 0;
@@ -137,7 +264,7 @@ function crowdTalk(dt) {
   const cand = SP.filter(p => p.app > 0.7 && p.x > 2 && p.x < 98);
   if (!cand.length) return;
   const p = cand[Math.floor(Math.random() * cand.length)];
-  addPopup(CROWD[Math.floor(Math.random() * CROWD.length)], p.x, p.y - 22, 3.8, '#2b2b3a', 0.9, 5, '#fff');
+  addPopup(STR.pop.crowd[Math.floor(Math.random() * STR.pop.crowd.length)], p.x, p.y - 22, 3.8, '#2b2b3a', 0.9, 5, '#fff');
 }
 
 function frame(ts) {
@@ -145,7 +272,8 @@ function frame(ts) {
   last = ts; nowT += dt;
   Game.step(dt);
   reactToEvents();
-  if (Game.mode === 'over' && !shownResult) showResult();
+  checkRival();
+  if (Game.mode === 'over' && !shownResult && App.screen === 'play') showResult();
   if (shownResult) updateResult(dt);
   crowdTalk(dt);
   updateVisual(dt);
@@ -155,8 +283,8 @@ function frame(ts) {
 
 // ===== 共有（記録用紙のカード）=====
 function shareText() {
-  const r = resultInfo();
-  return '分身反復横とびで 記録 ' + fmt(r.rec) + ' 回（本当は ' + r.steps + ' 回）、判定「' + r.judge + '」！ 分身 ' + r.maxN + ' 人 #分身反復横とび';
+  const r = resultInfo(), win = !!(App.res && App.res.win);
+  return STR.share.text(ph(STR.tournaments[App.idx].name), fmt(r.rec), r.steps, r.judge, r.maxN, win);
 }
 function shareUrl() {
   const web = /^https?:/.test(location.protocol) && !/^(localhost|127\.0\.0\.1)/.test(location.host);
@@ -164,7 +292,7 @@ function shareUrl() {
 }
 function makeShareImage() {
   return new Promise(resolve => {
-    const Wd = 1080, Ht = 1350, r = resultInfo();
+    const Wd = 1080, Ht = 1350, r = resultInfo(), K = STR.share.card;
     const cc = document.createElement('canvas');
     cc.width = Wd; cc.height = Ht;
     const c = cc.getContext('2d');
@@ -173,13 +301,13 @@ function makeShareImage() {
     c.fillStyle = '#fffdf2'; c.strokeStyle = '#2c4aa0'; c.lineWidth = 10;
     rr(c, 90, 90, Wd - 180, Ht - 330, 22); c.fill(); c.stroke();
     c.textAlign = 'center'; c.textBaseline = 'alphabetic';
-    c.fillStyle = '#2c4aa0'; c.font = 'bold 66px ' + FONT; c.fillText('体力測定 記録用紙', Wd / 2, 210);
+    c.fillStyle = '#2c4aa0'; c.font = 'bold 66px ' + FONT; c.fillText(K.head, Wd / 2, 210);
     c.fillRect(150, 240, Wd - 300, 6);
-    c.fillStyle = '#55608a'; c.font = '48px ' + FONT; c.textAlign = 'left'; c.fillText('種目', 160, 330);
-    c.textAlign = 'right'; c.fillStyle = '#2b2b3a'; c.font = 'bold 54px ' + FONT; c.fillText('反復横とび', Wd - 160, 330);
-    c.textAlign = 'left'; c.fillStyle = '#55608a'; c.font = 'bold 52px ' + FONT; c.fillText('記録', 160, 520);
+    c.fillStyle = '#55608a'; c.font = '48px ' + FONT; c.textAlign = 'left'; c.fillText(K.kind, 160, 330);
+    c.textAlign = 'right'; c.fillStyle = '#2b2b3a'; c.font = 'bold 54px ' + FONT; c.fillText(K.kindVal, Wd - 160, 330);
+    c.textAlign = 'left'; c.fillStyle = '#55608a'; c.font = 'bold 52px ' + FONT; c.fillText(K.rec, 160, 520);
     c.textAlign = 'right'; c.fillStyle = '#d2382f'; c.font = '900 200px ' + FONT; c.fillText(fmt(r.rec), Wd - 260, 560);
-    c.fillStyle = '#55608a'; c.font = 'bold 58px ' + FONT; c.fillText('回', Wd - 160, 560);
+    c.fillStyle = '#55608a'; c.font = 'bold 58px ' + FONT; c.fillText(K.unit, Wd - 160, 560);
     // 判定の判子
     c.save(); c.translate(Wd - 230, 360); c.rotate(-0.25);
     c.strokeStyle = '#d2382f'; c.fillStyle = '#d2382f'; c.lineWidth = 12;
@@ -188,7 +316,7 @@ function makeShareImage() {
     if (r.judge.length > 3) { c.fillText(r.judge.slice(0, 3), 0, -6); c.fillText(r.judge.slice(3), 0, 40); }
     else c.fillText(r.judge, 0, r.judge.length > 1 ? 14 : 38);
     c.restore();
-    const rows = [['本当の回数', fmt(r.steps) + ' 回'], ['最高の分身', fmt(r.maxN) + ' 人'], ['転んだ回数', fmt(r.trips) + ' 回']];
+    const rows = [[K.steps, fmt(r.steps) + K.times], [K.maxN, fmt(r.maxN) + K.people], [K.trips, fmt(r.trips) + K.times]];
     rows.forEach(([a, b], i) => {
       const y = 700 + i * 110;
       c.strokeStyle = '#9aa7d0'; c.lineWidth = 3; c.setLineDash([12, 10]); c.beginPath(); c.moveTo(150, y + 28); c.lineTo(Wd - 150, y + 28); c.stroke(); c.setLineDash([]);

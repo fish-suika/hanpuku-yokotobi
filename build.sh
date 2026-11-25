@@ -4,7 +4,9 @@ cd "$(dirname "$0")"
 
 cat src/00-head.html \
     src/10-config.js \
+    src/12-strings.js \
     src/20-logic.js \
+    src/25-tourney.js \
     src/40-render.js \
     src/50-audio.js \
     src/60-ui.js \
@@ -15,7 +17,9 @@ cp hanpuku-yokotobi.html index.html   # GitHub Pages はルートの index.html 
 # 検証ページ（画面を使わないロジックだけ）
 cat src/verify-head.html \
     src/10-config.js \
+    src/12-strings.js \
     src/20-logic.js \
+    src/25-tourney.js \
     src/verify-tests.js \
     src/99-tail.html > verify.html
 
