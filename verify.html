@@ -25,25 +25,26 @@ const CFG = {
   // 判定（記録の下限）
   judge: [[0, 'E'], [40, 'D'], [80, 'C'], [150, 'B'], [400, 'A'], [1000, 'S'], [3000, 'x'], [7000, 'y']],   // 名前は STR.judge（言語ごと）。ここは下限の数と並びだけ使う。分身が早く出るようにしたので記録の桁が上がった（元は 130/200/400/1000/3000）
 
-  // v2 大会：ライバルの記録（これを超えると勝ち）。数字は仮。Phase 2 でボットを使って調整する
-  targets: [80, 200, 500, 1200, 3000, 8000, 20000, 45000, 100000],
+  // v2 大会：ライバルの記録（これを超えると勝ち）。v2 最終修正（2026-11-25）で作り直した。毎秒 6 回の人が強化なしで出す記録（約 1,400）より少し上から始めて、一歩ごとに約 1.5〜1.75 倍で上がる
+  // （元は 80 / 200 / 500 / 1,200 / 3,000 / 8,000 / 20,000 / 45,000 / 100,000：序盤は強化なしで勝てて、終盤は値段の上がり方に強化が追いつかなかった）
+  targets: [2700, 4400, 6800, 11000, 18000, 27000, 47000, 75000, 130000],
 
   // v2 Phase 2：購買部。強化は、測定の前に CFG の値へ掛け算・足し算で反映する（Shop.apply）。ここの値は強化なしの素の値
   recMul: 1,             // 記録の倍率（記録係を増やす）
   startLvl: 0,           // 測定のはじめの勢いの段階（応援団）
   startGrace: 0,         // はじめのこの秒数は、勢いが落ちない（応援団）
-  levelRateExtra: [8.6, 9.6, 10.8, 12.5],            // 分身の秘伝書で増える段階 7〜10 の、段階になる最低の速さ
+  levelRateExtra: [9.3, 10.2, 11.5, 12.6],            // 分身の秘伝書で増える段階 7〜10 の、段階になる最低の速さ
   bodiesExtra: [100, 500, 3000, 20000],        // その段階の体の数
-  payWin: 0.08, payLose: 0.04,                 // 記録のうち引換券になる割合（勝ったときは多い）
-  payPart: 0.3,                                // 参加賞：まだ勝っていない大会の目標の記録に、この割合をかけた引換券
+  payWin: 0.074, payLose: 0.032,               // 記録のうち引換券になる割合（勝ったときは多い）
+  payPart: 0.27,                               // 参加賞：まだ勝っていない大会の目標の記録に、この割合をかけた引換券
   shop: {
-    // price＝次の段階を買う値段（配列の長さ＝段階の数）。ほかは段階ごとの効果
-    shoes:    { price: [130, 950, 3200, 35000, 380000], mul: [1.2, 1.3, 1.4, 1.5, 1.6] },                         // 勢いを数える時間の倍率
-    clothes:  { price: [190, 1400, 4700, 51000, 560000], mul: [0.8, 0.72, 0.65, 0.6, 0.55] },                  // 段階になる速さの倍率
-    fall:     { price: [430, 7000, 77000, 840000], drop: [1, 1, 1, 0], secs: [0.36, 0.32, 0.28, 0.24] },     // 転んだときの勢いの落ち方・動けない時間
-    recorder: { price: [290, 2100, 23000, 250000, 2800000], mul: [1.5, 2, 3, 5, 8] },                                 // 記録の倍率
-    cheer:    { price: [640, 10000, 110000, 1300000], lvl: [3, 4, 5, 6], grace: 3 },                            // はじめの勢いの段階
-    book:     { price: [16000, 170000, 1900000, 4100000], gate: [3, 5, 7, 9] },                                     // 段階の上限が増える。gate＝勝っておく大会の数
+    // price＝次の段階を買う値段（配列の長さ＝段階の数。同じ品物の次の段階は 2〜3.5 倍）。ほかは段階ごとの効果
+    shoes:    { price: [310, 940, 3200, 9400, 30000], mul: [1.2, 1.4, 1.6, 2, 2.2] },                         // 勢いを数える時間の倍率
+    clothes:  { price: [130, 440, 1100, 3500, 9000], mul: [0.8, 0.7, 0.6, 0.5, 0.4] },                  // 段階になる速さの倍率
+    fall:     { price: [8700, 26000, 90000, 250000], drop: [1, 1, 1, 0], secs: [0.36, 0.32, 0.28, 0.24] },     // 転んだときの勢いの落ち方・動けない時間
+    recorder: { price: [1900, 4300, 8800, 18000, 40000], mul: [1.5, 2.2, 3.5, 6, 11] },                                 // 記録の倍率
+    cheer:    { price: [28000, 80000, 240000, 730000], lvl: [3, 4, 5, 6], grace: 3 },                            // はじめの勢いの段階
+    book:     { price: [26000, 90000, 310000, 1000000], gate: [3, 5, 7, 9] },                                     // 段階の上限が増える。gate＝勝っておく大会の数
   },
 
   cloneDelay: 0.022,     // 分身1体あたりの遅れ（秒）
@@ -961,8 +962,8 @@ const Tourney = {
   const N = Tourney.count();
   const winRec = i => CFG.targets[i] + 1;
 
-  check('大会は 9 つ・ライバルの目標の記録は設定どおり', N === 9 && CFG.targets.join() === '80,200,500,1200,3000,8000,20000,45000,100000', CFG.targets.join());
-  check('目標の記録は、大会が進むほど大きくなる', CFG.targets.every((t, i) => i === 0 || t > CFG.targets[i - 1]));
+  check('大会は 9 つ・ライバルの目標の記録は設定どおり', N === 9 && CFG.targets.join() === '2700,4400,6800,11000,18000,27000,47000,75000,130000', CFG.targets.join());
+  check('目標の記録は、大会が進むほど大きくなる（一歩ごとに 1.4〜1.8 倍・急に跳ね上がらない）', CFG.targets.every((t, i) => i === 0 || (t > CFG.targets[i - 1] && t / CFG.targets[i - 1] >= 1.4 && t / CFG.targets[i - 1] <= 1.8)), CFG.targets.slice(1).map((t, i) => (t / CFG.targets[i]).toFixed(2)).join(' '));
   check('大会の名前・ライバル・一言が 9 つぶん揃っている（言葉の表）',
     STR.tournaments.length === N && STR.tournaments.every(t => t.name && t.rival.name && t.rival.short && t.rival.say));
   check('大会の順番は クラス→学年→校内→市→県→全国→世界→月面→宇宙',
@@ -982,7 +983,7 @@ const Tourney = {
   check('ライバルと同じ記録は負け（超えていないので次は開かない）', !r.win && !r.unlockedNext && sv.unlocked === 0 && Tourney.status(sv, 0) === 'next');
   r = Tourney.record(sv, 0, CFG.targets[0] - 1);
   check('負けても次は開かない（ベストは残る）', !r.win && sv.unlocked === 0 && sv.best[0] === CFG.targets[0]);
-  check('Tourney.beats は 超えたときだけ true', Tourney.beats(81, 0) && !Tourney.beats(80, 0) && !Tourney.beats(0, 0));
+  check('Tourney.beats は 超えたときだけ true', Tourney.beats(CFG.targets[0] + 1, 0) && !Tourney.beats(CFG.targets[0], 0) && !Tourney.beats(0, 0));
 
   // ベスト
   sv = Tourney.newSave();
@@ -1087,8 +1088,8 @@ const Tourney = {
   check('引換券：記録が 0 でも参加賞だけはもらえる／勝った大会で 0 なら 0', Shop.payout(0, false, 500, false) === Math.floor(500 * CFG.payPart) && Shop.payout(0, false, 500, true) === 0);
   check('引換券：記録があれば最低 1 枚', Shop.payout(5, false, 80, true) >= 1);
   sv = Tourney.newSave();
-  r = Tourney.record(sv, 0, 1000);
-  check('結果を記録すると引換券がたまる（残りに加わり、結果にも出る）', r.gain === Shop.payout(1000, true, CFG.targets[0], false) && sv.tickets === r.gain && r.gain > 0, 'gain=' + r.gain);
+  r = Tourney.record(sv, 0, 5000);
+  check('結果を記録すると引換券がたまる（残りに加わり、結果にも出る）', r.gain === Shop.payout(5000, true, CFG.targets[0], false) && sv.tickets === r.gain && r.gain > 0, 'gain=' + r.gain);
   r = Tourney.record(sv, 0, 10);
   check('負けても（勝った大会でも）引換券は増える・減らない', r.gain >= 1 && sv.tickets > 0);
   const snapT = sv.tickets;
@@ -1169,8 +1170,8 @@ const Tourney = {
   const bk3 = Tourney.newSave(); for (const id of Shop.ids) bk3.up[id] = Shop.maxLevel(id); Shop.apply(bk3);
   const hi = run({ rate: 9, err: 0.01, seed: 2 });
   check('秘伝書：速い人は 48 人を超えて 100 人以上に分身できる（段階 7 以上）', hi.maxLvl >= 7 && hi.maxN >= 100, 'maxLvl=' + hi.maxLvl + ' maxN=' + hi.maxN);
-  const slowHi = run({ rate: 2, seed: 2 });
-  check('秘伝書があっても、ゆっくりなら秘伝書の段階（7 以上）には上がらない', slowHi.maxLvl < 7, 'maxLvl=' + slowHi.maxLvl);
+  const slowHi = run({ rate: 1, seed: 2 });
+  check('秘伝書があっても、とてもゆっくり（毎秒 1 回）なら秘伝書の段階（7 以上）には上がらない', slowHi.maxLvl < 7, 'maxLvl=' + slowHi.maxLvl);
   Shop.reset();
 
   // --- 保存：引換券と強化、Phase 1 の保存の引き継ぎ ---
@@ -1189,44 +1190,61 @@ const Tourney = {
   Shop.reset();
 
   // ===== ボットでペースを確認：毎秒 4 / 6 / 8 回のボットが、次に勝っていない大会を遊び続け、いちばん安い強化を買いながら宇宙大会まで =====
-  // 1 回は約 30 秒（測定 20 秒＋画面）で数える
+  // 1 回は約 30 秒（測定 20 秒＋画面）で数える。大会ごとの挑戦回数と、「強化を買えないまま続けて遊んだ回数」も数える（v2 最終修正）
   function playThrough(rate, err, seed, maxRuns) {
-    const q = Tourney.newSave(); let runs = 0, buys = 0;
+    const q = Tourney.newSave(); let runs = 0, buys = 0, dry = 0, maxDry = 0;
+    const att = new Array(N).fill(0);
     while (!q.won[N - 1] && runs < maxRuns) {
       const i = q.won.indexOf(false);
       Shop.apply(q);
       const res = run({ rate, err, seed: seed * 1000 + runs });
       Tourney.record(q, i, res.rec);
-      runs++;
-      for (let g = 0; g < 60; g++) { const id = Shop.cheapest(q); if (!id) break; Shop.buy(q, id); buys++; }
+      runs++; att[i]++;
+      let bought = 0;
+      for (let g = 0; g < 60; g++) { const id = Shop.cheapest(q); if (!id) break; Shop.buy(q, id); buys++; bought++; }
+      if (bought) dry = 0; else { dry++; maxDry = Math.max(maxDry, dry); }
     }
     Shop.reset();
-    return { runs, done: q.won[N - 1], up: q.up, buys, tickets: q.tickets };
+    return { runs, done: q.won[N - 1], up: q.up, buys, tickets: q.tickets, att, maxDry };
   }
+  const botSeeds = [1, 2, 3, 4, 5, 6, 7];
   const bots = [[4, 0.02], [6, 0.03], [8, 0.03]].map(([rate, err]) => {
-    const rs = [1, 2, 3, 4, 5].map(sd => playThrough(rate, err, sd, 600));
+    const rs = botSeeds.map(sd => playThrough(rate, err, sd, 600));
     const runs = rs.map(x => x.runs).sort((a, b) => a - b);
-    return { rate, err, runs: runs[2], min: runs[2] * 0.5, done: rs.every(x => x.done), up: rs[2].up };
+    const mid = runs[runs.length >> 1];
+    return {
+      rate, err, runs: mid, min: mid * 0.5, done: rs.every(x => x.done), up: rs[rs.length >> 1].up,
+      att: Array.from({ length: N }, (_, i) => median(rs.map(x => x.att[i]))),        // 大会ごとの挑戦回数（中央値）
+      attMax: Array.from({ length: N }, (_, i) => Math.max(...rs.map(x => x.att[i]))),
+      dry: Math.max(...rs.map(x => x.maxDry)),                                         // 続けて買えなかった回数の最大
+    };
   });
   const tbl = document.createElement('pre');
-  tbl.textContent = 'ボットで宇宙大会まで（5 回の中央値・1 回 30 秒で換算）\n' + bots.map(b => '毎秒 ' + b.rate + ' 回（ミス ' + Math.round(b.err * 100) + '%）：' + b.runs + ' 回・約 ' + b.min.toFixed(1) + ' 分　最終の強化 ' + JSON.stringify(b.up)).join('\n');
+  tbl.textContent = 'ボットで宇宙大会まで（' + botSeeds.length + ' 回の中央値・1 回 30 秒で換算）\n'
+    + bots.map(b => '毎秒 ' + b.rate + ' 回（ミス ' + Math.round(b.err * 100) + '%）：' + b.runs + ' 回・約 ' + b.min.toFixed(1) + ' 分　大会ごとの挑戦回数 ' + b.att.join(' ') + '（最大 ' + b.attMax.join(' ') + '）　買えない連続の最大 ' + b.dry + ' 回　最終の強化 ' + JSON.stringify(b.up)).join('\n');
   out.appendChild(tbl);
   check('ボット：毎秒 6 回の人は 20〜30 分で宇宙大会に勝つ', bots[1].done && bots[1].min >= 20 && bots[1].min <= 30, bots[1].runs + ' 回・' + bots[1].min.toFixed(1) + ' 分');
-  check('ボット：毎秒 8 回の人は、毎秒 6 回の人より早い', bots[2].done && bots[2].runs < bots[1].runs, bots[2].runs + ' 回・' + bots[2].min.toFixed(1) + ' 分');
-  check('ボット：毎秒 4 回の人も、いつかは勝てる（毎秒 6 回の人の 5 倍以内）', bots[0].done && bots[0].runs <= bots[1].runs * 5, bots[0].runs + ' 回・' + bots[0].min.toFixed(1) + ' 分');
-  check('ボット：毎秒 6 回の人は最初の大会に 1 回目で勝てる（始めで詰まらない）', (() => { Shop.reset(); const x = run({ rate: 6, err: 0.03, seed: 1 }); return Tourney.beats(x.rec, 0); })());
-  check('ボット：毎秒 4 回の人でも、最初の強化は 5 回以内に買える（遅い人でも最初の手応えが早い）', (() => {
+  check('ボット：毎秒 8 回の人は、毎秒 6 回の人より 2 割以上早い', bots[2].done && bots[2].min <= bots[1].min * 0.8, bots[2].runs + ' 回・' + bots[2].min.toFixed(1) + ' 分 ／ 6 回の人 ' + bots[1].min.toFixed(1) + ' 分');
+  check('ボット：毎秒 4 回の人も、いつかは勝てる（毎秒 6 回の人の 1.5 倍以内）', bots[0].done && bots[0].runs <= bots[1].runs * 1.5, bots[0].runs + ' 回・' + bots[0].min.toFixed(1) + ' 分');
+  check('ボット：毎秒 6 回の人は最初の大会に 2 回以内で勝てる（始めで詰まらない）', bots[1].att[0] <= 2, 'att=' + bots[1].att[0]);
+  check('ボット：毎秒 6 回の人でも、大会 2〜4 のうち 2 つ以上は 2 回以上かかる（序盤も歯ごたえがある）', bots[1].att.slice(1, 4).filter(a => a >= 2).length >= 2, bots[1].att.slice(0, 4).join(' '));
+  check('ボット：壁がない（どの大会も、毎秒 6 回の人は 8 回以内・毎秒 4 回の人は 9 回以内・毎秒 8 回の人は 7 回以内で勝つ）',
+    bots[1].att.every(a => a <= 8) && bots[0].att.every(a => a <= 9) && bots[2].att.every(a => a <= 7), '6: ' + bots[1].att.join(' ') + ' ／ 4: ' + bots[0].att.join(' ') + ' ／ 8: ' + bots[2].att.join(' '));
+  check('ボット：大会 2 以降で、毎秒 6 回の人が 1 回で勝つ大会はない（簡単すぎる大会がない）', bots[1].att.slice(1).every(a => a >= 2), bots[1].att.join(' '));
+  check('ボット：引換券が足りなくて続けて買えない回数は、毎秒 6 回の人で 3 回まで（4 回の人は 4 回まで）', bots[1].dry <= 3 && bots[0].dry <= 4 && bots[2].dry <= 4, 'dry 6=' + bots[1].dry + ' 4=' + bots[0].dry + ' 8=' + bots[2].dry);
+  check('ボット：毎秒 4 回の人でも、最初の強化は 2 回以内に買える（遅い人でも最初の手応えが早い）', (() => {
     const q = Tourney.newSave(); let runs = 0;
     while (!Shop.cheapest(q) && runs < 30) { const i = q.won.indexOf(false); Shop.apply(q); Tourney.record(q, i, run({ rate: 4, err: 0.02, seed: 50 + runs }).rec); runs++; }
-    Shop.reset(); return runs <= 5;
+    Shop.reset(); return runs <= 2;
   })());
+  check('値段：同じ品物の次の段階は 2〜3.5 倍（上がりすぎない）', Shop.ids.every(id => CFG.shop[id].price.every((p, i, a) => i === 0 || (p / a[i - 1] >= 2 && p / a[i - 1] <= 3.5))), Shop.ids.map(id => id + ' ' + CFG.shop[id].price.map((p, i, a) => i ? (p / a[i - 1]).toFixed(2) : '').filter(Boolean).join('/')).join(' '));
   Shop.reset();
 
   // ボットで目安：強化なしの Phase 1 で、どこまで勝てるか
   const rec6 = median([1, 2, 3, 4, 5].map(sd => run({ rate: 6, err: 0.02, seed: sd }).rec));
   const rec9 = median([1, 2, 3, 4, 5].map(sd => run({ rate: 9, err: 0.05, seed: sd }).rec));
   const beaten = rec => CFG.targets.filter(t => rec > t).length;
-  check('毎秒6回のボットは、少なくとも最初の大会に勝てる（遊び始めで詰まらない）', beaten(rec6) >= 1, 'rec=' + rec6 + ' 勝てる大会=' + beaten(rec6));
+  check('強化なしの毎秒6回のボットは最初の大会にまだ届かない（買い物が 1 回いる）が、記録は目標の半分以上（最初の強化で届く）', beaten(rec6) === 0 && rec6 * 2 > CFG.targets[0], 'rec=' + rec6 + ' 勝てる大会=' + beaten(rec6));
   check('強化なしでは、最後の大会には勝てない（毎秒10回でも宇宙大会には届かない）', beaten(rec9) < N && beaten(b11.rec) < N, 'rec9=' + rec9 + ' 勝てる大会=' + beaten(rec9) + ' ／ 最高速 rec=' + b11.rec);
 
   // ===== v2 Phase 3：会場・記録係・ライバルの一言・エンディング =====
