@@ -107,6 +107,7 @@ function bindUI() {
   $('rShop').addEventListener('click', () => { Snd.init(); openShop('result'); });
   $('shopBack').addEventListener('click', () => { Snd.init(); if (App.pendingEnding) showEnding(); else openList(); });
   $('shopGo').addEventListener('click', () => { Snd.init(); startRun(); });
+  $('shopReset').addEventListener('click', () => { Snd.init(); respecShop(); });
   $('shopBody').addEventListener('click', e => {
     const b = e.target.closest('.buy');
     if (b) { Snd.init(); buyItem(b.closest('.it').dataset.id); }
@@ -176,6 +177,7 @@ function anyBuyable() { return Shop.ids.some(id => Shop.canBuy(SAVE, id)); }
 // from：'list'（大会の一覧から）／'result'（記録用紙から。「もう一回」で続けて測れる）
 function openShop(from) {
   App.shopFrom = from;
+  disarmRespec();
   if (from !== 'result') resetRun();
   renderShop();
   $('shopGo').style.display = from === 'result' && !App.pendingEnding ? '' : 'none';
@@ -201,9 +203,33 @@ function renderShop() {
   }
   $('shopBody').innerHTML = html;
   $('shopTk').textContent = fmt(SAVE.tickets);
+  const rs = $('shopReset'), none = Shop.spent(SAVE) <= 0;
+  if (none) disarmRespec();
+  rs.disabled = none;
+  rs.classList.toggle('arm', respecArmed);
+  rs.textContent = respecArmed ? S.respecAsk : S.respec;
+}
+
+// 振り直し：1 回目で「もう一度」に変わり、4 秒以内にもう一度押すと戻る（買う・画面を出る・時間がたつと取り消し）
+let respecArmed = false, respecTimer = 0;
+function disarmRespec() { respecArmed = false; clearTimeout(respecTimer); respecTimer = 0; }
+function respecShop() {
+  if ($('shopReset').disabled) return;
+  if (!respecArmed) {
+    respecArmed = true; clearTimeout(respecTimer);
+    respecTimer = setTimeout(() => { disarmRespec(); if (App.screen === 'shop') renderShop(); }, 4000);
+    renderShop();
+    return;
+  }
+  disarmRespec();
+  const r = Shop.respec(SAVE);
+  if (r.ok) { Tourney.persist(store, SAVE); Snd.buy(); }
+  renderShop();
+  if (r.ok) { const tk = $('shopTk'); tk.classList.add('got'); setTimeout(() => tk.classList.remove('got'), 400); }
 }
 
 function buyItem(id) {
+  disarmRespec();
   const r = Shop.buy(SAVE, id);
   if (r.ok) { Tourney.persist(store, SAVE); Snd.buy(); }
   else if (r.reason !== 'max') Snd.deny();

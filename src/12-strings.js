@@ -18,6 +18,7 @@ const STR_JA = {
   // 購買部。品物は 6 つ。name・desc（何が強くなるか 1 行）・lb（効果の見出し）・v（段階ごとの効果の短い表示。引数は Shop.effect の値）。画面には「lb v → 次の v」
   shop: {
     head: '購買部', tickets: '引換券', back: '大会の一覧', go: 'もう一回',
+    respec: '振り直す', respecAsk: 'もう一度押す',
     price: n => n, max: 'MAX', soldOut: '最大', poor: 'たりない', lock: 'ロック',
     gate: name => name + 'に|勝つと|買える',
     arrow: ' → ',
@@ -151,6 +152,7 @@ const STR_EN = {
 
   shop: {
     head: 'School Shop', tickets: 'Coupons', back: 'Tournaments', go: 'Try Again',
+    respec: 'Respec', respecAsk: 'Again?',
     price: n => n, max: 'MAX', soldOut: 'Maxed', poor: 'Short', lock: 'Locked',
     gate: name => 'Win|' + name + '|to unlock',
     arrow: ' → ',

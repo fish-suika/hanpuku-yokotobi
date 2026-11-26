@@ -44,6 +44,20 @@ const Shop = {
     save.up[id] = this.level(save, id) + 1;
     return { ok: true, price: p, level: save.up[id] };
   },
+  // 買った段階までの値段の合計（今の値段表で）。振り直しで全額戻る額
+  spent(save) {
+    let t = 0;
+    for (const id of SHOP_IDS) { const lv = this.level(save, id); for (let k = 0; k < lv; k++) t += CFG.shop[id].price[k]; }
+    return t;
+  },
+  // 振り直し：強化を全部 0 段階に戻し、買ったぶんを全額、引換券に戻す。大会の進み具合には触らない。何も買っていなければ何も変えない
+  respec(save) {
+    const refund = this.spent(save);
+    if (refund <= 0) return { ok: false, refund: 0 };
+    save.tickets = (save.tickets || 0) + refund;
+    save.up = this.zeroUp();
+    return { ok: true, refund };
+  },
   // いま買える中でいちばん安い品物（なければ null）。ボット用
   cheapest(save) {
     let best = null, bp = Infinity;

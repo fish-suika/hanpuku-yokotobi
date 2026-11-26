@@ -101,6 +101,15 @@ body{display:flex;align-items:center;justify-content:center}
 #shop .hd small b{color:#d2382f;margin-left:calc(1 * var(--q));font-size:calc(5.4 * var(--q));font-variant-numeric:tabular-nums}
 #shopBack{flex:1;height:calc(10 * var(--q));font-size:calc(3.9 * var(--q));background:transparent;color:#2c4aa0;white-space:nowrap;border:calc(.5 * var(--q)) solid #2c4aa0;border-radius:calc(3 * var(--q));box-shadow:0 calc(.6 * var(--q)) 0 #2c4aa066}
 #shopGo{flex:1.2;height:calc(12 * var(--q));font-size:calc(5.2 * var(--q));white-space:nowrap}
+/* 振り直す：見出しの右に小さく。何も買っていないときは薄く押せない。1 回目で桃色になり、もう一度押すと戻る */
+#shop .hd>span:first-child{margin-right:auto}
+#shopReset{align-self:center;margin-right:calc(2.4 * var(--q));height:calc(6.6 * var(--q));padding:0 calc(2.2 * var(--q));font:inherit;font-size:calc(3.2 * var(--q));font-weight:bold;letter-spacing:0;color:#2c4aa0;background:transparent;
+  border:calc(.45 * var(--q)) solid #2c4aa0;border-radius:calc(2.2 * var(--q));white-space:nowrap;cursor:pointer;touch-action:manipulation;pointer-events:auto}
+#shopReset:active:not(:disabled){transform:translateY(calc(.4 * var(--q)))}
+#shopReset:disabled{opacity:.32;cursor:default}
+html[lang=en] #shopReset{font-size:calc(3 * var(--q));padding:0 calc(1.8 * var(--q))}
+#shop .hd small b.got{animation:got .35s ease-out}
+#shopReset.arm{background:#e0356f;border-color:#e0356f;color:#fff}
 #intro{position:absolute;left:calc(6 * var(--q));right:calc(6 * var(--q));top:calc(51 * var(--q));z-index:25;display:none;flex-direction:column;align-items:center;gap:calc(3 * var(--q));text-align:center}
 #intro.on{display:flex;animation:pop .3s cubic-bezier(.3,1.5,.5,1)}
 #inName{font-size:calc(5 * var(--q));font-weight:bold;color:#fff;background:#d2382f;border-radius:calc(5 * var(--q));padding:calc(.8 * var(--q)) calc(5 * var(--q));letter-spacing:calc(.5 * var(--q));box-shadow:0 calc(.8 * var(--q)) 0 #8f221c;white-space:nowrap}
@@ -304,6 +313,7 @@ html[lang=en] .t4,html[lang=en] #intro .go{letter-spacing:calc(.3 * var(--q))}
   #shop .row{width:calc(110 * var(--q));margin:0 auto;gap:calc(5 * var(--q))}
   #shopBack{height:calc(9 * var(--q));font-size:calc(4 * var(--q))}
   #shopGo{height:calc(10.5 * var(--q));font-size:calc(5.4 * var(--q))}
+  #shopReset{height:calc(6.2 * var(--q));font-size:calc(3.3 * var(--q));margin-right:calc(5 * var(--q))}
   html[lang=en] #shopBack{font-size:calc(3.8 * var(--q))}
   html[lang=en] #shopGo{font-size:calc(4.8 * var(--q))}
 
@@ -423,7 +433,7 @@ html[lang=en] .t4,html[lang=en] #intro .go{letter-spacing:calc(.3 * var(--q))}
     <button id="listBack" class="btn back" data-s="list.back"></button>
   </div>
   <div id="shop" class="scr">
-    <div class="hd"><span data-s="shop.head"></span><small><span data-s="shop.tickets"></span><b id="shopTk"></b></small></div>
+    <div class="hd"><span data-s="shop.head"></span><button id="shopReset" class="rs" type="button"></button><small><span data-s="shop.tickets"></span><b id="shopTk"></b></small></div>
     <div id="shopBody"></div>
     <div class="row"><button id="shopBack" class="btn" data-s="shop.back"></button><button id="shopGo" class="btn" data-s="shop.go"></button></div>
   </div>

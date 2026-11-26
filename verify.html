@@ -86,6 +86,7 @@ const STR_JA = {
   // 購買部。品物は 6 つ。name・desc（何が強くなるか 1 行）・lb（効果の見出し）・v（段階ごとの効果の短い表示。引数は Shop.effect の値）。画面には「lb v → 次の v」
   shop: {
     head: '購買部', tickets: '引換券', back: '大会の一覧', go: 'もう一回',
+    respec: '振り直す', respecAsk: 'もう一度押す',
     price: n => n, max: 'MAX', soldOut: '最大', poor: 'たりない', lock: 'ロック',
     gate: name => name + 'に|勝つと|買える',
     arrow: ' → ',
@@ -219,6 +220,7 @@ const STR_EN = {
 
   shop: {
     head: 'School Shop', tickets: 'Coupons', back: 'Tournaments', go: 'Try Again',
+    respec: 'Respec', respecAsk: 'Again?',
     price: n => n, max: 'MAX', soldOut: 'Maxed', poor: 'Short', lock: 'Locked',
     gate: name => 'Win|' + name + '|to unlock',
     arrow: ' → ',
@@ -653,6 +655,20 @@ const Shop = {
     save.tickets -= p;
     save.up[id] = this.level(save, id) + 1;
     return { ok: true, price: p, level: save.up[id] };
+  },
+  // 買った段階までの値段の合計（今の値段表で）。振り直しで全額戻る額
+  spent(save) {
+    let t = 0;
+    for (const id of SHOP_IDS) { const lv = this.level(save, id); for (let k = 0; k < lv; k++) t += CFG.shop[id].price[k]; }
+    return t;
+  },
+  // 振り直し：強化を全部 0 段階に戻し、買ったぶんを全額、引換券に戻す。大会の進み具合には触らない。何も買っていなければ何も変えない
+  respec(save) {
+    const refund = this.spent(save);
+    if (refund <= 0) return { ok: false, refund: 0 };
+    save.tickets = (save.tickets || 0) + refund;
+    save.up = this.zeroUp();
+    return { ok: true, refund };
   },
   // いま買える中でいちばん安い品物（なければ null）。ボット用
   cheapest(save) {
@@ -1117,6 +1133,41 @@ const Tourney = {
   check('秘伝書：次の段階は、もっと多くの大会に勝たないと買えない', Shop.state(gSv, 'book') === 'locked' && Shop.gate(gSv, 'book') === CFG.shop.book.gate[1]);
   const cheap = Tourney.newSave(); cheap.tickets = CFG.shop.clothes.price[0];
   check('いちばん安い買える品物が選べる（ボット用）', Shop.cheapest(cheap) !== null && Shop.price(cheap, Shop.cheapest(cheap)) <= cheap.tickets && Shop.cheapest(Tourney.newSave()) === null);
+
+  // --- 振り直し（強化を全部 0 に戻し、買ったぶんの全額を引換券に戻す。大会の進み具合はそのまま）---
+  const rsSv = Tourney.newSave();
+  for (let i = 0; i < 4; i++) Tourney.record(rsSv, i, CFG.targets[i] + 10);   // 4 つの大会に勝つ（秘伝書の段階も買えるように）
+  rsSv.tickets = 1e9;
+  for (let g = 0; g < 200; g++) { const id = Shop.cheapest(rsSv); if (!id) break; Shop.buy(rsSv, id); }   // 買えるだけ買う
+  const rsLv = Shop.ids.map(id => rsSv.up[id]);
+  let rsSum = 0; Shop.ids.forEach((id, n) => { for (let k = 0; k < rsLv[n]; k++) rsSum += CFG.shop[id].price[k]; });
+  const rsTk0 = rsSv.tickets, rsProg = JSON.stringify([rsSv.unlocked, rsSv.won, rsSv.best, rsSv.endingSeen]);
+  check('振り直し：前提として、強化を何段階か買った状態になっている（秘伝書も 1 段階以上）', rsSum > 0 && rsLv.every(x => x >= 0) && rsLv.filter(x => x > 0).length >= 5 && rsSv.up.book >= 1, rsLv.join());
+  check('振り直し：買った段階までの値段の合計（いまの値段表で）を Shop.spent が数える', Shop.spent(rsSv) === rsSum && Shop.spent(Tourney.newSave()) === 0, 'sum=' + rsSum);
+  const rsR = Shop.respec(rsSv);
+  check('振り直し：戻る引換券は、持っている段階までの値段の合計の全額（持っていた枚数に足される）', rsR.ok === true && rsR.refund === rsSum && rsSv.tickets === rsTk0 + rsSum, 'refund=' + rsR.refund + ' sum=' + rsSum);
+  check('振り直し：6 種の強化が全部 0 段階に戻る', Shop.ids.every(id => rsSv.up[id] === 0 && Shop.level(rsSv, id) === 0) && Object.keys(rsSv.up).length === 6);
+  check('振り直し：大会の進み具合（開いた数・勝ち・ベスト・エンディング）は変わらない', JSON.stringify([rsSv.unlocked, rsSv.won, rsSv.best, rsSv.endingSeen]) === rsProg);
+  check('振り直し：全部戻ったので、また 1 段階目から買える（値段は 1 段階目のまま・差し引きは元どおり）', Shop.price(rsSv, 'shoes') === CFG.shop.shoes.price[0] && Shop.buy(rsSv, 'shoes').ok && rsSv.tickets === rsTk0 + rsSum - CFG.shop.shoes.price[0]);
+  const rsNone = Tourney.newSave(); rsNone.tickets = 777; Tourney.record(rsNone, 0, CFG.targets[0] + 1);
+  const rsNoneJ = JSON.stringify(rsNone), rsNoneR = Shop.respec(rsNone);
+  check('振り直し：何も買っていないときは何も起きない（ok:false・引換券も保存の中身も変わらない）', rsNoneR.ok === false && rsNoneR.refund === 0 && JSON.stringify(rsNone) === rsNoneJ);
+  const rsTwice = Tourney.newSave(); rsTwice.tickets = 1e6; Shop.buy(rsTwice, 'shoes'); const t1 = rsTwice.tickets;
+  Shop.respec(rsTwice); const t2 = rsTwice.tickets; const again = Shop.respec(rsTwice);
+  check('振り直し：続けて 2 回押しても、戻るのは 1 回だけ（引換券が増え続けない）', t2 === t1 + CFG.shop.shoes.price[0] && t2 === 1e6 && again.ok === false && rsTwice.tickets === 1e6);
+  const rsMax = Tourney.newSave(); rsMax.tickets = 0; for (const id of Shop.ids) rsMax.up[id] = Shop.maxLevel(id);
+  const rsMaxSum = Shop.ids.reduce((a, id) => a + CFG.shop[id].price.reduce((x, y) => x + y, 0), 0);
+  check('振り直し：全部最大まで買っていても、全品物の全段階の値段の合計が戻る', Shop.respec(rsMax).refund === rsMaxSum && rsMax.tickets === rsMaxSum && Shop.ids.every(id => rsMax.up[id] === 0), 'sum=' + rsMaxSum);
+  const rsSt = fake({}); const rsSave2 = Tourney.newSave(); Tourney.record(rsSave2, 0, 5000); rsSave2.tickets += 99999; rsSave2.up.recorder = 2; rsSave2.up.cheer = 1; Shop.respec(rsSave2); Tourney.persist(rsSt, rsSave2);
+  const rsBack = Tourney.load(rsSt);
+  check('振り直し：すぐ保存すれば、読み直しても同じ（強化 0・引換券は戻ったまま・形は版 3 のまま）', JSON.stringify(rsBack) === JSON.stringify(rsSave2) && Shop.ids.every(id => rsBack.up[id] === 0) && rsBack.v === SAVE_VER && SAVE_VER === 3 && JSON.parse(rsSt.d[SAVE_KEY]).tickets === rsSave2.tickets);
+  const rsAp = Tourney.newSave(); Shop.ids.forEach(id => { rsAp.up[id] = Shop.maxLevel(id); }); Shop.apply(rsAp); const rsApMax = JSON.stringify([CFG.winFull, CFG.levelRate, CFG.bodies, CFG.recMul]);
+  Shop.respec(rsAp); Shop.apply(rsAp);
+  check('振り直し：次の測定（Shop.apply）から、強化なしの素の数値になる', JSON.stringify([CFG.winFull, CFG.winEnd, CFG.levelRate, CFG.bodies, CFG.stunDrop, CFG.stunSecs, CFG.recMul, CFG.startLvl, CFG.startGrace]) === JSON.stringify([Shop.base.winFull, Shop.base.winEnd, Shop.base.levelRate, Shop.base.bodies, Shop.base.stunDrop, Shop.base.stunSecs, 1, 0, 0]) && rsApMax !== JSON.stringify([CFG.winFull, CFG.levelRate, CFG.bodies, CFG.recMul]));
+  const rsGate = Tourney.newSave(); rsGate.tickets = 1e9; for (let i = 0; i < 3; i++) Tourney.record(rsGate, i, CFG.targets[i] + 1); rsGate.tickets = 1e9; Shop.buy(rsGate, 'book'); Shop.respec(rsGate);
+  check('振り直し：秘伝書の解放条件（勝った大会の数）は今までどおり', Shop.gate(rsGate, 'book') === CFG.shop.book.gate[0] && Shop.state(rsGate, 'book') === 'ok' && Shop.state(Tourney.newSave(), 'book') === 'locked');
+  check('振り直しの言葉：日本語・英語の両方に、ふだんの文字と「もう一度」の文字がある', ['respec', 'respecAsk'].every(k => STR_JA.shop[k] && STR_EN.shop[k] && STR_JA.shop[k] !== STR_JA.shop[k === 'respec' ? 'respecAsk' : 'respec']));
+  Shop.reset();
 
   // --- 強化が CFG を変える（測定の前に反映）---
   const base0 = JSON.stringify([CFG.winFull, CFG.winEnd, CFG.levelRate, CFG.bodies, CFG.stunDrop, CFG.stunSecs, CFG.recMul, CFG.startLvl, CFG.startGrace]);
